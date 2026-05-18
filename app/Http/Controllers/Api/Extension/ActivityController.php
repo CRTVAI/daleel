@@ -226,12 +226,43 @@ class ActivityController extends Controller
             $keywords = $this->extractKeywords($domain);
             \Log::info("Recommendation domain={$domain}, keywords=" . implode(',', $keywords));
 
-            // Try each keyword in priority order until we find a content match
+            // Exclude already completed/watched videos
+            $completedIds = \App\Models\UserVideoProgress::where('user_id', $user->id)
+                ->where('completed', true)
+                ->pluck('content_id');
+
+            // Exclude recently recommended videos (last 5) to keep suggestions fresh
+            $recentRecIds = \App\Models\ExtensionRecommendation::where('user_id', $user->id)
+                ->latest()
+                ->take(5)
+                ->pluck('content_id');
+
+            // Try each keyword in priority order
             foreach ($keywords as $keyword) {
+                // Try 1: Fresh matches (unwatched & not recently suggested)
                 $content = \App\Models\Content::where('status', 'active')
                     ->where('connected_tools', 'like', "%{$keyword}%")
+                    ->whereNotIn('id', $completedIds)
+                    ->whereNotIn('id', $recentRecIds)
                     ->inRandomOrder()
                     ->first();
+
+                // Try 2: Fallback (unwatched but allowed recently suggested)
+                if (!$content) {
+                    $content = \App\Models\Content::where('status', 'active')
+                        ->where('connected_tools', 'like', "%{$keyword}%")
+                        ->whereNotIn('id', $completedIds)
+                        ->inRandomOrder()
+                        ->first();
+                }
+
+                // Try 3: Absolute fallback (any tool video)
+                if (!$content) {
+                    $content = \App\Models\Content::where('status', 'active')
+                        ->where('connected_tools', 'like', "%{$keyword}%")
+                        ->inRandomOrder()
+                        ->first();
+                }
 
                 if ($content) {
                     \Log::info("Matched content '{$content->title}' via keyword '{$keyword}'");
@@ -242,7 +273,15 @@ class ActivityController extends Controller
 
         // Fallback: return any active content if no tool match found
         if (!$content) {
-            $content = \App\Models\Content::where('status', 'active')->inRandomOrder()->first();
+            $completedIds = \App\Models\UserVideoProgress::where('user_id', $user->id)->where('completed', true)->pluck('content_id');
+            $content = \App\Models\Content::where('status', 'active')
+                ->whereNotIn('id', $completedIds)
+                ->inRandomOrder()
+                ->first();
+
+            if (!$content) {
+                $content = \App\Models\Content::where('status', 'active')->inRandomOrder()->first();
+            }
             \Log::info('No tool-specific match, using random fallback');
         }
 
