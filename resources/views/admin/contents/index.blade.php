@@ -207,6 +207,59 @@
         padding: 4px 10px;
         border-radius: 6px;
     }
+
+    /* Modal Premium Upgrades */
+    .premium-modal-header {
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+        color: #ffffff;
+        border-radius: 16px 16px 0 0;
+        padding: 1.5rem 2rem 1.25rem;
+        position: relative;
+    }
+    .premium-modal-header h5 {
+        font-family: 'Outfit', sans-serif;
+        font-weight: 850;
+        letter-spacing: -0.02em;
+    }
+    .premium-modal-header p {
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 0.8rem;
+    }
+    .premium-modal-header .btn-close {
+        filter: invert(1) grayscale(1) brightness(2);
+        opacity: 0.8;
+        transition: all 0.2s;
+    }
+    .premium-modal-header .btn-close:hover {
+        opacity: 1;
+        transform: rotate(90deg);
+    }
+    .modal-section-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 1.25rem;
+        margin-bottom: 1.25rem;
+        transition: all 0.2s;
+    }
+    .modal-section-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+    }
+    .modal-section-title {
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #4f46e5;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .modal-section-title i {
+        font-size: 1rem;
+    }
 </style>
 @endsection
 
@@ -373,99 +426,108 @@
             <!-- Edit Content Modal -->
             <div class="modal fade" id="editContentModal{{ $content->id }}" tabindex="-1" aria-hidden="true">
                 <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-                    <div class="modal-content border-0 rounded-4 shadow-lg">
-                        <div class="modal-header border-0 bg-white pt-4 px-4 pb-2">
+                    <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+                        <div class="premium-modal-header d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 class="fw-800 mb-0" style="color: #000;">Update Content Details</h5>
-                                <p class="text-muted small mb-0">Modify video information and classification for this entry.</p>
+                                <h5 class="mb-1 text-white"><i class="bi bi-pencil-square me-2 text-warning"></i> Update Content Details</h5>
+                                <p class="mb-0">Modify video details, categories, smart extension tools, and course sequencing.</p>
                             </div>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form action="{{ route('admin.contents.update', $content) }}" method="POST">
                             @csrf
                             @method('PUT')
-                            <div class="modal-body px-4 py-4">
-                                <div class="row g-4">
-                                    <!-- Basic Info -->
-                                    <div class="col-12">
-                                        <h6 class="fw-800 small text-uppercase letter-spacing-1 mb-3 text-primary">1. Content Information</h6>
+                            <div class="modal-body p-4 bg-light-subtle">
+                                
+                                <!-- Section 1: Video Details -->
+                                <div class="modal-section-card shadow-sm">
+                                    <div class="modal-section-title text-indigo">
+                                        <i class="bi bi-play-btn-fill"></i> 1. Video & Metadata
                                     </div>
-                                    <div class="col-12">
-                                        <label class="form-label">Video Title</label>
-                                        <input type="text" name="title" class="form-control" value="{{ $content->title }}" placeholder="e.g. Master AI Automation" required>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">YouTube URL</label>
-                                        <input type="url" name="video_url" class="form-control" value="{{ $content->video_url }}" placeholder="https://youtube.com/watch?v=..." required>
-                                    </div>
-
-                                    <!-- Classification -->
-                                    <div class="col-12 mt-4">
-                                        <h6 class="fw-800 small text-uppercase letter-spacing-1 mb-3 text-primary">2. Classification</h6>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Category</label>
-                                        <input type="text" name="category" class="form-control" value="{{ $content->category }}" placeholder="e.g. Marketing">
-                                    </div>
-                                    <div class="col-md-6">
-                                        <label class="form-label">Skill Level</label>
-                                        <select name="skill_level" class="form-select">
-                                            <option value="Beginner" {{ $content->skill_level == 'Beginner' ? 'selected' : '' }}>Beginner</option>
-                                            <option value="Intermediate" {{ $content->skill_level == 'Intermediate' ? 'selected' : '' }}>Intermediate</option>
-                                            <option value="Advanced" {{ $content->skill_level == 'Advanced' ? 'selected' : '' }}>Advanced</option>
-                                        </select>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">Connected Tools (Press Enter)</label>
-                                        <input type="text" name="connected_tools" class="form-control tagify-tools-input" value="{{ is_array($content->connected_tools) ? implode(',', $content->connected_tools) : '' }}">
-                                    </div>
-
-                                    <!-- Grouping & Sequence -->
-                                    <div class="col-12 mt-4">
-                                        <h6 class="fw-800 small text-uppercase letter-spacing-1 mb-3 text-primary">3. Grouping & Sequence</h6>
-                                    </div>
-                                    <div class="col-md-12">
-                                        <label class="form-label">Associated Course (Optional)</label>
-                                        <select name="course_id" class="form-select">
-                                            <option value="">Individual Content (None)</option>
-                                            @foreach($courses as $course)
-                                                <option value="{{ $course->id }}" {{ $content->course_id == $course->id ? 'selected' : '' }}>{{ $course->title }}</option>
-                                            @endforeach
-                                        </select>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <label class="form-label">Section or Part Label</label>
-                                        <input type="text" name="section_part_label" class="form-control" value="{{ $content->section_part_label }}" placeholder="e.g. Section 1, Part 3, Introduction">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Part/Order #</label>
-                                        <input type="number" name="sort_order" class="form-control" value="{{ $content->sort_order }}" placeholder="1">
-                                    </div>
-
-                                    <!-- Details -->
-                                    <div class="col-12 mt-4">
-                                        <h6 class="fw-800 small text-uppercase letter-spacing-1 mb-3 text-primary">4. Metadata & Tags</h6>
-                                    </div>
-                                    <div class="col-12">
-                                        <label class="form-label">Description</label>
-                                        <textarea name="description" rows="3" class="form-control" placeholder="Brief overview...">{{ $content->description }}</textarea>
-                                    </div>
-                                    <div class="col-md-8">
-                                        <label class="form-label">Search Tags (Press Enter)</label>
-                                        <input type="text" name="tags" class="form-control tagify-input" value="{{ $content->tags }}">
-                                    </div>
-                                    <div class="col-md-4">
-                                        <label class="form-label">Status</label>
-                                        <select name="status" class="form-select">
-                                            <option value="active" {{ $content->status == 'active' ? 'selected' : '' }}>Active</option>
-                                            <option value="draft" {{ $content->status == 'draft' ? 'selected' : '' }}>Draft</option>
-                                        </select>
+                                    <div class="row g-3">
+                                        <div class="col-12">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-fonts"></i> Video Title</label>
+                                            <input type="text" name="title" class="form-control" value="{{ $content->title }}" placeholder="e.g. Master AI Automation with ChatGPT" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-youtube text-danger"></i> YouTube URL</label>
+                                            <input type="url" name="video_url" class="form-control" value="{{ $content->video_url }}" placeholder="https://youtube.com/watch?v=..." required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-text-left"></i> Description</label>
+                                            <textarea name="description" rows="2" class="form-control" placeholder="Brief overview...">{{ $content->description }}</textarea>
+                                        </div>
                                     </div>
                                 </div>
+
+                                <!-- Section 2: Mapping & Extension Smart Tags -->
+                                <div class="modal-section-card shadow-sm">
+                                    <div class="modal-section-title text-success">
+                                        <i class="bi bi-cpu-fill"></i> 2. Extension Link & Smart Matching
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-grid-fill"></i> Category</label>
+                                            <input type="text" name="category" class="form-control" value="{{ $content->category }}" placeholder="e.g. Marketing">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-activity"></i> Skill Level</label>
+                                            <select name="skill_level" class="form-select">
+                                                <option value="Beginner" {{ $content->skill_level == 'Beginner' ? 'selected' : '' }}>Beginner</option>
+                                                <option value="Intermediate" {{ $content->skill_level == 'Intermediate' ? 'selected' : '' }}>Intermediate</option>
+                                                <option value="Advanced" {{ $content->skill_level == 'Advanced' ? 'selected' : '' }}>Advanced</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-plug-fill"></i> Connected Tools (Triggers Extension Recommendations)</label>
+                                            <input type="text" name="connected_tools" class="form-control tagify-tools-input" value="{{ is_array($content->connected_tools) ? implode(',', $content->connected_tools) : '' }}">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Section 3: Sequences & Tags -->
+                                <div class="modal-section-card shadow-sm">
+                                    <div class="modal-section-title text-warning">
+                                        <i class="bi bi-collection-play-fill"></i> 3. Course Alignment & Tagging
+                                    </div>
+                                    <div class="row g-3">
+                                        <div class="col-md-8">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-journal-album"></i> Associated Course</label>
+                                            <select name="course_id" class="form-select">
+                                                <option value="">Individual Video (No Course)</option>
+                                                @foreach($courses as $course)
+                                                    <option value="{{ $course->id }}" {{ $content->course_id == $course->id ? 'selected' : '' }}>{{ $course->title }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-eye-slash-fill"></i> Status</label>
+                                            <select name="status" class="form-select">
+                                                <option value="active" {{ $content->status == 'active' ? 'selected' : '' }}>Active</option>
+                                                <option value="draft" {{ $content->status == 'draft' ? 'selected' : '' }}>Draft</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-tag-fill"></i> Section Label</label>
+                                            <input type="text" name="section_part_label" class="form-control" value="{{ $content->section_part_label }}" placeholder="e.g. Section 1, Part 3">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-sort-numeric-down"></i> Sort Order #</label>
+                                            <input type="number" name="sort_order" class="form-control" value="{{ $content->sort_order }}" placeholder="1">
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-hash"></i> Search Tags (Press Enter)</label>
+                                            <input type="text" name="tags" class="form-control tagify-input" value="{{ $content->tags }}">
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
-                            <div class="modal-footer border-0 bg-light py-3 px-4">
-                                <button type="button" class="btn btn-link text-muted fw-bold text-decoration-none" data-bs-dismiss="modal">Cancel</button>
-                                <button type="submit" class="btn btn-primary px-4 rounded-3 fw-800">Save Changes</button>
+                            <div class="modal-footer border-0 bg-light py-3 px-4 d-flex justify-content-between align-items-center">
+                                <button type="button" class="btn btn-outline-secondary btn-sm fw-700 rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                                <button type="submit" class="btn btn-dark btn-sm fw-800 rounded-pill px-4 shadow-sm" style="height:38px;">
+                                    Save Changes
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -497,92 +559,102 @@
 <!-- Add Content Modal -->
 <div class="modal fade" id="addContentModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content border-0 rounded-4 shadow-lg">
-            <div class="modal-header border-0 bg-white pt-4 px-4 pb-2">
+        <div class="modal-content border-0 rounded-4 shadow-lg overflow-hidden">
+            <div class="premium-modal-header d-flex justify-content-between align-items-center">
                 <div>
-                    <h5 class="fw-800 mb-0" style="color: #000;">Upload New Content</h5>
-                    <p class="text-muted small mb-0">Add a new YouTube video or course to your library.</p>
+                    <h5 class="mb-1 text-white"><i class="bi bi-cloud-arrow-up-fill me-2 text-warning"></i> Upload New Content</h5>
+                    <p class="mb-0">Add a new educational YouTube video or tutorial to your interactive library.</p>
                 </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <form action="{{ route('admin.contents.store') }}" method="POST">
                 @csrf
-                <div class="modal-body px-4 py-4">
-                    <div class="row g-4">
-                        <!-- Basic Info -->
-                        <div class="col-12">
-                            <h6 class="fw-800 small text-uppercase letter-spacing-1 mb-3 text-primary">1. Content Information</h6>
+                <div class="modal-body p-4 bg-light-subtle">
+                    
+                    <!-- Section 1: Video Details -->
+                    <div class="modal-section-card shadow-sm">
+                        <div class="modal-section-title text-indigo">
+                            <i class="bi bi-play-btn-fill"></i> 1. Video & Metadata
                         </div>
-                        <div class="col-12">
-                            <label class="form-label">Video Title</label>
-                            <input type="text" name="title" class="form-control" placeholder="e.g. Master AI Automation with ChatGPT" required>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">YouTube URL</label>
-                            <input type="url" name="video_url" class="form-control" placeholder="https://youtube.com/watch?v=..." required>
-                        </div>
-
-                        <!-- Classification -->
-                        <div class="col-12 mt-4">
-                            <h6 class="fw-800 small text-uppercase letter-spacing-1 mb-3 text-primary">2. Classification</h6>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Category</label>
-                            <input type="text" name="category" class="form-control" placeholder="e.g. Marketing">
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Skill Level</label>
-                            <select name="skill_level" class="form-select">
-                                <option value="Beginner">Beginner</option>
-                                <option value="Intermediate">Intermediate</option>
-                                <option value="Advanced">Advanced</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Connected Tools (Press Enter)</label>
-                            <input type="text" name="connected_tools" class="form-control tagify-tools-input" placeholder="e.g. Gmail, Notion, Slack">
-                        </div>
-
-                        <!-- Grouping & Sequence -->
-                        <div class="col-12 mt-4">
-                            <h6 class="fw-800 small text-uppercase letter-spacing-1 mb-3 text-primary">3. Grouping & Sequence</h6>
-                        </div>
-                        <div class="col-md-12">
-                            <label class="form-label">Associated Course (Optional)</label>
-                            <select name="course_id" class="form-select">
-                                <option value="">Individual Content (None)</option>
-                                @foreach($courses as $course)
-                                    <option value="{{ $course->id }}">{{ $course->title }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-md-8">
-                            <label class="form-label">Section or Part Label</label>
-                            <input type="text" name="section_part_label" class="form-control" placeholder="e.g. Section 1, Part 3, Introduction">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Part/Order #</label>
-                            <input type="number" name="sort_order" class="form-control" placeholder="1" value="0">
-                        </div>
-
-                        <!-- Details -->
-                        <div class="col-12 mt-4">
-                            <h6 class="fw-800 small text-uppercase letter-spacing-1 mb-3 text-primary">4. Metadata & Tags</h6>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Description</label>
-                            <textarea name="description" rows="3" class="form-control" placeholder="Brief overview of the content..."></textarea>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label">Search Tags (Press Enter)</label>
-                            <input type="text" name="tags" class="form-control tagify-input" placeholder="Type tags and press enter">
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-fonts"></i> Video Title</label>
+                                <input type="text" name="title" class="form-control" placeholder="e.g. Master AI Automation with ChatGPT" required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-youtube text-danger"></i> YouTube URL</label>
+                                <input type="url" name="video_url" class="form-control" placeholder="https://youtube.com/watch?v=..." required>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-text-left"></i> Description / What You Will Learn</label>
+                                <textarea name="description" rows="2" class="form-control" placeholder="Provide a brief summary of what this tutorial covers..."></textarea>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Section 2: Mapping & Extension Smart Tags -->
+                    <div class="modal-section-card shadow-sm">
+                        <div class="modal-section-title text-success">
+                            <i class="bi bi-cpu-fill"></i> 2. Extension Link & Smart Matching
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-grid-fill"></i> Category</label>
+                                <input type="text" name="category" class="form-control" placeholder="e.g. Artificial Intelligence">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-activity"></i> Skill Level</label>
+                                <select name="skill_level" class="form-select">
+                                    <option value="Beginner">Beginner</option>
+                                    <option value="Intermediate">Intermediate</option>
+                                    <option value="Advanced">Advanced</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-plug-fill"></i> Connected Tools (Triggers Extension Recommendations)</label>
+                                <input type="text" name="connected_tools" class="form-control tagify-tools-input" placeholder="e.g. Gmail, Notion, Slack">
+                                <span class="text-muted" style="font-size:0.7rem; display:block; margin-top:0.25rem;">
+                                    Type tools (e.g. slack, notion) & press enter. When the user stays on these pages, this video will be suggested!
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Section 3: Sequences & Tags -->
+                    <div class="modal-section-card shadow-sm">
+                        <div class="modal-section-title text-warning">
+                            <i class="bi bi-collection-play-fill"></i> 3. Course Alignment & Tagging
+                        </div>
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-journal-album"></i> Associated Course (Optional)</label>
+                                <select name="course_id" class="form-select">
+                                    <option value="">Individual Video (No Course)</option>
+                                    @foreach($courses as $course)
+                                        <option value="{{ $course->id }}">{{ $course->title }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-tag-fill"></i> Section Label</label>
+                                <input type="text" name="section_part_label" class="form-control" placeholder="e.g. Section 1: Intro, Part 3">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-sort-numeric-down"></i> Sort Order #</label>
+                                <input type="number" name="sort_order" class="form-control" placeholder="1" value="0">
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-hash"></i> Search Tags (Press Enter)</label>
+                                <input type="text" name="tags" class="form-control tagify-input" placeholder="Type tags and press enter">
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-                <div class="modal-footer border-0 bg-light py-3 px-4">
-                    <button type="button" class="btn btn-link text-muted fw-bold text-decoration-none" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary px-4 rounded-3 fw-800">
-                        <i class="bi bi-cloud-arrow-up-fill me-2"></i> Upload Content
+                <div class="modal-footer border-0 bg-light py-3 px-4 d-flex justify-content-between align-items-center">
+                    <button type="button" class="btn btn-outline-secondary btn-sm fw-700 rounded-pill px-4" data-bs-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-dark btn-sm fw-800 rounded-pill px-4 shadow-sm" style="height:38px;">
+                        <i class="bi bi-cloud-arrow-up-fill me-1"></i> Upload Content
                     </button>
                 </div>
             </form>
