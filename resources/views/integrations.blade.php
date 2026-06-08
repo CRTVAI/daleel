@@ -32,7 +32,7 @@
                                 <i class="bi bi-puzzle-fill"></i>
                             </div>
                             <div>
-                                <h4 class="fw-800 mb-0" style="color: #000;">CRTVAI Mentor Extension</h4>
+                                <h4 class="fw-800 mb-0" style="color: #000;">Dallel AI Mentor Extension</h4>
                                 <span class="text-dark opacity-50 fw-800" style="font-size: 11px;">v1.2.0</span>
                             </div>
                         </div>
@@ -85,7 +85,7 @@
                                     <div class="d-flex justify-content-between mb-3">
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="logo-mini"></div>
-                                            <span class="fw-800" style="font-size: 11px; color: #000;">CRTVAI Mentor</span>
+                                            <span class="fw-800" style="font-size: 11px; color: #000;">Dallel AI Mentor</span>
                                         </div>
                                         <i class="bi bi-three-dots text-dark" style="font-size: 11px;"></i>
                                     </div>
@@ -118,42 +118,50 @@
                 <p class="text-dark opacity-75 small">Connect the tools you use daily to get better recommendations and save time.</p>
             </div>
 
-            <div class="row g-3">
-                @php
-                    $integrations = [
-                        ['name' => 'Gmail', 'status' => 'Connected', 'icon' => 'bi-envelope', 'color' => '#ea4335'],
-                        ['name' => 'Notion', 'status' => 'Connected', 'icon' => 'bi-journal-text', 'color' => '#000000'],
-                        ['name' => 'Google Drive', 'status' => 'Connect', 'icon' => 'bi-hdd-network', 'color' => '#34a853'],
-                        ['name' => 'Slack', 'status' => 'Connect', 'icon' => 'bi-slack', 'color' => '#4a154b'],
-                        ['name' => 'LinkedIn', 'status' => 'Connect', 'icon' => 'bi-linkedin', 'color' => '#0a66c2'],
-                        ['name' => 'Google Calendar', 'status' => 'Connect', 'icon' => 'bi-calendar3', 'color' => '#4285f4'],
-                        ['name' => 'GitHub', 'status' => 'Connect', 'icon' => 'bi-github', 'color' => '#181717'],
-                        ['name' => 'Zapier', 'status' => 'Connect', 'icon' => 'bi-lightning-charge', 'color' => '#ff4a00'],
-                    ];
-                @endphp
+            @if(session('success'))
+                <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-4" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i> {{ session('success') }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            @endif
 
-                @foreach($integrations as $item)
-                <div class="col-md-3">
-                    <div class="card border border-light-subtle rounded-4 p-3 h-100 shadow-sm-hover">
-                        <div class="d-flex justify-content-between mb-3">
-                            <div class="tool-icon-box" style="background: {{ $item['color'] }}10; color: {{ $item['color'] }};">
-                                <i class="bi {{ $item['icon'] }}"></i>
+            <div class="row g-3">
+                @forelse($tools as $tool)
+                    @php
+                        $isConnected = is_array(auth()->user()->connections) && in_array($tool->name, auth()->user()->connections);
+                    @endphp
+                    <div class="col-md-3">
+                        <div class="card border border-light-subtle rounded-4 p-4 h-100 shadow-sm-hover d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-center mb-4">
+                                <div class="bg-light p-2 rounded-3 border border-light-subtle d-inline-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                                    <img src="{{ $tool->logo }}" alt="{{ $tool->name }}" class="img-fluid rounded-2" style="max-height: 32px; object-fit: contain;">
+                                </div>
+                                <span class="badge rounded-pill {{ $isConnected ? 'bg-success-subtle text-success' : 'bg-light text-muted border' }} px-3 py-2" style="font-size: 10px; font-weight: 800;">
+                                    {{ $isConnected ? 'Connected' : 'Disconnected' }}
+                                </span>
                             </div>
-                            <i class="bi bi-three-dots-vertical text-dark cursor-pointer opacity-50"></i>
-                        </div>
-                        <h6 class="fw-800 mb-1" style="font-size: 15px; color: #000;">{{ $item['name'] }}</h6>
-                        <p class="text-dark opacity-75 mb-3" style="font-size: 11px; line-height: 1.5;">Integrate {{ $item['name'] }} to sync your activity and learning data.</p>
-                        <div class="d-flex justify-content-between align-items-center mt-auto pt-2">
-                            @if($item['status'] == 'Connected')
-                                <span class="badge rounded-pill bg-success-subtle text-success border-0 px-3 py-2" style="font-size: 10px; font-weight: 800;">Connected</span>
-                                <a href="#" class="text-decoration-none text-dark fw-800 small" style="font-size: 11px;">Manage</a>
-                            @else
-                                <button class="btn btn-outline-dark border-2 text-dark w-100 py-2 fw-800" style="font-size: 11px; border-radius: 10px;">Connect</button>
-                            @endif
+                            <h6 class="fw-800 mb-1" style="font-size: 15px; color: #000;">{{ $tool->name }}</h6>
+                            <p class="text-dark opacity-75 mb-4 flex-grow-1" style="font-size: 11px; line-height: 1.5;">
+                                {{ $tool->description ?? 'Integrate ' . $tool->name . ' to sync your activity.' }}
+                            </p>
+                            <div class="mt-auto pt-2">
+                                <form action="{{ route('profile.connections.toggle') }}" method="POST">
+                                    @csrf
+                                    <input type="hidden" name="tool_name" value="{{ $tool->name }}">
+                                    @if($isConnected)
+                                        <button type="submit" class="btn btn-outline-danger w-100 py-2 fw-800" style="font-size: 11px; border-radius: 10px; border-width: 2px;">Disconnect</button>
+                                    @else
+                                        <button type="submit" class="btn btn-outline-dark border-2 text-dark w-100 py-2 fw-800" style="font-size: 11px; border-radius: 10px;">Connect</button>
+                                    @endif
+                                </form>
+                            </div>
                         </div>
                     </div>
-                </div>
-                @endforeach
+                @empty
+                    <div class="col-12 text-center py-4">
+                        <p class="text-muted small fw-600">No dynamic tools added by the administrator yet.</p>
+                    </div>
+                @endforelse
             </div>
         </div>
 
@@ -167,7 +175,7 @@
                 <div class="d-flex align-items-start gap-3 mb-4">
                     <i class="bi bi-check-circle-fill text-success mt-1"></i>
                     <div>
-                        <p class="small fw-800 mb-0" style="color: #000;">CRTVAI Mentor is connected</p>
+                        <p class="small fw-800 mb-0" style="color: #000;">Dallel AI Mentor is connected</p>
                         <p class="text-dark opacity-50" style="font-size: 11px;">Active: 2 mins ago</p>
                     </div>
                 </div>

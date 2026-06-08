@@ -34,9 +34,26 @@ class AuthenticatedSessionController extends Controller
     {
         $request->authenticate();
 
+        $user = Auth::user();
+        if ($user) {
+            $user->refresh();
+        }
+
+        // Strict verification check
+        if ($user && !$user->is_admin && !$user->hasVerifiedEmail()) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+            
+            return redirect()->route('login')
+                ->with('status', 'verification-required')
+                ->with('unverified_email', $user->email)
+                ->withErrors(['email' => 'Your email address is not verified. Please check your inbox for the activation link.']);
+        }
+
         $request->session()->regenerate();
 
-        if (Auth::user()->is_admin) {
+        if ($user && $user->is_admin) {
             return redirect()->route('admin.dashboard');
         }
 

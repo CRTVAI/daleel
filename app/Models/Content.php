@@ -8,8 +8,12 @@ class Content extends Model
 {
     protected $fillable = [
         'title',
+        'slug',
         'type',
         'video_url',
+        'video_url_ar',
+        'youtube_id',
+        'language',
         'duration_seconds',
         'thumbnail',
         'description',
@@ -36,9 +40,20 @@ class Content extends Model
      */
     public function getYoutubeIdAttribute(): ?string
     {
+        return $this->extractYoutubeId($this->video_url);
+    }
+
+    public function getYoutubeIdArAttribute(): ?string
+    {
+        return $this->extractYoutubeId($this->video_url_ar);
+    }
+
+    public function extractYoutubeId($url): ?string
+    {
+        if (!$url) return null;
         preg_match(
             '%(?:youtube(?:-nocookie)?\.com/(?:[^/]+/.+/|(?:v|e(?:mbed)?)/|.*[?&]v=)|youtu\.be/)([^"&?/ ]{11})%i',
-            $this->video_url,
+            $url,
             $match
         );
         return $match[1] ?? null;
@@ -100,6 +115,27 @@ class Content extends Model
     }
 
     // ── Scopes ─────────────────────────────────────────────────
+
+    protected static function booted()
+    {
+        static::creating(function ($content) {
+            if (!$content->slug) {
+                $content->slug = \Illuminate\Support\Str::slug($content->title);
+            }
+            if (!$content->youtube_id) {
+                $content->youtube_id = $content->extractYoutubeId($content->video_url);
+            }
+        });
+
+        static::updating(function ($content) {
+            if ($content->isDirty('title') && !$content->isDirty('slug')) {
+                $content->slug = \Illuminate\Support\Str::slug($content->title);
+            }
+            if ($content->isDirty('video_url')) {
+                $content->youtube_id = $content->extractYoutubeId($content->video_url);
+            }
+        });
+    }
 
     public function scopeActive($query)
     {

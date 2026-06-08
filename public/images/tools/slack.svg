@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64">
+  <defs>
+    <linearGradient id="slack-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4a154b" />
+      <stop offset="100%" stop-color="#3b113c" />
+    </linearGradient>
+  </defs>
+  <rect width="24" height="24" rx="6" fill="url(#slack-grad)"/>
+  <circle cx="9" cy="9" r="1.5" fill="#e01e5a"/>
+  <circle cx="15" cy="9" r="1.5" fill="#36c5f0"/>
+  <circle cx="9" cy="15" r="1.5" fill="#2eb67d"/>
+  <circle cx="15" cy="15" r="1.5" fill="#ecb22e"/>
+</svg>

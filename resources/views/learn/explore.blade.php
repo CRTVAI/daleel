@@ -1,8 +1,9 @@
 @extends('layouts.user')
 
-@section('title', 'Learning Hub — Explore — CRTVAI')
+@section('title', 'Learning Hub — Explore — Dallel AI')
 
 @section('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <style>
     :root {
         --crtv-primary: #6366f1;
@@ -444,12 +445,27 @@
         {{-- Tool quick filters --}}
         <div class="quick-tags animate-slide-up delay-1">
             <span class="quick-tag-label">🔌 Connected Browser Tools:</span>
-            <a href="{{ route('learn.explore', ['type' => $type, 'search' => 'chatgpt']) }}" class="quick-tag-btn">🤖 ChatGPT</a>
-            <a href="{{ route('learn.explore', ['type' => $type, 'search' => 'youtube']) }}" class="quick-tag-btn">🎥 YouTube</a>
-            <a href="{{ route('learn.explore', ['type' => $type, 'search' => 'slack']) }}" class="quick-tag-btn">💬 Slack</a>
-            <a href="{{ route('learn.explore', ['type' => $type, 'search' => 'notion']) }}" class="quick-tag-btn">📝 Notion</a>
-            <a href="{{ route('learn.explore', ['type' => $type, 'search' => 'github']) }}" class="quick-tag-btn">💻 GitHub</a>
-            <a href="{{ route('learn.explore', ['type' => $type, 'search' => 'figma']) }}" class="quick-tag-btn">🎨 Figma</a>
+            @php
+                $emojiMap = [
+                    'chatgpt' => '🤖',
+                    'notion' => '📝',
+                    'slack' => '💬',
+                    'zapier' => '⚡',
+                    'gmail' => '📧',
+                    'youtube' => '🎥',
+                    'github' => '💻',
+                    'figma' => '🎨',
+                ];
+            @endphp
+            @foreach($connectedTools as $tool)
+                @php
+                    $lowerName = strtolower($tool->name);
+                    $emoji = $emojiMap[$lowerName] ?? '🔌';
+                @endphp
+                <a href="{{ route('learn.explore', ['type' => $type, 'search' => $lowerName]) }}" class="quick-tag-btn">
+                    {{ $emoji }} {{ $tool->name }}
+                </a>
+            @endforeach
         </div>
     </div>
 
@@ -487,40 +503,53 @@
             <h4 class="fw-800 text-dark mb-0 d-flex align-items-center gap-2">
                 <i class="bi bi-stars text-primary"></i> Recommended for Your Learning Path
             </h4>
-        </div>
-        <div class="row g-4">
-            @foreach($recommendedItems as $item)
-            <div class="col-xl-3 col-lg-4 col-md-6">
-                <div class="premium-card">
-                    <button class="premium-bookmark-btn {{ Auth::user()->bookmarkedContents()->where('content_id', $item->id)->exists() ? 'active' : '' }}" 
-                            onclick="event.preventDefault(); toggleBookmark({{ $item->id }}, this)" 
-                            title="Bookmark">
-                        <i class="bi {{ Auth::user()->bookmarkedContents()->where('content_id', $item->id)->exists() ? 'bi-bookmark-fill' : 'bi-bookmark' }}"></i>
-                    </button>
-                    <a href="{{ route('learn.watch', $item) }}" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;height:100%">
-                        <div class="premium-thumb">
-                            <img src="{{ $item->thumbnail_url }}" alt="{{ $item->title }}">
-                            <div class="premium-card-overlay">
-                                <span class="premium-badge">{{ $item->category }}</span>
-                                @if($item->connected_tools && is_array($item->connected_tools))
-                                    @foreach($item->connected_tools as $tool)
-                                        <span class="tool-connection-badge"><i class="bi bi-cpu"></i> {{ ucfirst($tool) }}</span>
-                                    @endforeach
-                                @endif
-                            </div>
-                        </div>
-                        <div class="premium-body bg-white">
-                            <h6 class="premium-title">{{ $item->title }}</h6>
-                            <p class="premium-desc">{{ $item->description }}</p>
-                            <div class="premium-footer">
-                                <span><i class="bi bi-clock me-1"></i> {{ $item->duration_label ?: '15m' }}</span>
-                                <span class="watch-cta-btn">WATCH LESSON <i class="bi bi-arrow-right"></i></span>
-                            </div>
-                        </div>
-                    </a>
-                </div>
+            <div class="d-flex gap-2">
+                <button class="swiper-prev-explore-recom btn btn-light rounded-circle shadow-sm p-0" style="width: 32px; height: 32px; border: 1px solid #eee;">
+                    <i class="bi bi-chevron-left" style="font-size: 12px;"></i>
+                </button>
+                <button class="swiper-next-explore-recom btn btn-light rounded-circle shadow-sm p-0" style="width: 32px; height: 32px; border: 1px solid #eee;">
+                    <i class="bi bi-chevron-right" style="font-size: 12px;"></i>
+                </button>
             </div>
-            @endforeach
+        </div>
+        
+        <div class="swiper exploreRecomSwiper" style="overflow: hidden; padding: 10px 4px;">
+            <div class="swiper-wrapper">
+                @foreach($recommendedItems as $item)
+                <div class="swiper-slide h-auto">
+                    <div class="premium-card h-100 d-flex flex-column">
+                        <button class="premium-bookmark-btn {{ Auth::user()->bookmarkedContents()->where('content_id', $item->id)->exists() ? 'active' : '' }}" 
+                                onclick="event.preventDefault(); toggleBookmark({{ $item->id }}, this)" 
+                                title="Bookmark">
+                            <i class="bi {{ Auth::user()->bookmarkedContents()->where('content_id', $item->id)->exists() ? 'bi-bookmark-fill' : 'bi-bookmark' }}"></i>
+                        </button>
+                        <a href="{{ route('learn.watch', $item) }}" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;height:100%">
+                            <div class="premium-thumb">
+                                <img src="{{ $item->thumbnail_url }}" alt="{{ $item->title }}">
+                                <div class="premium-card-overlay">
+                                    <span class="premium-badge">{{ $item->category }}</span>
+                                    @if($item->connected_tools && is_array($item->connected_tools))
+                                        @foreach($item->connected_tools as $tool)
+                                            <span class="tool-connection-badge"><i class="bi bi-cpu"></i> {{ ucfirst($tool) }}</span>
+                                        @endforeach
+                                    @endif
+                                </div>
+                            </div>
+                            <div class="premium-body bg-white flex-grow-1 d-flex flex-column justify-content-between">
+                                <div>
+                                    <h6 class="premium-title">{{ $item->title }}</h6>
+                                    <p class="premium-desc">{{ $item->description }}</p>
+                                </div>
+                                <div class="premium-footer mt-auto pt-3 border-top border-light">
+                                    <span><i class="bi bi-clock me-1"></i> {{ $item->duration_label ?: '15m' }}</span>
+                                    <span class="watch-cta-btn">WATCH LESSON <i class="bi bi-arrow-right"></i></span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                @endforeach
+            </div>
         </div>
     </div>
     <hr class="my-5 opacity-10">
@@ -619,7 +648,26 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        if (document.querySelector('.exploreRecomSwiper')) {
+            new Swiper('.exploreRecomSwiper', {
+                slidesPerView: 1,
+                spaceBetween: 24,
+                navigation: {
+                    nextEl: '.swiper-next-explore-recom',
+                    prevEl: '.swiper-prev-explore-recom',
+                },
+                breakpoints: {
+                    640: { slidesPerView: 2, spaceBetween: 20 },
+                    1024: { slidesPerView: 3, spaceBetween: 24 },
+                    1200: { slidesPerView: 4, spaceBetween: 24 }
+                }
+            });
+        }
+    });
+
     function toggleBookmark(contentId, btn) {
         const icon = btn.querySelector('i');
         const url = `/bookmarks/${contentId}/toggle`;

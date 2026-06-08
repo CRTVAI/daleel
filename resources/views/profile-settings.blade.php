@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Profile Settings — CRTVAI')
+@section('title', 'Profile Settings — Dallel AI')
 
 @section('content')
 <div class="profile-settings-wrapper">
@@ -71,7 +71,7 @@
                             <i class="bi bi-stars fs-3"></i>
                         </div>
                     </div>
-                    <h4 class="fw-800 mb-2" style="letter-spacing: -0.5px;">Welcome to TrackWave!</h4>
+                    <h4 class="fw-800 mb-2" style="letter-spacing: -0.5px;">Welcome to Dallel AI!</h4>
                     <p class="mb-0 mx-auto opacity-90 fw-500" style="max-width: 500px; font-size: 1.05rem; line-height: 1.6;">
                         Your account has been created successfully. Please take a moment to **complete your learning profile** below to help us tailor your experience.
                     </p>
@@ -125,18 +125,18 @@
                                 <div class="col-md-6">
                                     <label class="form-label-minimal">Primary Learning Goal</label>
                                     <select name="learning_goal" class="form-select-minimal">
-                                        @foreach(['Get a job in tech', 'Build a side project', 'Improve skills at work', 'Explore AI tools', 'Learn to code'] as $goal)
-                                            <option value="{{ $goal }}" {{ auth()->user()->learning_goal == $goal ? 'selected' : '' }}>{{ $goal }}</option>
+                                        @foreach($learningGoals as $goal)
+                                            <option value="{{ $goal->title }}" {{ auth()->user()->learning_goal == $goal->title ? 'selected' : '' }}>{{ $goal->title }}</option>
                                         @endforeach
                                     </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label class="form-label-minimal">Experience Level</label>
                                     <div class="d-flex gap-2">
-                                        @foreach(['Beginner', 'Intermediate', 'Advanced'] as $level)
+                                        @foreach($experienceLevels as $level)
                                         <div class="flex-grow-1">
-                                            <input type="radio" class="btn-check" name="experience_level" id="edit_level_{{ $level }}" value="{{ $level }}" {{ auth()->user()->experience_level == $level ? 'checked' : '' }}>
-                                            <label class="btn btn-outline-primary w-100 rounded-3 py-2 small fw-bold" for="edit_level_{{ $level }}">{{ $level }}</label>
+                                            <input type="radio" class="btn-check" name="experience_level" id="edit_level_{{ Str::slug($level->title) }}" value="{{ $level->title }}" {{ auth()->user()->experience_level == $level->title ? 'checked' : '' }}>
+                                            <label class="btn btn-outline-primary w-100 rounded-3 py-2 small fw-bold" for="edit_level_{{ Str::slug($level->title) }}">{{ $level->title }}</label>
                                         </div>
                                         @endforeach
                                     </div>
@@ -350,20 +350,46 @@
     .tagify__tag > div { display: flex; align-items: center; gap: 8px; }
     .tagify__tag img { width: 18px; height: 18px; object-fit: contain; }
     
-    .tags-look .tagify__dropdown__item {
+    /* Complete high-fidelity style for Tagify dropdown items */
+    .tagify__dropdown {
+        border-radius: 12px !important;
+        border: 1px solid #e2e8f0 !important;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
+        background: #ffffff !important;
+        overflow: hidden;
+        z-index: 9999 !important;
+    }
+    .tagify__dropdown__wrapper {
+        border: none !important;
+        background: #ffffff !important;
+    }
+    .tagify__dropdown__item {
+        color: #1e293b !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        padding: 10px 16px !important;
+        background: transparent !important;
+        transition: all 0.15s ease !important;
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 10px 15px;
     }
-    .tags-look img { width: 24px; height: 24px; object-fit: contain; }
-    .tags-look .tagify__dropdown__item--active { background: #f8fafc; }
+    .tagify__dropdown__item img {
+        width: 20px;
+        height: 20px;
+        object-fit: contain;
+    }
+    .tagify__dropdown__item--active,
+    .tagify__dropdown__item:hover {
+        background: #000000 !important;
+        color: #ffffff !important;
+    }
+    .tagify__dropdown__item--active *,
+    .tagify__dropdown__item:hover * {
+        color: #ffffff !important;
+    }
 
-    /* Fix hover text color */
     .tagify__tag:hover .tagify__tag-text { color: #000 !important; }
-    .tagify__dropdown__item:hover span { color: #000 !important; }
-    .tagify__tag--active .tagify__tag-text { color: #000 !important; }
-
     .tagify__tag--active .tagify__tag-text { color: #000 !important; }
 </style>
 @endsection
@@ -375,7 +401,11 @@
         var input = document.querySelector('#interests-tagify');
         if(input) {
             new Tagify(input, {
-                whitelist: ['AI & ML', 'Web Development', 'Design', 'Productivity', 'Data Science', 'Business', 'Marketing', 'Cybersecurity'],
+                whitelist: [
+                    @foreach($interestsList as $interest)
+                        "{{ $interest }}",
+                    @endforeach
+                ],
                 maxTags: 10,
                 dropdown: {
                     maxItems: 20,
@@ -389,44 +419,9 @@
 var connInput = document.querySelector('#connections-tagify');
 if(connInput) {
     const appsList = [
-        { value: 'Gmail', icon: 'https://cdn.simpleicons.org/gmail' },
-        { value: 'Slack', icon: 'https://cdn.simpleicons.org/slackware' },
-        { value: 'Excel', icon: 'https://cdn.simpleicons.org/googlesheets' },
-        { value: 'GitHub', icon: 'https://cdn.simpleicons.org/github/black' },
-        { value: 'Notion', icon: 'https://cdn.simpleicons.org/notion/black' },
-        { value: 'Trello', icon: 'https://cdn.simpleicons.org/trello' },
-        { value: 'Zoom', icon: 'https://cdn.simpleicons.org/zoom' },
-        { value: 'Discord', icon: 'https://cdn.simpleicons.org/discord' },
-        { value: 'Google Drive', icon: 'https://cdn.simpleicons.org/googledrive' },
-        { value: 'Teams', icon: 'https://cdn.simpleicons.org/teamspeak' },
-        { value: 'LinkedIn', icon: 'https://cdn.simpleicons.org/apacheflink' },
-        { value: 'Google Calendar', icon: 'https://cdn.simpleicons.org/googlecalendar' },
-        { value: 'Zapier', icon: 'https://cdn.simpleicons.org/zapier' },
-        { value: 'Outlook', icon: 'https://cdn.simpleicons.org/microsoftoutlook' },
-        { value: 'WhatsApp', icon: 'https://cdn.simpleicons.org/whatsapp' },
-        { value: 'Telegram', icon: 'https://cdn.simpleicons.org/telegram' },
-        { value: 'Figma', icon: 'https://cdn.simpleicons.org/figma' },
-        { value: 'Adobe CC', icon: 'https://cdn.simpleicons.org/adonisjs' },
-        { value: 'Dropbox', icon: 'https://cdn.simpleicons.org/dropbox' },
-        { value: 'Asana', icon: 'https://cdn.simpleicons.org/asana' },
-        { value: 'Monday.com', icon: 'https://cdn.simpleicons.org/alliedmodders' },
-        { value: 'Jira', icon: 'https://cdn.simpleicons.org/jira' },
-        { value: 'Bitbucket', icon: 'https://cdn.simpleicons.org/bitbucket' },
-        { value: 'GitLab', icon: 'https://cdn.simpleicons.org/gitlab' },
-        { value: 'Spotify', icon: 'https://cdn.simpleicons.org/spotify' },
-        { value: 'Canva', icon: 'https://cdn.simpleicons.org/canvas' },
-        { value: 'Pinterest', icon: 'https://cdn.simpleicons.org/pinterest' },
-        { value: 'Twitter', icon: 'https://cdn.simpleicons.org/x' },
-        { value: 'Instagram', icon: 'https://cdn.simpleicons.org/instagram' },
-        { value: 'Facebook', icon: 'https://cdn.simpleicons.org/facebook' },
-        { value: 'TikTok', icon: 'https://cdn.simpleicons.org/tiktok/black' },
-        { value: 'Reddit', icon: 'https://cdn.simpleicons.org/reddit' },
-        { value: 'Stack Overflow', icon: 'https://cdn.simpleicons.org/stackoverflow' },
-        { value: 'Medium', icon: 'https://cdn.simpleicons.org/medium/black' },
-        { value: 'Substack', icon: 'https://cdn.simpleicons.org/substack' },
-        { value: 'Mailchimp', icon: 'https://cdn.simpleicons.org/mailchimp' },
-        { value: 'HubSpot', icon: 'https://cdn.simpleicons.org/hubspot' },
-        { value: 'Salesforce', icon: 'https://cdn.simpleicons.org/salla' }
+        @foreach($tools as $tool)
+            { value: "{{ $tool->name }}", icon: "{{ $tool->logo }}" },
+        @endforeach
     ];
 
     // Safely pre-populate initial value

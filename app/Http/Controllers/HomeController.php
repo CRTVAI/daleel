@@ -71,8 +71,8 @@ class HomeController extends Controller
         // Shorts
         $shorts = \App\Models\Content::where('type', 'short')->active()->latest()->limit(12)->get();
 
-        // Videos the user is currently watching (has progress, not completed)
         $continueWatching = $user->videoProgress()
+            ->has('content')
             ->with('content')
             ->where('completed', false)
             ->where('watched_seconds', '>', 0)
@@ -92,6 +92,70 @@ class HomeController extends Controller
         // Fallback: if no interests set or no matching content, show latest active
         if ($recommended->isEmpty()) {
             $recommended = \App\Models\Content::where('type', 'video')->where('is_featured', false)->active()->latest()->limit(12)->get();
+        }
+
+        // --- Behavioral Recommendations based on user Browsing History ---
+        $visitedDomains = \App\Models\BrowsingHistory::where('user_id', $user->id)
+            ->distinct()
+            ->pluck('domain')
+            ->toArray();
+
+        $domainToToolsMap = [
+            'chatgpt.com' => ['chatgpt', 'openai'],
+            'youtube.com' => ['youtube'],
+            'slack.com' => ['slack'],
+            'notion.so' => ['notion'],
+            'github.com' => ['github'],
+            'figma.com' => ['figma'],
+            'canva.com' => ['canva'],
+            'linkedin.com' => ['linkedin'],
+            'gmail.com' => ['gmail', 'google'],
+            'sheets.google.com' => ['sheets', 'google sheets'],
+            'instagram.com' => ['instagram'],
+            'facebook.com' => ['facebook', 'meta'],
+        ];
+
+        $behaviorTags = [];
+        foreach ($visitedDomains as $domain) {
+            $domainClean = strtolower(trim($domain));
+            if (isset($domainToToolsMap[$domainClean])) {
+                $behaviorTags = array_merge($behaviorTags, $domainToToolsMap[$domainClean]);
+            }
+        }
+        $behaviorTags = array_unique($behaviorTags);
+
+        $behaviorRecommended = collect();
+        if (!empty($behaviorTags)) {
+            $behaviorRecommended = \App\Models\Content::active()
+                ->where('type', 'video')
+                ->where(function($q) use ($behaviorTags) {
+                    foreach ($behaviorTags as $tag) {
+                        $q->orWhere('tags', 'like', "%{$tag}%")
+                          ->orWhere('connected_tools', 'like', "%{$tag}%");
+                    }
+                })
+                ->whereNotIn('id', $user->videoProgress()->pluck('content_id'))
+                ->latest()
+                ->limit(12)
+                ->get();
+        }
+
+        if ($behaviorRecommended->isEmpty()) {
+            $behaviorRecommended = \App\Models\Content::forUser($user)
+                ->where('type', 'video')
+                ->whereNotIn('id', $user->videoProgress()->pluck('content_id'))
+                ->inRandomOrder()
+                ->limit(12)
+                ->get();
+        }
+
+        if ($behaviorRecommended->isEmpty()) {
+            $behaviorRecommended = \App\Models\Content::active()
+                ->where('type', 'video')
+                ->whereNotIn('id', $user->videoProgress()->pluck('content_id'))
+                ->latest()
+                ->limit(12)
+                ->get();
         }
 
         // Stats
@@ -134,6 +198,77 @@ class HomeController extends Controller
         // Active Courses
         $courses = \App\Models\Course::where('status', 'active')->latest()->limit(8)->get();
 
+        // Connected Tools ranked by dynamic usage scores from user browsing history & sessions
+        $allTools = \App\Models\Tool::where('status', 'active')->get();
+        
+        $sessionStats = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->selectRaw('platform_domain as domain, sum(active_ms) as total_active_ms')
+            ->groupBy('platform_domain')
+            ->get()
+            ->keyBy(function($item) {
+                return strtolower(trim($item->domain));
+            });
+
+        $browsingStats = \App\Models\BrowsingHistory::where('user_id', $user->id)
+            ->selectRaw('domain, sum(duration) as total_duration')
+            ->groupBy('domain')
+            ->get()
+            ->keyBy(function($item) {
+                return strtolower(trim($item->domain));
+            });
+
+        $toolDomainMap = [
+            'ChatGPT' => ['chatgpt.com'],
+            'Notion'  => ['notion.so', 'notion.com'],
+            'Slack'   => ['slack.com'],
+            'Zapier'  => ['zapier.com'],
+            'Gmail'   => ['gmail.com', 'mail.google.com'],
+            'YouTube' => ['youtube.com'],
+            'GitHub'  => ['github.com'],
+            'Figma'   => ['figma.com'],
+        ];
+
+        $toolsWithScores = $allTools->map(function($tool) use ($sessionStats, $browsingStats, $toolDomainMap) {
+            $totalSeconds = 0;
+            $toolName = $tool->name;
+            $mappedDomains = $toolDomainMap[$toolName] ?? [strtolower($toolName) . '.com'];
+
+            foreach ($mappedDomains as $domain) {
+                if (isset($sessionStats[$domain])) {
+                    $totalSeconds += ($sessionStats[$domain]->total_active_ms / 1000);
+                }
+                if (isset($browsingStats[$domain])) {
+                    $totalSeconds += $browsingStats[$domain]->total_duration;
+                }
+            }
+
+            $tool->usage_seconds = $totalSeconds;
+            $tool->usage_score = $totalSeconds; // Alias for safety
+            return $tool;
+        });
+
+        $hasTrackedUsage = $toolsWithScores->sum('usage_seconds') > 0;
+        $hasBrowsingHistory = \App\Models\BrowsingHistory::where('user_id', $user->id)->exists() || 
+                              \App\Models\ExtensionSession::where('user_id', $user->id)->exists();
+
+        if ($hasTrackedUsage) {
+            // Get tools actually used (usage_seconds > 0), sorted descending
+            $usedTools = $toolsWithScores->filter(function($tool) {
+                return $tool->usage_seconds > 0;
+            })->sortByDesc('usage_seconds')->values();
+
+            // Get tools NOT used, sorted alphabetically
+            $unusedTools = $toolsWithScores->filter(function($tool) {
+                return $tool->usage_seconds == 0;
+            })->sortBy('name')->values();
+
+            // Merge them so used ones are first, and the rest are related unused tools, capped at exactly 6
+            $connectedTools = $usedTools->merge($unusedTools)->take(6)->values();
+        } else {
+            // Fallback for new accounts: show top 6 active tools by default
+            $connectedTools = $allTools->take(6)->values();
+        }
+
         return view('user-dashboard', compact(
             'featured',
             'shorts',
@@ -144,8 +279,17 @@ class HomeController extends Controller
             'completedCount',
             'inProgressCount',
             'dailyActivity',
-            'extensionStats'
-        ));
+            'extensionStats',
+            'connectedTools',
+            'behaviorRecommended',
+            'hasBrowsingHistory',
+            'hasTrackedUsage'
+        ))->with([
+            'learningGoals' => \App\Models\LearningGoal::orderBy('title')->get(),
+            'experienceLevels' => \App\Models\ExperienceLevel::orderBy('title')->get(),
+            'tools' => \App\Models\Tool::where('status', 'active')->orderBy('name')->get(),
+            'interestsList' => \App\Models\Content::distinct()->whereNotNull('category')->pluck('category')->toArray(),
+        ]);
     }
 
     public function activityHistory(Request $request)
@@ -203,7 +347,48 @@ class HomeController extends Controller
             ->orderBy('last_active_at', 'desc')
             ->get();
 
-        return view('extension-setup', compact('devices'));
+        // Data Viewer data (embedded in setup page)
+        $sessions = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->orderBy('started_at', 'desc')->get();
+
+        $snapshots = \App\Models\ExtensionMetricsSnapshot::where('user_id', $user->id)
+            ->orderBy('captured_at', 'desc')->get();
+
+        $rollups = \App\Models\ExtensionDailyRollup::where('user_id', $user->id)
+            ->orderBy('date', 'desc')->get();
+
+        $recommendations = \App\Models\ExtensionRecommendation::where('user_id', $user->id)
+            ->with(['events' => fn($q) => $q->orderBy('occurred_at', 'desc')])
+            ->orderBy('created_at', 'desc')->get();
+
+        $helpRequestsQuery = \App\Models\ExtensionHelpRequest::query();
+        
+        if (!$user->is_admin) {
+            $helpRequestsQuery->where('user_id', $user->id);
+        }
+        
+        $helpRequests = $helpRequestsQuery->with('user')->orderBy('created_at', 'desc')->get();
+
+        $todayActiveMs = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->whereDate('started_at', today())->sum('active_ms');
+
+        $domainGroups = $sessions
+            ->groupBy(fn($s) => $s->platform_domain ?: 'Unknown')
+            ->map(fn($g, $d) => [
+                'domain'    => $d,
+                'count'     => $g->count(),
+                'active_ms' => $g->sum('active_ms'),
+                'ai'        => (bool) $g->where('is_ai_tool', true)->count(),
+                'category'  => $g->first()->platform_category ?? null,
+                'sessions'  => $g->sortByDesc('started_at')->values(),
+            ])->sortByDesc('count')->values();
+
+        $uniqueRecommendedCount = $recommendations->unique('content_id')->count();
+
+        return view('extension-setup', compact(
+            'devices', 'sessions', 'snapshots', 'rollups', 'recommendations',
+            'helpRequests', 'todayActiveMs', 'domainGroups', 'uniqueRecommendedCount'
+        ));
     }
 
     /**
@@ -231,8 +416,33 @@ class HomeController extends Controller
             }])
             ->orderBy('created_at', 'desc')
             ->get();
+
+        // Today's active time only
+        $todayActiveMs = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->whereDate('started_at', today())
+            ->sum('active_ms');
+
+        // Domain-grouped sessions for Sessions tab
+        $domainGroups = $sessions
+            ->groupBy(fn($s) => $s->platform_domain ?: 'Unknown')
+            ->map(fn($g, $d) => [
+                'domain'    => $d,
+                'count'     => $g->count(),
+                'active_ms' => $g->sum('active_ms'),
+                'ai'        => (bool) $g->where('is_ai_tool', true)->count(),
+                'category'  => $g->first()->platform_category ?? null,
+                'sessions'  => $g->sortByDesc('started_at')->values(),
+            ])
+            ->sortByDesc('count')
+            ->values();
+
+        // Unique content recommendations (deduplicated)
+        $uniqueRecommendedCount = $recommendations->unique('content_id')->count();
             
-        return view('extension-data', compact('sessions', 'snapshots', 'rollups', 'recommendations'));
+        return view('extension-data', compact(
+            'sessions', 'snapshots', 'rollups', 'recommendations',
+            'todayActiveMs', 'domainGroups', 'uniqueRecommendedCount'
+        ));
     }
 
     /**

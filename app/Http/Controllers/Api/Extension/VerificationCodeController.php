@@ -23,7 +23,7 @@ class VerificationCodeController extends Controller
             ->delete();
 
         // Generate a 6-digit random code
-        $plainCode = 'CRTVAI-' . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        $plainCode = 'DALLEL-' . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
         
         $code = ExtensionVerificationCode::create([
             'user_id' => $user->id,

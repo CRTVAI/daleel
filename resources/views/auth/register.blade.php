@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.public')
 
 @section('content')
 <div class="auth-wrapper">
@@ -6,12 +6,10 @@
         <!-- Left Side: Register Form -->
         <div class="auth-form-section">
             <div class="auth-form-inner">
-                <div class="brand-logo mb-5">
-                    <div class="logo-icon">
-                        <i class="bi bi-robot text-dark fs-4"></i>
-                    </div>
-                    <span class="brand-name">CrtvAI <u>Register</u></span>
-                </div>
+                <a class="brand mb-5" href="/" style="display: flex; gap: 10px; text-decoration: none; align-items: center;">
+                    <span class="brand-mark">DA</span>
+                    <span class="brand-copy"><strong>Dallel AI</strong><small>by Creative AI</small></span>
+                </a>
 
                 <div class="auth-header mb-4">
                     <h1 class="auth-title">Create account</h1>
@@ -119,7 +117,6 @@
     }
 
     .auth-wrapper {
-        min-height: 100vh;
         display: flex;
     }
 
@@ -135,7 +132,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 40px;
+        padding: 20px 40px;
         background: #fff;
     }
 
@@ -281,7 +278,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 40px;
+        padding: 20px;
     }
 
     @media (max-width: 900px) {
@@ -290,10 +287,10 @@
 
     .visual-card {
         width: 100%;
-        max-width: 680px;
+        max-width: 580px;
         background: #fff;
-        border-radius: 32px;
-        padding: 60px;
+        border-radius: 24px;
+        padding: 30px;
         box-shadow: 0px 48px 80px -12px rgba(16, 24, 40, 0.12);
         border: 1px solid #F2F4F7;
         text-align: center;
@@ -301,9 +298,9 @@
 
     .image-wrapper {
         background: #f9fafb;
-        border-radius: 24px;
-        padding: 30px;
-        margin-bottom: 40px;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
     }
 
     .image-wrapper img {

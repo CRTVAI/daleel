@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64">
+  <defs>
+    <linearGradient id="notion-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#000000" />
+      <stop offset="100%" stop-color="#2d3748" />
+    </linearGradient>
+  </defs>
+  <rect width="24" height="24" rx="6" fill="url(#notion-grad)"/>
+  <path d="M7 6h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zm2 3v6l2-1.5V9H9zm4 0v6l2-1.5V9h-2z" fill="#ffffff"/>
+</svg>

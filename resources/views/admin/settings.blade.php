@@ -45,7 +45,7 @@
                             </div>
                         </div>
                     </a>
-                    <a class="list-group-item list-group-item-action border-0 rounded-3 py-3" id="api-tab" data-bs-toggle="pill" href="#api-settings" role="tab">
+                    <a class="list-group-item list-group-item-action border-0 rounded-3 py-3 mb-1" id="api-tab" data-bs-toggle="pill" href="#api-settings" role="tab">
                         <div class="d-flex align-items-center gap-3">
                             <i class="bi bi-code-slash fs-5"></i>
                             <div>
@@ -85,11 +85,11 @@
                                 <div class="row g-4">
                                     <div class="col-md-6 setting-item" data-search="platform name site title">
                                         <label class="form-label fw-bold text-muted small text-uppercase">Platform Name</label>
-                                        <input type="text" class="form-control rounded-3 border-light bg-light p-3 fw-semibold" value="TrackWave AI">
+                                        <input type="text" class="form-control rounded-3 border-light bg-light p-3 fw-semibold" value="Dallel AI">
                                     </div>
                                     <div class="col-md-6 setting-item" data-search="support email contact">
                                         <label class="form-label fw-bold text-muted small text-uppercase">Support Email</label>
-                                        <input type="email" class="form-control rounded-3 border-light bg-light p-3 fw-semibold" value="support@trackwave.ai">
+                                        <input type="email" class="form-control rounded-3 border-light bg-light p-3 fw-semibold" value="support@dallel.ai">
                                     </div>
                                     <div class="col-md-12 setting-item" data-search="site description meta tags">
                                         <label class="form-label fw-bold text-muted small text-uppercase">Site Description</label>
@@ -257,6 +257,8 @@
                         </div>
                     </div>
                 </div>
+
+
             </div>
         </div>
     </div>

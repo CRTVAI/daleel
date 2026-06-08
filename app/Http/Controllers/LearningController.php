@@ -12,21 +12,25 @@ class LearningController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['watch']);
     }
 
     /**
      * Show the in-platform video player for a given content.
      */
-    public function watch(Content $content)
+    public function watch(Request $request, Content $content)
     {
         $user = Auth::user();
+        $query = $request->get('query');
+        $progress = null;
 
-        // Get or create progress record
-        $progress = UserVideoProgress::firstOrCreate(
-            ['user_id' => $user->id, 'content_id' => $content->id],
-            ['watched_seconds' => 0, 'duration_seconds' => $content->duration_seconds, 'completion_percent' => 0]
-        );
+        if ($user) {
+            // Get or create progress record
+            $progress = UserVideoProgress::firstOrCreate(
+                ['user_id' => $user->id, 'content_id' => $content->id],
+                ['watched_seconds' => 0, 'duration_seconds' => $content->duration_seconds, 'completion_percent' => 0]
+            );
+        }
 
         // If part of a course, get course context
         $course = null;
@@ -36,15 +40,53 @@ class LearningController extends Controller
 
         // Recommended videos
         $recommended = collect();
-        if (!$course) {
-            $watchedIds = $user->videoProgress()->pluck('content_id');
-            $recommended = Content::active()
-                ->where('category', $content->category)
-                ->where('id', '!=', $content->id)
-                ->whereNotIn('id', $watchedIds)
-                ->limit(5)
-                ->get();
 
+        // If coming from AI Mentor with a query, search for related videos
+        if ($query) {
+            $keywords = array_filter(explode(' ', strtolower($query)), function($k) {
+                return strlen($k) > 2;
+            });
+
+            $recommended = Content::active()
+                ->where('id', '!=', $content->id)
+                ->where(function ($q) use ($query, $keywords) {
+                    $q->where('title', 'like', "%{$query}%")
+                      ->orWhere('tags', 'like', "%{$query}%");
+                    
+                    foreach ($keywords as $word) {
+                        $q->orWhere('title', 'like', "%{$word}%")
+                          ->orWhere('tags', 'like', "%{$word}%");
+                    }
+                })
+                ->limit(10)
+                ->get();
+        }
+
+        // Fallback recommendations
+        if ($recommended->isEmpty()) {
+            if ($user) {
+                $watchedIds = $user->videoProgress()->pluck('content_id');
+                $recommended = Content::active()
+                    ->where('category', $content->category)
+                    ->where('id', '!=', $content->id)
+                    ->whereNotIn('id', $watchedIds)
+                    ->limit(5)
+                    ->get();
+            }
+
+            if ($recommended->isEmpty()) {
+                $recommended = Content::active()
+                    ->where(function($q) use ($content) {
+                        $q->where('category', $content->category);
+                        if ($content->tags) $q->orWhere('tags', 'like', "%{$content->tags}%");
+                    })
+                    ->where('id', '!=', $content->id)
+                    ->inRandomOrder()
+                    ->limit(5)
+                    ->get();
+            }
+
+            // Final safety fallback: just get any active videos if still empty
             if ($recommended->isEmpty()) {
                 $recommended = Content::active()
                     ->where('id', '!=', $content->id)
@@ -107,24 +149,119 @@ class LearningController extends Controller
         $user = Auth::user();
         $type = $request->get('type', 'video'); // default to videos
         
-        // 1. Get Recommendations (Always based on type 'video' for better focus)
-        $interests = $user->interests ?? [];
-        $recommendedItems = Content::active()
-            ->where(function($q) use ($interests) {
-                if (!empty($interests)) {
-                    $q->whereIn('category', (array)$interests);
-                }
-            })
-            ->whereNotIn('id', $user->videoProgress()->pluck('content_id'))
-            ->inRandomOrder()
-            ->limit(4)
-            ->get();
+         // 1. Get Recommendations (Most watched globally among user's most used tools)
+        $sessionStats = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->selectRaw('platform_domain as domain, sum(active_ms) as total_active_ms')
+            ->groupBy('platform_domain')
+            ->get()
+            ->keyBy(fn($item) => strtolower(trim($item->domain)));
 
-        if ($recommendedItems->isEmpty()) {
-            $recommendedItems = Content::active()->inRandomOrder()->limit(4)->get();
+        $browsingStats = \App\Models\BrowsingHistory::where('user_id', $user->id)
+            ->selectRaw('domain, sum(duration) as total_duration')
+            ->groupBy('domain')
+            ->get()
+            ->keyBy(fn($item) => strtolower(trim($item->domain)));
+
+        $allTools = \App\Models\Tool::where('status', 'active')->get();
+        $toolDomainMap = [
+            'ChatGPT' => ['chatgpt', 'chatgpt.com', 'openai'],
+            'Notion'  => ['notion', 'notion.so', 'notion.com'],
+            'Slack'   => ['slack', 'slack.com'],
+            'Zapier'  => ['zapier', 'zapier.com'],
+            'Gmail'   => ['gmail', 'gmail.com', 'mail.google.com'],
+            'YouTube' => ['youtube', 'youtube.com'],
+            'GitHub'  => ['github', 'github.com'],
+            'Figma'   => ['figma', 'figma.com'],
+        ];
+
+        $toolsWithScores = $allTools->map(function($tool) use ($sessionStats, $browsingStats, $toolDomainMap) {
+            $totalSeconds = 0;
+            $toolName = strtolower($tool->name);
+            $mappedDomains = $toolDomainMap[$tool->name] ?? [$toolName . '.com'];
+
+            foreach ($mappedDomains as $domain) {
+                if (isset($sessionStats[$domain])) {
+                    $totalSeconds += ($sessionStats[$domain]->total_active_ms / 1000);
+                }
+                if (isset($browsingStats[$domain])) {
+                    $totalSeconds += $browsingStats[$domain]->total_duration;
+                }
+            }
+            $tool->usage_seconds = $totalSeconds;
+            return $tool;
+        });
+
+        // Get names of tools used by this specific user
+        $usedToolNames = $toolsWithScores->filter(fn($t) => $t->usage_seconds > 0)
+            ->sortByDesc('usage_seconds')
+            ->map(fn($t) => strtolower($t->name))
+            ->toArray();
+
+        // Get most watched video content IDs globally
+        $popularContentIds = \App\Models\UserVideoProgress::selectRaw('content_id, count(*) as watch_count')
+            ->groupBy('content_id')
+            ->orderByDesc('watch_count')
+            ->pluck('content_id')
+            ->toArray();
+
+        $recommendedItems = collect();
+
+        if (!empty($usedToolNames)) {
+            // Find active videos connected to the user's top used tools that they haven't watched yet
+            $matchedContents = Content::active()
+                ->where('type', 'video')
+                ->where(function($q) use ($usedToolNames) {
+                    foreach ($usedToolNames as $toolName) {
+                        $q->orWhere('tags', 'like', "%{$toolName}%")
+                          ->orWhere('connected_tools', 'like', "%{$toolName}%");
+                    }
+                })
+                ->whereNotIn('id', $user->videoProgress()->pluck('content_id'))
+                ->get();
+
+            // Sort matched videos by global popularity (most watched globally first)
+            $recommendedItems = $matchedContents->sortBy(function($content) use ($popularContentIds) {
+                $pos = array_search($content->id, $popularContentIds);
+                return $pos === false ? 999999 : $pos;
+            })->values()->take(20);
         }
 
-        // 2. All Items (Filtered and Paginated)
+        // Fallback/Padded items to guarantee 20 recommendations: match declared onboarding interests sorted by popularity
+        if ($recommendedItems->count() < 20) {
+            $interests = (array) ($user->interests ?? []);
+            $fallbackQuery = Content::active()
+                ->where('type', 'video')
+                ->whereNotIn('id', $user->videoProgress()->pluck('content_id'));
+
+            if (!empty($interests)) {
+                $fallbackQuery->where(function($q) use ($interests) {
+                    foreach ($interests as $interest) {
+                        $q->orWhere('category', 'like', "%{$interest}%")
+                          ->orWhere('tags', 'like', "%{$interest}%");
+                    }
+                });
+            }
+
+            $fallbackItems = $fallbackQuery->get()->sortBy(function($content) use ($popularContentIds) {
+                $pos = array_search($content->id, $popularContentIds);
+                return $pos === false ? 999999 : $pos;
+            })->values();
+
+            $recommendedItems = $recommendedItems->merge($fallbackItems)->unique('id')->take(20)->values();
+        }
+
+        // Absolute fallback if still under 20 items: most popular videos overall
+        if ($recommendedItems->count() < 20) {
+            $allActiveVideos = Content::active()->where('type', 'video')->get();
+            $absoluteFallback = $allActiveVideos->sortBy(function($content) use ($popularContentIds) {
+                $pos = array_search($content->id, $popularContentIds);
+                return $pos === false ? 999999 : $pos;
+            })->values();
+
+            $recommendedItems = $recommendedItems->merge($absoluteFallback)->unique('id')->take(20)->values();
+        }
+
+        // 2. All Items (Filtered, Ranked, and Paginated)
         $query = ($type === 'course') ? Course::where('status', 'active') : Content::active();
 
         if ($request->filled('category')) {
@@ -137,17 +274,73 @@ class LearningController extends Controller
 
         if ($request->filled('search')) {
             $s = $request->search;
-            $query->where(function ($q) use ($s) {
+            $query->where(function ($q) use ($s, $type) {
                 $q->where('title', 'like', "%$s%")
-                  ->orWhere('description', 'like', "%$s%")
-                  ->orWhere('connected_tools', 'like', "%$s%")
-                  ->orWhere('tags', 'like', "%$s%");
+                  ->orWhere('description', 'like', "%$s%");
+
+                // Only search Content-specific columns if we are searching videos
+                if ($type === 'video') {
+                    $q->orWhere('connected_tools', 'like', "%$s%")
+                      ->orWhere('tags', 'like', "%$s%")
+                      ->orWhere('language', 'like', "%$s%")
+                      ->orWhere('video_url_ar', 'like', "%$s%");
+
+                    $term = strtolower($s);
+                    if ($term === 'arabic' || $term === 'ar') {
+                        $q->orWhereIn('language', ['ar', 'both']);
+                    } elseif ($term === 'english' || $term === 'en') {
+                        $q->orWhereIn('language', ['en', 'both']);
+                    }
+                }
             });
         }
 
-        $items = $query->latest()->paginate(16)->withQueryString();
-        $categories = Content::active()->distinct()->pluck('category')->sort()->values();
+        // Retrieve and dynamically rank items (YouTube trending style based on usage and popularity)
+        $itemsCollection = $query->get();
 
-        return view('learn.explore', compact('items', 'categories', 'type', 'recommendedItems'));
+        if ($type === 'video') {
+            $itemsCollection = $itemsCollection->sortBy(function($content) use ($usedToolNames, $popularContentIds) {
+                // 1. Tool Usage Rank: smaller value = higher used tool = higher rank
+                $toolRank = 999;
+                if (!empty($usedToolNames) && $content->connected_tools) {
+                    foreach ($usedToolNames as $index => $toolName) {
+                        if (in_array($toolName, array_map('strtolower', (array)$content->connected_tools)) ||
+                            str_contains(strtolower($content->tags), $toolName)) {
+                            $toolRank = $index;
+                            break;
+                        }
+                    }
+                }
+
+                // 2. Global Watch Rank: smaller value = more watched globally = higher rank
+                $watchPos = array_search($content->id, $popularContentIds);
+                $watchRank = $watchPos === false ? 999999 : $watchPos;
+
+                // ToolRank takes first priority (weighted by millions), WatchRank takes second
+                return ($toolRank * 1000000) + $watchRank;
+            })->values();
+        } else {
+            // For courses, sort by course latest status
+            $itemsCollection = $itemsCollection->sortByDesc('created_at')->values();
+        }
+
+        // Manual Laravel Pagination over sorted Collection
+        $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+        $perPage = 16;
+        $currentPageItems = $itemsCollection->slice(($currentPage - 1) * $perPage, $perPage)->all();
+
+        $items = new \Illuminate\Pagination\LengthAwarePaginator(
+            $currentPageItems,
+            $itemsCollection->count(),
+            $perPage,
+            $currentPage,
+            ['path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath()]
+        );
+        $items->withQueryString();
+
+        $categories = Content::active()->distinct()->pluck('category')->sort()->values();
+        $connectedTools = \App\Models\Tool::where('status', 'active')->orderBy('name')->get();
+
+        return view('learn.explore', compact('items', 'categories', 'type', 'recommendedItems', 'connectedTools'));
     }
 }

@@ -1,12 +1,14 @@
 @extends('layouts.admin')
 
+@section('title', 'User Profile Settings — Admin')
+
 @section('content')
 <div class="container-fluid p-0">
     <div class="row mb-4">
         <div class="col-12 d-flex justify-content-between align-items-center">
             <div>
-                <h2 class="page-title mb-1">User Profile</h2>
-                <p class="text-muted">Viewing profile details for {{ $user->name }}</p>
+                <h2 class="page-title mb-1">Manage User Profile</h2>
+                <p class="text-muted">Updating profile details for <strong>{{ $user->name }}</strong></p>
             </div>
             <a href="{{ route('admin.users.index') }}" class="btn btn-light rounded-3 fw-bold">
                 <i class="bi bi-arrow-left me-2"></i> Back to Users
@@ -14,192 +16,163 @@
         </div>
     </div>
 
-    <div class="row g-4">
-        <!-- Main Content Area -->
-        <div class="col-lg-12">
-            <div class="d-flex justify-content-between align-items-end mb-5">
-                <div class="d-flex align-items-center gap-4">
-                    <div class="avatar-large" style="width: 64px; height: 64px; font-size: 22px; margin: 0; background: #f1f5f9; color: #6366f1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">
-                        {{ strtoupper(substr($user->name, 0, 1)) }}{{ strtoupper(substr(strrchr($user->name, " "), 1, 1)) ?: '' }}
+    <div class="profile-settings-wrapper">
+        <div class="row g-4">
+            <!-- Settings Sidebar -->
+            <div class="col-lg-3">
+                <div class="settings-nav card border-0 shadow-sm rounded-4 p-3 mb-4">
+                    <div class="d-flex align-items-center gap-3 mb-4 px-2">
+                        <div class="avatar-box" style="width: 48px; height: 48px; font-size: 18px; background: #f1f5f9; color: #6366f1; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">
+                            {{ strtoupper(substr($user->name, 0, 2)) }}
+                        </div>
+                        <div>
+                            <h6 class="fw-bold mb-0 text-dark">{{ $user->name }}</h6>
+                            <p class="text-muted small mb-0">{{ $user->account_type ?? 'Student Account' }}</p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 class="fw-800 h3 mb-1" style="color: #000;">{{ $user->name }}</h1>
-                        <p class="small fw-800 mb-0" style="color: #000; opacity: 0.6;">{{ $user->email }}</p>
+                    
+                    <nav class="nav flex-column gap-2">
+                        <a href="#account" class="nav-link-custom active" data-bs-toggle="pill">
+                            <i class="bi bi-person-circle"></i> Account Information
+                        </a>
+                        <a href="#learning" class="nav-link-custom" data-bs-toggle="pill">
+                            <i class="bi bi-mortarboard"></i> Learning Profile
+                        </a>
+                        <a href="#security" class="nav-link-custom" data-bs-toggle="pill">
+                            <i class="bi bi-shield-lock"></i> Password & Security
+                        </a>
+                    </nav>
+                </div>
+
+                <!-- Stats Mini Widget -->
+                <div class="card border-0 shadow-sm rounded-4 p-4 bg-dark text-white mb-4">
+                    <h6 class="fw-bold small mb-3 opacity-75">LEARNING STREAK</h6>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="fs-1 fw-bold">{{ $user->streak_count }}</div>
+                        <div class="lh-1">
+                            <div class="fw-bold">Days</div>
+                            <div class="small opacity-75">
+                                @if($user->streak_count >= 5) Active Learner 🔥 @else Getting started 🚀 @endif
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Accordion Container -->
-            <div class="accordion-custom">
-                
-                <!-- Section: Profile -->
-                <div class="accordion-item shadow-sm mb-3 rounded-4 overflow-hidden border border-light-subtle">
-                    <div class="accordion-header active p-4 d-flex justify-content-between align-items-center cursor-pointer bg-white" onclick="toggleAccordion(this)">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="header-icon bg-light rounded-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="bi bi-person text-dark"></i></div>
-                            <span class="fw-800 h6 mb-0" style="color: #000;">Profile</span>
-                        </div>
-                        <i class="bi bi-chevron-down chevron-icon transition-transform"></i>
+            <!-- Main Settings Form Area -->
+            <div class="col-lg-9">
+                @if(session('success'))
+                    <div class="alert alert-success border-0 shadow-sm rounded-4 mb-4 d-flex align-items-center gap-3">
+                        <i class="bi bi-check-circle-fill fs-5"></i>
+                        <div>{{ session('success') }}</div>
+                        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
-                    <div class="accordion-body p-4 border-top border-light-subtle bg-white" style="display: block;">
-                        <div class="row g-4">
-                            <div class="col-md-6">
-                                <label class="small fw-800 text-muted text-uppercase mb-1" style="font-size: 10px;">Full Name</label>
-                                <p class="fw-800 mb-0" style="color: #000;">{{ $user->name }}</p>
+                @endif
+
+                <form action="{{ route('admin.users.update', $user) }}" method="POST">
+                    @csrf
+                    @method('PATCH')
+
+                    <div class="tab-content">
+                        <!-- Account Section -->
+                        <div class="tab-pane fade show active" id="account">
+                            <div class="card border-0 shadow-sm rounded-4 p-5 mb-4">
+                                <div class="mb-4">
+                                    <h4 class="fw-800 text-dark mb-1">Account Information</h4>
+                                    <p class="text-muted small">Official account details and subscription status.</p>
+                                </div>
+
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label-minimal">Full Name</label>
+                                        <input type="text" name="name" class="form-control-minimal" value="{{ $user->name }}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-minimal">Email Address</label>
+                                        <input type="email" name="email" class="form-control-minimal" value="{{ $user->email }}" required>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-minimal">Account Type</label>
+                                        <select name="account_type" class="form-select-minimal">
+                                            <option value="Free Plan" {{ $user->account_type == 'Free Plan' ? 'selected' : '' }}>Free Plan</option>
+                                            <option value="Premium" {{ $user->account_type == 'Premium' ? 'selected' : '' }}>Premium</option>
+                                            <option value="Enterprise" {{ $user->account_type == 'Enterprise' ? 'selected' : '' }}>Enterprise</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-minimal">Member Since</label>
+                                        <input type="text" class="form-control-minimal" value="{{ $user->created_at->format('M d, Y') }}" readonly disabled>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="small fw-800 text-muted text-uppercase mb-1" style="font-size: 10px;">Email Address</label>
-                                <p class="fw-800 mb-0" style="color: #000;">{{ $user->email }}</p>
+                        </div>
+
+                        <!-- Learning Profile Section -->
+                        <div class="tab-pane fade" id="learning">
+                            <div class="card border-0 shadow-sm rounded-4 p-5 mb-4">
+                                <div class="mb-4">
+                                    <h4 class="fw-800 text-dark mb-1">Learning Profile</h4>
+                                    <p class="text-muted small">Personalized learning paths and interests.</p>
+                                </div>
+
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label-minimal">Primary Learning Goal</label>
+                                        <select name="primary_goal" class="form-select-minimal">
+                                            <option value="">Select a Goal</option>
+                                            @foreach($learningGoals as $goal)
+                                                <option value="{{ $goal->title }}" {{ $user->learning_goal == $goal->title ? 'selected' : '' }}>{{ $goal->title }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-minimal">Experience Level</label>
+                                        <select name="experience_level" class="form-select-minimal">
+                                            <option value="">Select Level</option>
+                                            @foreach($experienceLevels as $level)
+                                                <option value="{{ $level->title }}" {{ $user->experience_level == $level->title ? 'selected' : '' }}>{{ $level->title }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label-minimal">Interests</label>
+                                        <input type="text" name="interests" id="interests-tagify" class="form-control-minimal" value="{{ is_array($user->interests) ? implode(',', $user->interests) : '' }}">
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label-minimal">Used Tools</label>
+                                        <input type="text" name="tools" id="tools-tagify" class="form-control-minimal" value="{{ is_array($user->tools) ? implode(',', $user->tools) : '' }}">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-md-6">
-                                <label class="small fw-800 text-muted text-uppercase mb-1" style="font-size: 10px;">Member Since</label>
-                                <p class="fw-800 mb-0" style="color: #000;">{{ $user->created_at->format('M d, Y') }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="small fw-800 text-muted text-uppercase mb-1" style="font-size: 10px;">Account Type</label>
-                                <div class="d-flex align-items-center gap-3">
-                                    <p class="fw-800 mb-0" style="color: #000;">{{ $user->account_type ?? 'Free Plan' }}</p>
+                        </div>
+
+                        <!-- Security Section -->
+                        <div class="tab-pane fade" id="security">
+                            <div class="card border-0 shadow-sm rounded-4 p-5 mb-4">
+                                <div class="mb-4">
+                                    <h4 class="fw-800 text-dark mb-1">Reset Password</h4>
+                                    <p class="text-muted small">Manually reset the user's password if requested.</p>
+                                </div>
+
+                                <div class="row g-4">
+                                    <div class="col-md-6">
+                                        <label class="form-label-minimal">New Password</label>
+                                        <input type="password" name="password" class="form-control-minimal" autocomplete="new-password">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label-minimal">Confirm Password</label>
+                                        <input type="password" name="password_confirmation" class="form-control-minimal" autocomplete="new-password">
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Section: Learning Preferences -->
-                <div class="accordion-item shadow-sm mb-3 rounded-4 overflow-hidden border border-light-subtle">
-                    <div class="accordion-header p-4 d-flex justify-content-between align-items-center cursor-pointer bg-white" onclick="toggleAccordion(this)">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="header-icon bg-light rounded-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="bi bi-book text-dark"></i></div>
-                            <span class="fw-800 h6 mb-0" style="color: #000;">Learning Preferences</span>
-                        </div>
-                        <i class="bi bi-chevron-down chevron-icon transition-transform"></i>
+                    <div class="d-flex justify-content-end gap-3 mt-2">
+                        <button type="reset" class="btn btn-light rounded-3 px-4 fw-bold">Discard Changes</button>
+                        <button type="submit" class="btn btn-primary rounded-3 px-5 fw-bold shadow-sm">Save User Updates</button>
                     </div>
-                    <div class="accordion-body p-4 border-top border-light-subtle bg-white" style="display: none;">
-                        <div class="row g-3 mb-4">
-                            <div class="col-md-6">
-                                <label class="small fw-800 text-dark mb-1" style="font-size: 11px;">Primary Goal</label>
-                                <p class="fw-800 mb-0" style="color: #000;">{{ $user->primary_goal ?: 'Not set' }}</p>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="small fw-800 text-dark mb-1" style="font-size: 11px;">Experience Level</label>
-                                <p class="fw-800 mb-0" style="color: #000;">{{ $user->experience_level ?: 'Not set' }}</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section: Work & Tools -->
-                <div class="accordion-item shadow-sm mb-3 rounded-4 overflow-hidden border border-light-subtle">
-                    <div class="accordion-header p-4 d-flex justify-content-between align-items-center cursor-pointer bg-white" onclick="toggleAccordion(this)">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="header-icon bg-light rounded-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="bi bi-briefcase text-dark"></i></div>
-                            <span class="fw-800 h6 mb-0" style="color: #000;">Work & Tools</span>
-                        </div>
-                        <i class="bi bi-chevron-down chevron-icon transition-transform"></i>
-                    </div>
-                    <div class="accordion-body p-4 border-top border-light-subtle bg-white" style="display: none;">
-                        <div class="d-flex flex-wrap gap-3">
-                            @if($user->tools)
-                                @foreach($user->tools as $tool)
-                                    <div class="tool-badge-pill">
-                                        @php
-                                            $icon = 'https://www.google.com/s2/favicons?domain=' . strtolower($tool) . '.com&sz=32';
-                                            if (strtolower($tool) == 'gmail') $icon = 'https://www.gstatic.com/images/branding/product/2x/gmail_48dp.png';
-                                            if (strtolower($tool) == 'notion') $icon = 'https://upload.wikimedia.org/wikipedia/commons/4/45/Notion_app_logo.png';
-                                            if (strtolower($tool) == 'slack') $icon = 'https://upload.wikimedia.org/wikipedia/commons/b/b9/Slack_Technologies_Logo.svg';
-                                            if (strtolower($tool) == 'youtube') $icon = 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png';
-                                        @endphp
-                                        <img src="{{ $icon }}" alt="{{ $tool }}" width="18">
-                                        <span>{{ $tool }}</span>
-                                        <i class="bi bi-check-circle-fill text-success ms-2"></i>
-                                    </div>
-                                @endforeach
-                            @else
-                                <p class="text-muted small">No tools added yet.</p>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section: Interests -->
-                <div class="accordion-item shadow-sm mb-3 rounded-4 overflow-hidden border border-light-subtle">
-                    <div class="accordion-header p-4 d-flex justify-content-between align-items-center cursor-pointer bg-white" onclick="toggleAccordion(this)">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="header-icon bg-light rounded-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="bi bi-hash text-dark"></i></div>
-                            <span class="fw-800 h6 mb-0" style="color: #000;">Interests</span>
-                        </div>
-                        <i class="bi bi-chevron-down chevron-icon transition-transform"></i>
-                    </div>
-                    <div class="accordion-body p-4 border-top border-light-subtle bg-white" style="display: none;">
-                        <div class="d-flex flex-wrap gap-2">
-                            @if($user->interests)
-                                @foreach($user->interests as $interest)
-                                    <span class="topic-tag">{{ $interest }}</span>
-                                @endforeach
-                            @else
-                                <p class="text-muted small">No interests added yet.</p>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Section: Video Engagement -->
-                <div class="accordion-item shadow-sm mb-3 rounded-4 overflow-hidden border border-light-subtle">
-                    <div class="accordion-header p-4 d-flex justify-content-between align-items-center cursor-pointer bg-white" onclick="toggleAccordion(this)">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="header-icon bg-light rounded-3 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="bi bi-play-btn-fill text-dark"></i></div>
-                            <span class="fw-800 h6 mb-0" style="color: #000;">Video Engagement</span>
-                        </div>
-                        <i class="bi bi-chevron-down chevron-icon transition-transform"></i>
-                    </div>
-                    <div class="accordion-body p-4 border-top border-light-subtle bg-white" style="display: none;">
-                        <div class="table-responsive">
-                            <table class="table table-hover align-middle border-0">
-                                <thead class="bg-light">
-                                    <tr>
-                                        <th class="border-0 small fw-800 text-muted text-uppercase" style="font-size: 10px;">Video Title</th>
-                                        <th class="border-0 small fw-800 text-muted text-uppercase text-center" style="font-size: 10px;">Time Spent</th>
-                                        <th class="border-0 small fw-800 text-muted text-uppercase text-center" style="font-size: 10px;">Completion</th>
-                                        <th class="border-0 small fw-800 text-muted text-uppercase text-end" style="font-size: 10px;">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    @php
-                                        $fakeHistory = [
-                                            ['title' => 'Mastering AI Prompts', 'time' => '18m 45s', 'rate' => 100, 'status' => 'Completed'],
-                                            ['title' => 'Introduction to Neural Networks', 'time' => '12m 10s', 'rate' => 45, 'status' => 'In Progress'],
-                                            ['title' => 'Stable Diffusion Tutorial', 'time' => '25m 30s', 'rate' => 100, 'status' => 'Completed'],
-                                            ['title' => 'The Future of Generative AI', 'time' => '05m 15s', 'rate' => 15, 'status' => 'In Progress'],
-                                        ];
-                                    @endphp
-                                    @foreach($fakeHistory as $item)
-                                    <tr>
-                                        <td class="py-3">
-                                            <div class="fw-bold" style="color: #000;">{{ $item['title'] }}</div>
-                                        </td>
-                                        <td class="text-center py-3">
-                                            <span class="badge bg-light text-dark fw-800">{{ $item['time'] }}</span>
-                                        </td>
-                                        <td class="text-center py-3">
-                                            <div class="d-flex align-items-center justify-content-center gap-2">
-                                                <div class="progress w-100" style="height: 6px; max-width: 100px;">
-                                                    <div class="progress-bar bg-primary" style="width: {{ $item['rate'] }}%"></div>
-                                                </div>
-                                                <span class="fw-800 small">{{ $item['rate'] }}%</span>
-                                            </div>
-                                        </td>
-                                        <td class="text-end py-3">
-                                            <span class="badge {{ $item['status'] == 'Completed' ? 'bg-success' : 'bg-warning text-dark' }} rounded-pill px-3">
-                                                {{ $item['status'] }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
+                </form>
             </div>
         </div>
     </div>
@@ -207,65 +180,60 @@
 @endsection
 
 @section('styles')
+<!-- Tagify CSS -->
+<link href="https://cdn.jsdelivr.net/npm/@yaireo/tagify/dist/tagify.css" rel="stylesheet" type="text/css" />
 <style>
-    .avatar-large {
-        width: 80px;
-        height: 80px;
-        background: #f1f3f5;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 28px;
-        font-weight: 800;
-        color: #000;
-    }
-
-    .topic-tag {
-        padding: 6px 14px;
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 10px;
-        font-size: 12px;
-        font-weight: 700;
-        color: #000;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .tool-badge-pill {
+    .profile-settings-wrapper { animation: fadeIn 0.3s ease-out; }
+    
+    .nav-link-custom {
         display: flex;
         align-items: center;
         gap: 12px;
-        padding: 10px 16px;
-        background: #fff;
-        border: 1px solid #e5e7eb;
-        border-radius: 12px;
-        font-size: 13px;
+        padding: 12px 16px;
+        color: #64748b;
         font-weight: 700;
-        color: #000;
+        font-size: 14px;
+        text-decoration: none;
+        border-radius: 12px;
+        transition: all 0.2s;
+    }
+    .nav-link-custom i { font-size: 1.1rem; }
+    .nav-link-custom:hover { background: #f1f5f9; color: #000; }
+    .nav-link-custom.active { background: #6366f1; color: #fff; }
+
+    .form-label-minimal {
+        font-size: 11px;
+        font-weight: 800;
+        color: #1e293b;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+        display: block;
     }
 
-    /* Accordion Styles */
-    .accordion-header {
+    .form-control-minimal, .form-select-minimal {
+        width: 100%;
+        padding: 12px 16px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        color: #1e293b;
+        font-size: 0.95rem;
+        font-weight: 500;
         transition: all 0.2s ease;
     }
-    
-    .accordion-header:hover {
-        background-color: #f8fafc !important;
+    .form-control-minimal:focus, .form-select-minimal:focus {
+        background: #fff;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        outline: none;
     }
-    
-    .accordion-header.active .chevron-icon {
-        transform: rotate(180deg);
-    }
-    
-    .cursor-pointer {
-        cursor: pointer;
-    }
-    
-    .transition-transform {
-        transition: transform 0.3s ease;
+
+    .tagify {
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        background: #f8fafc;
+        padding: 8px;
     }
 
     .fw-800 { font-weight: 800; }
@@ -273,16 +241,48 @@
 @endsection
 
 @section('scripts')
+<script src="https://cdn.jsdelivr.net/npm/@yaireo/tagify"></script>
 <script>
-function toggleAccordion(element) {
-    const body = element.nextElementSibling;
-    const isVisible = body.style.display === 'block';
-    
-    // Toggle active class on header
-    element.classList.toggle('active');
-    
-    // Toggle visibility
-    body.style.display = isVisible ? 'none' : 'block';
-}
+    document.addEventListener('DOMContentLoaded', function() {
+        var interestsInput = document.querySelector('#interests-tagify');
+        if(interestsInput) {
+            new Tagify(interestsInput, {
+                whitelist: [
+                    @foreach($interestsList as $interest)
+                        "{{ $interest }}",
+                    @endforeach
+                ],
+                dropdown: { enabled: 0 }
+            });
+        }
+
+        var toolsInput = document.querySelector('#tools-tagify');
+        if(toolsInput) {
+            new Tagify(toolsInput, {
+                whitelist: [
+                    @foreach($tools as $tool)
+                        "{{ $tool->name }}",
+                    @endforeach
+                ],
+                dropdown: { enabled: 0 }
+            });
+        }
+
+        // Pill Navigation
+        const navLinks = document.querySelectorAll('.nav-link-custom[data-bs-toggle="pill"]');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                navLinks.forEach(l => l.classList.remove('active'));
+                this.classList.add('active');
+                
+                const target = document.querySelector(this.getAttribute('href'));
+                document.querySelectorAll('.tab-pane').forEach(tp => {
+                    tp.classList.remove('show', 'active');
+                });
+                target.classList.add('show', 'active');
+            });
+        });
+    });
 </script>
 @endsection

@@ -7,6 +7,7 @@ use App\Models\Content;
 use App\Models\Course;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules;
 
 class AdminController extends Controller
@@ -19,13 +20,20 @@ class AdminController extends Controller
     // User Management
     public function usersIndex()
     {
-        $users = User::where('is_admin', false)->orderBy('created_at', 'desc')->paginate(10);
-        return view('admin.users.index', compact('users'));
+        $users = User::where('is_admin', false)->orderBy('created_at', 'desc')->paginate(20);
+        $learningGoals = \App\Models\LearningGoal::orderBy('title')->get();
+        $experienceLevels = \App\Models\ExperienceLevel::orderBy('title')->get();
+        return view('admin.users.index', compact('users', 'learningGoals', 'experienceLevels'));
     }
 
     public function userProfile(User $user)
     {
-        return view('admin.users.profile', compact('user'));
+        $learningGoals = \App\Models\LearningGoal::orderBy('title')->get();
+        $experienceLevels = \App\Models\ExperienceLevel::orderBy('title')->get();
+        $tools = \App\Models\Tool::where('status', 'active')->orderBy('name')->get();
+        $interestsList = \App\Models\Content::distinct()->whereNotNull('category')->pluck('category')->toArray();
+
+        return view('admin.users.profile', compact('user', 'learningGoals', 'experienceLevels', 'tools', 'interestsList'));
     }
 
     public function userStore(Request $request)
@@ -41,11 +49,10 @@ class AdminController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'is_admin' => false,
-            'account_type' => $request->account_type ?? 'Free Plan',
-            'primary_goal' => $request->primary_goal,
-            'experience_level' => $request->experience_level,
-            'tools' => $request->tools ? array_map('trim', explode(',', $request->tools)) : [],
-            'interests' => $request->interests ? array_map('trim', explode(',', $request->interests)) : [],
+            'account_type' => 'Free Plan',
+            'learning_goal' => null,
+            'experience_level' => null,
+            'interests' => [],
         ]);
 
         return redirect()->back()->with('success', 'User created successfully.');
@@ -58,14 +65,34 @@ class AdminController extends Controller
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,'.$user->id],
         ]);
 
+        $interests = $request->interests;
+        if ($interests) {
+            $decoded = json_decode($interests, true);
+            if (is_array($decoded)) {
+                $interests = array_map(fn($item) => $item['value'], $decoded);
+            } else {
+                $interests = array_filter(array_map('trim', explode(',', $interests)));
+            }
+        }
+
+        $tools = $request->tools;
+        if ($tools) {
+            $decoded = json_decode($tools, true);
+            if (is_array($decoded)) {
+                $tools = array_map(fn($item) => $item['value'], $decoded);
+            } else {
+                $tools = array_filter(array_map('trim', explode(',', $tools)));
+            }
+        }
+
         $user->update([
             'name' => $request->name,
             'email' => $request->email,
             'account_type' => $request->account_type,
-            'primary_goal' => $request->primary_goal,
+            'learning_goal' => $request->primary_goal,
             'experience_level' => $request->experience_level,
-            'tools' => $request->tools ? array_map('trim', explode(',', $request->tools)) : [],
-            'interests' => $request->interests ? array_map('trim', explode(',', $request->interests)) : [],
+            'interests' => $interests ?: [],
+            'tools' => $tools ?: [],
         ]);
 
         if ($request->filled('password')) {
@@ -86,6 +113,13 @@ class AdminController extends Controller
         return redirect()->back()->with('success', 'User deleted successfully.');
     }
 
+    public function toggleTeamAccess(User $user)
+    {
+        $user->update(['can_access_team' => !$user->can_access_team]);
+        $status = $user->can_access_team ? 'granted' : 'revoked';
+        return redirect()->back()->with('success', "Team access {$status} for {$user->name}.");
+    }
+
     // Content Management
     public function contentsIndex(Request $request)
     {
@@ -96,9 +130,21 @@ class AdminController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
                   ->orWhere('category', 'like', "%{$search}%")
                   ->orWhere('connected_tools', 'like', "%{$search}%")
-                  ->orWhere('tags', 'like', "%{$search}%");
+                  ->orWhere('tags', 'like', "%{$search}%")
+                  ->orWhere('language', 'like', "%{$search}%")
+                  ->orWhere('video_url', 'like', "%{$search}%")
+                  ->orWhere('video_url_ar', 'like', "%{$search}%");
+                
+                // Smart language mapping
+                $s = strtolower($search);
+                if ($s === 'arabic' || $s === 'ar') {
+                    $q->orWhereIn('language', ['ar', 'both']);
+                } elseif ($s === 'english' || $s === 'en') {
+                    $q->orWhereIn('language', ['en', 'both']);
+                }
             });
         }
 
@@ -107,9 +153,19 @@ class AdminController extends Controller
             $query->where('category', $request->category);
         }
 
+        // Connected Tool Filter
+        if ($request->filled('tool')) {
+            $query->where('connected_tools', 'like', "%{$request->tool}%");
+        }
+
         // Skill Level Filter
         if ($request->filled('skill_level')) {
             $query->where('skill_level', $request->skill_level);
+        }
+
+        // Language Filter
+        if ($request->filled('language')) {
+            $query->where('language', $request->language);
         }
 
         // Course Filter
@@ -136,6 +192,21 @@ class AdminController extends Controller
         $categories = Content::distinct()->whereNotNull('category')->pluck('category')->sort();
         $courses = Course::orderBy('title')->get();
 
+        // Extract unique connected tools currently mapped to contents
+        $allContents = Content::whereNotNull('connected_tools')->get();
+        $usedTools = [];
+        foreach ($allContents as $c) {
+            if (is_array($c->connected_tools)) {
+                foreach ($c->connected_tools as $tool) {
+                    $trimmed = trim($tool);
+                    if ($trimmed && !in_array($trimmed, $usedTools)) {
+                        $usedTools[] = $trimmed;
+                    }
+                }
+            }
+        }
+        sort($usedTools);
+
         // Statistics for the header
         $stats = [
             'total_videos' => Content::count(),
@@ -144,7 +215,8 @@ class AdminController extends Controller
             'total_duration' => Content::sum('duration_seconds'),
         ];
         
-        return view('admin.contents.index', compact('contents', 'categories', 'courses', 'stats'));
+        $tools = \App\Models\Tool::where('status', 'active')->orderBy('name')->get();
+        return view('admin.contents.index', compact('contents', 'categories', 'courses', 'stats', 'usedTools', 'tools'));
     }
 
     public function contentStore(Request $request)
@@ -152,19 +224,35 @@ class AdminController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'video_url' => 'required|url',
+            'video_url_ar' => 'nullable|url',
             'category' => 'nullable|string',
             'skill_level' => 'required|in:Beginner,Intermediate,Advanced',
             'course_id' => 'nullable|exists:courses,id',
             'section_part_label' => 'nullable|string|max:255',
             'sort_order' => 'nullable|integer',
             'connected_tools' => 'nullable|string',
+            'description' => 'nullable|string',
+            'status' => 'nullable|in:active,draft',
+            'tags' => 'nullable|string',
+            'duration_seconds' => 'nullable|integer',
+            'type' => 'nullable|string|in:video,article,course',
+            'is_featured' => 'nullable|boolean',
         ]);
 
         $data = $request->all();
+        $data['is_featured'] = $request->has('is_featured');
+        $data['language'] = $request->filled('video_url_ar') ? 'both' : 'en';
+
+        // Process connected tools (Tagify comma-separated string to array)
         if ($request->filled('connected_tools')) {
             $data['connected_tools'] = array_map('trim', explode(',', $request->connected_tools));
         } else {
             $data['connected_tools'] = [];
+        }
+
+        // Process tags (Standardized format)
+        if ($request->filled('tags')) {
+            $data['tags'] = $request->tags;
         }
 
         Content::create($data);
@@ -177,19 +265,34 @@ class AdminController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'video_url' => 'required|url',
+            'video_url_ar' => 'nullable|url',
             'category' => 'nullable|string',
             'skill_level' => 'required|in:Beginner,Intermediate,Advanced',
             'course_id' => 'nullable|exists:courses,id',
             'section_part_label' => 'nullable|string|max:255',
             'sort_order' => 'nullable|integer',
             'connected_tools' => 'nullable|string',
+            'description' => 'nullable|string',
+            'status' => 'nullable|in:active,draft',
+            'tags' => 'nullable|string',
+            'duration_seconds' => 'nullable|integer',
+            'type' => 'nullable|string|in:video,article,course',
+            'is_featured' => 'nullable|boolean',
         ]);
 
         $data = $request->all();
+        $data['is_featured'] = $request->has('is_featured');
+        $data['language'] = $request->filled('video_url_ar') ? 'both' : 'en';
+
         if ($request->filled('connected_tools')) {
             $data['connected_tools'] = array_map('trim', explode(',', $request->connected_tools));
         } else {
             $data['connected_tools'] = [];
+        }
+
+        // Process tags
+        if ($request->filled('tags')) {
+            $data['tags'] = $request->tags;
         }
 
         $content->update($data);
@@ -298,5 +401,50 @@ class AdminController extends Controller
     public function settingsIndex()
     {
         return view('admin.settings');
+    }
+
+    public function profileOptionsIndex()
+    {
+        $learningGoals = \App\Models\LearningGoal::orderBy('title')->get();
+        $experienceLevels = \App\Models\ExperienceLevel::orderBy('title')->get();
+        return view('admin.profile-options.index', compact('learningGoals', 'experienceLevels'));
+    }
+
+    public function storeLearningGoal(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255|unique:learning_goals,title',
+        ]);
+
+        \App\Models\LearningGoal::create([
+            'title' => $request->title,
+        ]);
+
+        return redirect()->back()->with('success', 'Learning goal added successfully.');
+    }
+
+    public function destroyLearningGoal(\App\Models\LearningGoal $goal)
+    {
+        $goal->delete();
+        return redirect()->back()->with('success', 'Learning goal deleted successfully.');
+    }
+
+    public function storeExperienceLevel(Request $request)
+    {
+        $request->validate([
+            'title' => 'required|string|max:255|unique:experience_levels,title',
+        ]);
+
+        \App\Models\ExperienceLevel::create([
+            'title' => $request->title,
+        ]);
+
+        return redirect()->back()->with('success', 'Experience level added successfully.');
+    }
+
+    public function destroyExperienceLevel(\App\Models\ExperienceLevel $level)
+    {
+        $level->delete();
+        return redirect()->back()->with('success', 'Experience level deleted successfully.');
     }
 }

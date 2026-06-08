@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Dashboard — CRTVAI')
+@section('title', 'Dashboard — Dallel AI')
 
 @section('content')
 <div class="dashboard-focus-modern">
@@ -63,12 +63,12 @@
             <div class="stats-focus-container d-flex flex-column gap-3 h-100">
                 <div class="stat-focus-card shadow-sm p-4 animate-slide-up delay-1">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="stat-icon-square bg-blue text-blue">
-                            <i class="bi bi-collection-play-fill"></i>
-                        </div>
-                        <div class="text-end">
+                        <div class="text-start">
                             <div class="text-muted small fw-800 mb-1">VIDEOS COMPLETED</div>
                             <div class="h2 fw-800 mb-0">{{ $completedCount }}</div>
+                        </div>
+                        <div class="stat-icon-square bg-blue text-blue">
+                            <i class="bi bi-collection-play-fill"></i>
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-top border-light">
@@ -80,32 +80,36 @@
                 </div>
                 <div class="stat-focus-card shadow-sm p-4 animate-slide-up delay-2">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="stat-icon-square bg-sky text-sky">
-                            <i class="bi bi-fire"></i>
-                        </div>
-                        <div class="text-end">
+                        <div class="text-start">
                             <div class="text-muted small fw-800 mb-1">ACTIVE STREAK</div>
                             <div class="h2 fw-800 mb-0">{{ auth()->user()->streak_count }} <span class="small fw-700 opacity-50" style="font-size: 14px;">days</span></div>
+                        </div>
+                        <div class="stat-icon-square bg-sky text-sky">
+                            <i class="bi bi-fire"></i>
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-top border-light">
                         <div class="progress rounded-pill" style="height: 6px; background: #f1f5f9;">
-                            <div class="progress-bar bg-sky" style="width: 70%"></div>
+                            <div class="progress-bar bg-sky" style="width: {{ min((auth()->user()->streak_count / 7) * 100, 100) }}%"></div>
                         </div>
                     </div>
                 </div>
                 <div class="stat-focus-card shadow-sm p-4 animate-slide-up delay-3">
                     <div class="d-flex justify-content-between align-items-center">
-                        <div class="stat-icon-square bg-teal text-teal">
-                            <i class="bi bi-clock-history"></i>
-                        </div>
-                        <div class="text-end">
+                        <div class="text-start">
                             <div class="text-muted small fw-800 mb-1">TOTAL TIME</div>
                             <div class="h2 fw-800 mb-0">{{ round($totalWatchSeconds / 3600, 1) }} <span class="small fw-700 opacity-50" style="font-size: 14px;">hrs</span></div>
                         </div>
+                        <div class="stat-icon-square bg-teal text-teal">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
                     </div>
                     <div class="mt-3 pt-3 border-top border-light">
-                        <div class="text-teal small fw-800"><i class="bi bi-graph-up-arrow me-1"></i> +12% this week</div>
+                        @if($totalWatchSeconds > 0)
+                            <div class="text-teal small fw-800"><i class="bi bi-graph-up-arrow me-1"></i> Keep it up!</div>
+                        @else
+                            <div class="text-muted small fw-800">No activity yet</div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -158,47 +162,104 @@
     </div>
     @endif
 
-    <!-- Learning Goals Section -->
+    <!-- Recommended Videos Section (Based on Behavior) -->
+    @if($behaviorRecommended->count() > 0)
     <div class="mb-5 animate-slide-up delay-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="fw-800 mb-0 d-flex align-items-center gap-2">
-                <i class="bi bi-compass-fill text-primary"></i> Choose Your Learning Path
+                <i class="bi bi-stars text-violet" style="color: #8b5cf6;"></i> Recommended Videos
             </h5>
-            <div class="d-flex gap-2">
-                <button class="swiper-prev-tracks btn btn-light rounded-circle shadow-sm p-0" style="width: 32px; height: 32px; border: 1px solid #eee;">
-                    <i class="bi bi-chevron-left" style="font-size: 12px;"></i>
-                </button>
-                <button class="swiper-next-tracks btn btn-light rounded-circle shadow-sm p-0" style="width: 32px; height: 32px; border: 1px solid #eee;">
-                    <i class="bi bi-chevron-right" style="font-size: 12px;"></i>
-                </button>
+            <div class="d-flex align-items-center gap-3">
+                <span class="badge rounded-pill px-3 py-2 fw-bold small d-none d-md-inline-block" style="font-size: 11px; background: rgba(139, 92, 246, 0.08); color: #8b5cf6; border: 1px solid rgba(139, 92, 246, 0.15);">Based on your activity</span>
+                <div class="d-flex gap-2">
+                    <button class="swiper-prev-recom-videos btn btn-light rounded-circle shadow-sm p-0" style="width: 32px; height: 32px; border: 1px solid #eee;">
+                        <i class="bi bi-chevron-left" style="font-size: 12px;"></i>
+                    </button>
+                    <button class="swiper-next-recom-videos btn btn-light rounded-circle shadow-sm p-0" style="width: 32px; height: 32px; border: 1px solid #eee;">
+                        <i class="bi bi-chevron-right" style="font-size: 12px;"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="swiper recommendedVideosSwiper">
+            <div class="swiper-wrapper">
+                @foreach($behaviorRecommended as $content)
+                <div class="swiper-slide">
+                    <a href="{{ route('learn.watch', $content) }}" class="text-decoration-none h-100 d-block">
+                        <div class="card-focus overflow-hidden h-100 transition-all hover-lift">
+                            <div class="position-relative" style="height: 150px;">
+                                <img src="{{ $content->thumbnail_url }}" class="w-100 h-100 object-fit-cover">
+                                <div class="position-absolute top-0 start-0 m-3">
+                                    <span class="badge bg-white text-primary rounded-pill px-3 py-2 fw-bold small shadow-sm">{{ $content->category }}</span>
+                                </div>
+                                <div class="position-absolute bottom-0 end-0 m-2">
+                                    <span class="badge rounded-pill px-2 py-1 small" style="font-size: 10px; background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px); color: #ffffff;">
+                                        <i class="bi bi-clock me-1"></i> {{ $content->duration_label ?: '12m' }}
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="p-3 bg-white">
+                                <h6 class="fw-800 text-dark mb-2 line-clamp-2" style="font-size: 13px; height: 38px; line-height: 1.4;">{{ $content->title }}</h6>
+                                <div class="d-flex align-items-center justify-content-between text-muted small fw-bold mt-2 pt-2 border-top border-light">
+                                    <span style="font-size: 11px; color: #8b5cf6;">
+                                        @if($content->connected_tools && is_array($content->connected_tools) && count($content->connected_tools) > 0)
+                                            <i class="bi bi-cpu me-1"></i> {{ ucfirst($content->connected_tools[0]) }}
+                                        @else
+                                            <i class="bi bi-play-circle me-1"></i> Video
+                                        @endif
+                                    </span>
+                                    <span style="font-size: 10px; color: #64748b;">{{ $content->skill_level }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </div>
+    @endif
+
+    <!-- Connected Tools Section -->
+    <div class="mb-5 animate-slide-up delay-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5 class="fw-800 mb-0 d-flex align-items-center gap-2">
+                <i class="bi bi-grid-fill text-primary"></i> Learn Best Use With AI.
+            </h5>
+            <div class="d-flex align-items-center gap-3">
+                @if($hasTrackedUsage)
+                <span class="badge rounded-pill px-3 py-2 fw-bold small d-none d-md-inline-block" style="font-size: 11px; background: rgba(99, 102, 241, 0.08); color: var(--focus-primary); border: 1px solid rgba(99, 102, 241, 0.15);">Your Top Used Tools</span>
+                @else
+                <span class="badge rounded-pill px-3 py-2 fw-bold small d-none d-md-inline-block" style="font-size: 11px; background: rgba(99, 102, 241, 0.08); color: var(--focus-primary); border: 1px solid rgba(99, 102, 241, 0.15);">Recommended Connected Apps</span>
+                @endif
+                <div class="d-flex gap-2">
+                    <button class="swiper-prev-tracks btn btn-light rounded-circle shadow-sm p-0" style="width: 32px; height: 32px; border: 1px solid #eee;">
+                        <i class="bi bi-chevron-left" style="font-size: 12px;"></i>
+                    </button>
+                    <button class="swiper-next-tracks btn btn-light rounded-circle shadow-sm p-0" style="width: 32px; height: 32px; border: 1px solid #eee;">
+                        <i class="bi bi-chevron-right" style="font-size: 12px;"></i>
+                    </button>
+                </div>
             </div>
         </div>
         
         <div class="swiper tracksSwiper">
             <div class="swiper-wrapper">
-                @php
-                    $goals = [
-                        'Get a job in tech' => ['icon' => 'bi-briefcase', 'img' => 'https://images.unsplash.com/photo-1521737711867-e3b97375f902?q=80&w=1974&auto=format&fit=crop', 'desc' => 'Career Acceleration'],
-                        'Build a side project' => ['icon' => 'bi-rocket-takeoff', 'img' => 'https://images.unsplash.com/photo-1559136555-9303baea8ebd?q=80&w=2070&auto=format&fit=crop', 'desc' => 'Founder Curriculum'],
-                        'Improve skills at work' => ['icon' => 'bi-graph-up-arrow', 'img' => 'https://images.unsplash.com/photo-1552664730-d307ca884978?q=80&w=2070&auto=format&fit=crop', 'desc' => 'Professional Growth'],
-                        'Explore AI tools' => ['icon' => 'bi-magic', 'img' => 'https://images.unsplash.com/photo-1677442136019-21780ecad995?q=80&w=2070&auto=format&fit=crop', 'desc' => 'Innovation Track'],
-                        'Learn to code' => ['icon' => 'bi-terminal', 'img' => 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?q=80&w=2070&auto=format&fit=crop', 'desc' => 'Core Development'],
-                    ];
-                @endphp
-                @foreach($goals as $name => $data)
+                @foreach($connectedTools as $tool)
                 <div class="swiper-slide">
-                    <a href="{{ route('learn.explore', ['goal' => $name]) }}" class="text-decoration-none h-100 d-block">
-                        <div class="card-focus overflow-hidden h-100 transition-all hover-lift">
-                            <div class="position-relative" style="height: 140px;">
-                                <img src="{{ $data['img'] }}" class="w-100 h-100 object-fit-cover">
-                                <div class="position-absolute top-0 start-0 m-3">
-                                    <div class="bg-white rounded-3 p-2 shadow-sm"><i class="bi {{ $data['icon'] }} text-primary"></i></div>
-                                </div>
+                    <a href="{{ route('learn.explore', ['search' => $tool->name]) }}" class="text-decoration-none h-100 d-block">
+                        <div class="card-focus overflow-hidden h-100 transition-all hover-lift d-flex flex-column align-items-center text-center p-4">
+                            <div class="tool-logo-container mb-3 d-flex align-items-center justify-content-center position-relative" style="width: 80px; height: 80px; background: #f8fafc; border-radius: 24px; border: 1px solid #e2e8f0; transition: all 0.3s ease;">
+                                <img src="{{ asset($tool->logo) }}" class="tool-logo" style="width: 44px; height: 44px; object-fit: contain;" alt="{{ $tool->name }} logo">
+                                @if($hasTrackedUsage && isset($tool->usage_score) && $tool->usage_score > 0)
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success border border-white" style="font-size: 9px; padding: 0.35em 0.6em;" title="Active Track">
+                                    <i class="bi bi-activity"></i>
+                                </span>
+                                @endif
                             </div>
-                            <div class="p-4">
-                                <h6 class="fw-800 text-dark mb-1">{{ $name }}</h6>
-                                <p class="text-muted small fw-600 mb-0">{{ $data['desc'] }}</p>
-                            </div>
+                            <h6 class="fw-800 text-dark mb-1">{{ $tool->name }}</h6>
+                            <p class="text-muted small fw-600 mb-0 line-clamp-2" style="font-size: 11px;">{{ $tool->description }}</p>
                         </div>
                     </a>
                 </div>
@@ -304,22 +365,40 @@
                 </div>
                 <div class="p-4">
                     @php
+                        $user = auth()->user();
                         // Calculate readiness based on primary category
                         $topCat = \App\Models\Content::select('category')
-                            ->whereIn('id', auth()->user()->videoProgress()->pluck('content_id'))
+                            ->whereIn('id', $user->videoProgress()->pluck('content_id'))
                             ->groupBy('category')
                             ->orderByRaw('COUNT(*) DESC')
-                            ->first()?->category ?? 'General AI';
+                            ->first()?->category;
+
+                        // Fallback to interests if no video progress
+                        if (!$topCat && !empty($user->interests) && is_array($user->interests)) {
+                            $topCat = $user->interests[0];
+                        }
+                        
+                        $topCat = $topCat ?? 'General AI';
                         
                         $totalInCat = \App\Models\Content::where('category', $topCat)->count();
-                        $compInCat = auth()->user()->videoProgress()
+                        $compInCat = $user->videoProgress()
                             ->whereHas('content', fn($q) => $q->where('category', $topCat))
                             ->where('completed', true)
                             ->count();
                         
                         $readiness = $totalInCat > 0 ? round(($compInCat / $totalInCat) * 100) : 0;
-                        // Add some logic to ensure it's not 0 for new users for UI demo
-                        $readiness = max($readiness, 15); 
+                        
+                        // Status determination
+                        if ($readiness >= 80) {
+                            $statusLabel = 'READY';
+                            $statusClass = 'bg-success text-white';
+                        } elseif ($readiness > 0) {
+                            $statusLabel = 'ON TRACK';
+                            $statusClass = 'bg-success-subtle text-success';
+                        } else {
+                            $statusLabel = 'STARTING';
+                            $statusClass = 'bg-light text-dark border';
+                        }
                     @endphp
                     
                     <div class="d-flex align-items-center justify-content-between mb-3">
@@ -328,7 +407,7 @@
                             <p class="text-muted small fw-700 mb-0">Junior {{ $topCat }} Roles</p>
                         </div>
                         <div class="text-end">
-                            <span class="badge bg-success-subtle text-success rounded-pill px-3 py-2 fw-800" style="font-size: 10px;">ON TRACK</span>
+                            <span class="badge {{ $statusClass }} rounded-pill px-3 py-2 fw-800" style="font-size: 10px;">{{ $statusLabel }}</span>
                         </div>
                     </div>
                     
@@ -341,7 +420,13 @@
                             <div class="flex-shrink-0 bg-white rounded-3 p-2 shadow-sm"><i class="bi bi-lightning-charge-fill text-warning"></i></div>
                             <div>
                                 <h6 class="fw-800 text-dark mb-1" style="font-size: 13px;">Next Milestone</h6>
-                                <p class="text-muted mb-0" style="font-size: 11px; font-weight: 600;">Complete 3 more modules in <strong>{{ $topCat }}</strong> to reach 80% readiness.</p>
+                                <p class="text-muted mb-0" style="font-size: 11px; font-weight: 600;">
+                                    @if($readiness == 0)
+                                        Start your first lesson in <strong>{{ $topCat }}</strong> to begin your journey.
+                                    @else
+                                        Complete 3 more modules in <strong>{{ $topCat }}</strong> to reach 80% readiness.
+                                    @endif
+                                </p>
                             </div>
                         </div>
                     </div>
@@ -651,6 +736,16 @@
     .cat-card-neo:hover .cat-icon-box {
         transform: rotate(10deg);
     }
+    
+    .tool-logo-container {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .card-focus:hover .tool-logo-container {
+        transform: scale(1.1) rotate(5deg);
+        background: #ffffff !important;
+        border-color: var(--focus-primary) !important;
+        box-shadow: 0 10px 20px rgba(79, 70, 229, 0.08);
+    }
 </style>
 @endsection
 
@@ -673,18 +768,36 @@
         });
 
         // Continue Watching Swiper
-        new Swiper('.continueWatchingSwiper', {
-            slidesPerView: 1,
-            spaceBetween: 20,
-            navigation: {
-                nextEl: '.swiper-next-watching',
-                prevEl: '.swiper-prev-watching',
-            },
-            breakpoints: {
-                640: { slidesPerView: 2, spaceBetween: 20 },
-                1024: { slidesPerView: 3, spaceBetween: 24 },
-            },
-        });
+        if (document.querySelector('.continueWatchingSwiper')) {
+            new Swiper('.continueWatchingSwiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                navigation: {
+                    nextEl: '.swiper-next-watching',
+                    prevEl: '.swiper-prev-watching',
+                },
+                breakpoints: {
+                    640: { slidesPerView: 2, spaceBetween: 20 },
+                    1024: { slidesPerView: 3, spaceBetween: 24 },
+                },
+            });
+        }
+
+        // Recommended Videos Swiper
+        if (document.querySelector('.recommendedVideosSwiper')) {
+            new Swiper('.recommendedVideosSwiper', {
+                slidesPerView: 1,
+                spaceBetween: 20,
+                navigation: {
+                    nextEl: '.swiper-next-recom-videos',
+                    prevEl: '.swiper-prev-recom-videos',
+                },
+                breakpoints: {
+                    640: { slidesPerView: 2, spaceBetween: 20 },
+                    1024: { slidesPerView: 4, spaceBetween: 24 },
+                },
+            });
+        }
 
         // Shorts Swiper
         new Swiper('.shortsSwiper', {

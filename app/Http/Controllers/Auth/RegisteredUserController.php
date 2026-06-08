@@ -44,9 +44,9 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
+        // Auth::login($user);
 
-        return redirect(route('profile.edit', absolute: false))
-            ->with('status', 'welcome-complete-profile');
+        return redirect()->route('login')
+            ->with('status', 'verification-link-sent-register');
     }
 }

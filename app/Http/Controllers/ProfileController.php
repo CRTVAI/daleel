@@ -16,8 +16,12 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
+        return view('profile-settings', [
             'user' => $request->user(),
+            'learningGoals' => \App\Models\LearningGoal::orderBy('title')->get(),
+            'experienceLevels' => \App\Models\ExperienceLevel::orderBy('title')->get(),
+            'tools' => \App\Models\Tool::where('status', 'active')->orderBy('name')->get(),
+            'interestsList' => \App\Models\Content::distinct()->whereNotNull('category')->pluck('category')->toArray(),
         ]);
     }
 

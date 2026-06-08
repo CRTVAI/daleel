@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.public')
 
 @section('content')
 <div class="auth-wrapper">
@@ -6,17 +6,69 @@
         <!-- Left Side: Login Form -->
         <div class="auth-form-section">
             <div class="auth-form-inner">
-                <div class="brand-logo mb-5">
-                    <div class="logo-icon">
-                        <i class="bi bi-robot text-dark fs-4"></i>
-                    </div>
-                    <span class="brand-name">CrtvAI <u>Login</u></span>
-                </div>
+                <a class="brand mb-5" href="/" style="display: flex; gap: 10px; text-decoration: none; align-items: center;">
+                    <span class="brand-mark">DA</span>
+                    <span class="brand-copy"><strong>Dallel AI</strong><small>by Creative AI</small></span>
+                </a>
 
                 <div class="auth-header mb-4">
                     <h1 class="auth-title">Sign In</h1>
                     <p class="auth-subtitle">Welcome back! Please enter your details.</p>
                 </div>
+
+                @if (session('status'))
+                    <div class="verification-status mb-4">
+                        @if (session('status') === 'verification-link-sent-register')
+                            <div class="alert-neo success">
+                                <i class="bi bi-envelope-check-fill me-3"></i>
+                                <div>
+                                    <strong>Verify Your Email</strong>
+                                    <p class="mb-0 small">Success! We've sent a verification link to your email address. Please check your inbox and click the link to activate your account.</p>
+                                </div>
+                            </div>
+                        @elseif (session('status') === 'verified-success')
+                            <div class="alert-neo success">
+                                <i class="bi bi-patch-check-fill me-3"></i>
+                                <div>
+                                    <strong>Email Verified!</strong>
+                                    <p class="mb-0 small">Great! Your account is now active. Please sign in below to start your personalization journey.</p>
+                                </div>
+                            </div>
+                        @elseif (session('status') === 'already-verified')
+                            <div class="alert-neo info">
+                                <i class="bi bi-info-circle-fill me-3"></i>
+                                <div>
+                                    <strong>Already Verified</strong>
+                                    <p class="mb-0 small">Your email is already verified. You can sign in right now.</p>
+                                </div>
+                            </div>
+                        @endif
+                        @if (session('status') === 'verification-required')
+                            <div class="alert alert-warning border-0 rounded-4 p-4 mb-4 shadow-sm animate__animated animate__fadeIn">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="alert-icon bg-warning-subtle text-warning rounded-circle p-2">
+                                        <i class="bi bi-exclamation-triangle-fill fs-4"></i>
+                                    </div>
+                                    <div class="flex-grow-1">
+                                        <h5 class="alert-title fw-800 mb-1">Action Required</h5>
+                                        <p class="alert-text text-muted mb-0">You must verify your email before you can log in. Did you check your spam folder?</p>
+                                    </div>
+                                </div>
+                                @if (session('unverified_email'))
+                                    <div class="mt-3 ps-5">
+                                        <form method="POST" action="{{ route('verification.resend') }}">
+                                            @csrf
+                                            <input type="hidden" name="email" value="{{ session('unverified_email') }}">
+                                            <button type="submit" class="btn btn-warning btn-sm rounded-pill fw-700 px-4">
+                                                Resend Verification Link
+                                            </button>
+                                        </form>
+                                    </div>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                @endif
 
                 @if (session('error'))
                     <div class="alert alert-soft-error mb-4">
@@ -121,7 +173,6 @@
     }
 
     .auth-wrapper {
-        min-height: 100vh;
         display: flex;
     }
 
@@ -137,7 +188,7 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        padding: 40px;
+        padding: 20px 40px;
         background: #fff;
     }
 
@@ -317,7 +368,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 40px;
+        padding: 20px;
     }
 
     @media (max-width: 900px) {
@@ -326,10 +377,10 @@
 
     .visual-card {
         width: 100%;
-        max-width: 680px;
+        max-width: 580px;
         background: #fff;
-        border-radius: 32px;
-        padding: 60px;
+        border-radius: 24px;
+        padding: 30px;
         box-shadow: 0px 48px 80px -12px rgba(16, 24, 40, 0.12);
         border: 1px solid #F2F4F7;
         text-align: center;
@@ -337,9 +388,9 @@
 
     .image-wrapper {
         background: #f9fafb;
-        border-radius: 24px;
-        padding: 30px;
-        margin-bottom: 40px;
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
     }
 
     .image-wrapper img {
@@ -412,6 +463,45 @@
         color: #D92D20;
         font-size: 0.75rem;
         margin-top: 4px;
+    }
+
+    /* Premium Alerts */
+    .alert-neo {
+        display: flex;
+        align-items: flex-start;
+        padding: 20px;
+        border-radius: 16px;
+        border: 1px solid transparent;
+        font-size: 0.95rem;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+
+    .alert-neo.success {
+        background: #f0fdf4;
+        border-color: #b9f6ca;
+        color: #1b5e20;
+    }
+    .alert-neo.success i { color: #2e7d32; font-size: 1.5rem; }
+
+    .alert-neo.info {
+        background: #eff6ff;
+        border-color: #bfdbfe;
+        color: #1e40af;
+    }
+    .alert-neo.info i { color: #2563eb; font-size: 1.5rem; }
+
+    .alert-neo.warning {
+        background: #fffbeb;
+        border-color: #fef3c7;
+        color: #92400e;
+    }
+    .alert-neo.warning i { color: #d97706; font-size: 1.5rem; }
+
+    .alert-neo strong {
+        display: block;
+        font-weight: 800;
+        font-size: 1.05rem;
+        margin-bottom: 4px;
     }
 </style>
 @endsection

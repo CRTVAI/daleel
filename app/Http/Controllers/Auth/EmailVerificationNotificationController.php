@@ -21,4 +21,24 @@ class EmailVerificationNotificationController extends Controller
 
         return back()->with('status', 'verification-link-sent');
     }
+
+    /**
+     * Resend verification link for unauthenticated users.
+     */
+    public function resend(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ]);
+
+        $user = \App\Models\User::where('email', $request->email)->first();
+
+        if ($user->hasVerifiedEmail()) {
+            return redirect()->route('login')->with('status', 'already-verified');
+        }
+
+        $user->sendEmailVerificationNotification();
+
+        return redirect()->route('login')->with('status', 'verification-link-sent');
+    }
 }

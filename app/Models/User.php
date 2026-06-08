@@ -2,14 +2,14 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+class User extends Authenticatable implements MustVerifyEmail
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -26,6 +26,11 @@ class User extends Authenticatable
         'connections',
         'streak_count',
         'last_activity_at',
+        'parent_id',
+        'department_id',
+        'is_employee',
+        'connection_code',
+        'can_access_team',
     ];
 
     protected $hidden = [
@@ -41,11 +46,28 @@ class User extends Authenticatable
             'interests'         => 'array',
             'connections'       => 'array',
             'is_admin'          => 'boolean',
+            'is_employee'       => 'boolean',
+            'can_access_team'   => 'boolean',
             'last_activity_at'  => 'datetime',
         ];
     }
 
     // ── Relationships ──────────────────────────────────────────
+
+    public function employees()
+    {
+        return $this->hasMany(User::class, 'parent_id');
+    }
+
+    public function company()
+    {
+        return $this->belongsTo(User::class, 'parent_id');
+    }
+
+    public function department()
+    {
+        return $this->belongsTo(Department::class, 'department_id');
+    }
 
     public function videoProgress()
     {

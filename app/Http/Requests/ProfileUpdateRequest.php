@@ -27,7 +27,7 @@ class ProfileUpdateRequest extends FormRequest
                 Rule::unique(User::class)->ignore($this->user()->id),
             ],
             'learning_goal' => ['nullable', 'string', 'max:255'],
-            'experience_level' => ['nullable', 'string', 'in:Beginner,Intermediate,Advanced'],
+            'experience_level' => ['nullable', 'string', 'max:255'],
             'interests' => ['nullable', 'string'],
             'connections' => ['nullable', 'string'],
             'password' => ['nullable', 'confirmed', \Illuminate\Validation\Rules\Password::defaults()],

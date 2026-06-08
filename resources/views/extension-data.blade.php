@@ -24,6 +24,8 @@
         ->sortByDesc('active_ms')->take(6)->values();
     $maxMs = $topDomains->max('active_ms') ?: 1;
     $hasData = $sessions->isNotEmpty() || $snapshots->isNotEmpty() || $rollups->isNotEmpty() || $recommendations->isNotEmpty();
+    $uniqueDomainCount = $domainGroups->count();
+    $uniqueRecCount = $uniqueRecommendedCount ?? $recommendations->unique('content_id')->count();
 @endphp
 
 @section('styles')
@@ -123,7 +125,7 @@
     <div class="ev-hero">
         <div>
             <h1>📊 Extension Activity Viewer</h1>
-            <p>All data your CRTVAI browser extension has tracked — private to your account only.</p>
+            <p>All data your Dallel AI browser extension has tracked — private to your account only.</p>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
             @if($hasData)
@@ -149,13 +151,13 @@
     {{-- Tab Nav --}}
     <div class="ev-tabs">
         <button class="ev-tab active" onclick="showTab('overview',this)">
-            📈 Overview <span class="ev-tab-badge">{{ $sessions->count() }}</span>
+            📈 Overview
         </button>
         <button class="ev-tab" onclick="showTab('recs',this)">
-            ⭐ Recommendations <span class="ev-tab-badge">{{ $recommendations->count() }}</span>
+            ⭐ Recommendations <span class="ev-tab-badge">{{ $uniqueRecCount }}</span>
         </button>
         <button class="ev-tab" onclick="showTab('sessions',this)">
-            🌐 Sessions <span class="ev-tab-badge">{{ $sessions->count() }}</span>
+            🌐 Sites Visited <span class="ev-tab-badge">{{ $uniqueDomainCount }}</span>
         </button>
         <button class="ev-tab" onclick="showTab('daily',this)">
             📅 Daily Report <span class="ev-tab-badge">{{ $rollups->count() }}</span>
@@ -169,14 +171,14 @@
     <div id="tab-overview" class="ev-panel active">
         <div class="ev-stat-grid">
             <div class="ev-stat">
-                <div class="val">{{ $ms($totalActiveMs) }}</div>
-                <div class="lbl">Active Time</div>
-                <div class="hint">Time you actively used your browser</div>
+                <div class="val">{{ $ms($todayActiveMs ?? 0) }}</div>
+                <div class="lbl">Today's Active Time</div>
+                <div class="hint">All-time total: {{ $ms($totalActiveMs) }}</div>
             </div>
             <div class="ev-stat">
-                <div class="val">{{ $sessions->count() }}</div>
-                <div class="lbl">Sessions</div>
-                <div class="hint">Individual website visits recorded</div>
+                <div class="val">{{ $uniqueDomainCount }}</div>
+                <div class="lbl">Sites Visited</div>
+                <div class="hint">{{ $sessions->count() }} total page sessions recorded</div>
             </div>
             <div class="ev-stat">
                 <div class="val">{{ number_format($totalClicks) }}</div>
@@ -189,9 +191,9 @@
                 <div class="hint">ChatGPT, Gemini, Claude, etc.</div>
             </div>
             <div class="ev-stat">
-                <div class="val">{{ $recommendations->count() }}</div>
-                <div class="lbl">Videos Suggested</div>
-                <div class="hint">Based on your browsing habits</div>
+                <div class="val">{{ $uniqueRecCount }}</div>
+                <div class="lbl">Unique Videos Suggested</div>
+                <div class="hint">{{ $recommendations->count() }} total recommendation triggers</div>
             </div>
         </div>
 
@@ -300,36 +302,49 @@
         </div>
     </div>
 
-    {{-- TAB: Sessions --}}
+    {{-- TAB: Sessions (Domain-Grouped) --}}
     <div id="tab-sessions" class="ev-panel">
         <div class="ev-box">
             <div class="ev-box-head">
-                <div><h3>🌐 Browsing Sessions</h3><p>Each entry is one website visit. Showing the 25 most recent.</p></div>
-                <span class="pill pill-gray">{{ $sessions->count() }} total</span>
+                <div><h3>🌐 Websites Visited</h3><p>{{ $uniqueDomainCount }} unique sites — click any row to see individual sessions</p></div>
+                <span class="pill pill-gray">{{ $sessions->count() }} total sessions</span>
             </div>
-            @forelse($sessions->take(25) as $s)
-            <div class="sess-row">
-                <div class="d-flex justify-content-between align-items-start gap-2 flex-wrap">
-                    <div>
-                        <div class="sess-domain">{{ $s->is_ai_tool ? '🤖' : '🌐' }} {{ $s->platform_domain ?: 'Unknown website' }}</div>
-                        <div class="sess-time">{{ $s->started_at?->format('M d, Y · H:i') ?? '—' }}{{ $s->ended_at ? ' → '.$s->ended_at->format('H:i') : '' }}</div>
+            @forelse($domainGroups as $dg)
+            <div class="sess-row" onclick="openDomainModal('{{ addslashes($dg['domain']) }}')" style="cursor:pointer;transition:background .15s;" onmouseover="this.style.background='#f9fafb'" onmouseout="this.style.background='#fff'">
+                <div class="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                    <div class="d-flex align-items-center gap-2">
+                        <div style="width:36px;height:36px;border-radius:8px;background:{{ $dg['ai']?'#eff6ff':'#f3f4f6' }};display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0">{{ $dg['ai'] ? '🤖' : '🌐' }}</div>
+                        <div>
+                            <div class="sess-domain">{{ $dg['domain'] }}</div>
+                            <div class="sess-time">{{ $dg['count'] }} session{{ $dg['count']!==1?'s':'' }}{{ $dg['category'] ? ' · '.ucfirst($dg['category']) : '' }}{{ $dg['ai'] ? ' · AI Tool' : '' }}</div>
+                        </div>
                     </div>
-                    <div style="display:flex;gap:.3rem;flex-wrap:wrap">
-                        @if($s->platform_category)<span class="pill pill-gray">{{ $s->platform_category }}</span>@endif
-                        @if($s->is_ai_tool)<span class="pill pill-purple">AI Tool</span>@endif
+                    <div class="d-flex align-items-center gap-3">
+                        <div style="text-align:right">
+                            <div style="font-weight:800;font-size:.9rem;color:#4f46e5">{{ $ms($dg['active_ms']) }}</div>
+                            <div style="font-size:.72rem;color:#9ca3af">active time</div>
+                        </div>
+                        <i class="bi bi-chevron-right" style="color:#d1d5db"></i>
                     </div>
-                </div>
-                <div class="sess-facts">
-                    <span class="sess-fact"><i class="bi bi-clock"></i> Active: <strong>{{ $ms($s->active_ms) }}</strong></span>
-                    <span class="sess-fact"><i class="bi bi-eye"></i> Open: <strong>{{ $ms($s->open_ms) }}</strong></span>
-                    <span class="sess-fact"><i class="bi bi-file-earmark"></i> <strong>{{ $s->page_count ?? 0 }}</strong> pages</span>
-                    <span class="sess-fact"><i class="bi bi-mouse"></i> <strong>{{ $s->click_count ?? 0 }}</strong> clicks</span>
-                    @if(($s->tab_switch_count??0)>0)<span class="sess-fact"><i class="bi bi-arrow-left-right"></i> <strong>{{ $s->tab_switch_count }}</strong> tab switches</span>@endif
                 </div>
             </div>
             @empty
             <div class="ev-empty"><i class="bi bi-window"></i><p>No sessions recorded yet.</p></div>
             @endforelse
+        </div>
+    </div>
+
+    {{-- Domain Sessions Popup Modal --}}
+    <div id="domainModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.45);padding:1rem;overflow-y:auto" onclick="if(event.target===this)closeDomainModal()">
+        <div style="background:#fff;border-radius:16px;max-width:700px;margin:2rem auto;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+            <div style="background:linear-gradient(135deg,#1e1b4b,#4338ca);padding:1.25rem 1.5rem;color:#fff;display:flex;justify-content:space-between;align-items:center">
+                <div>
+                    <div id="modalDomainTitle" style="font-weight:800;font-size:1.05rem"></div>
+                    <div id="modalDomainSub" style="font-size:.78rem;opacity:.75;margin-top:.2rem"></div>
+                </div>
+                <button onclick="closeDomainModal()" style="background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:1rem">✕</button>
+            </div>
+            <div id="modalDomainBody" style="max-height:65vh;overflow-y:auto;padding:.5rem 0"></div>
         </div>
     </div>
 
@@ -414,6 +429,46 @@ function showTab(name, btn) {
     document.querySelectorAll('.ev-tab').forEach(b => b.classList.remove('active'));
     document.getElementById('tab-' + name).classList.add('active');
     btn.classList.add('active');
+}
+
+// Domain groups data for popup
+const domainData = @json($domainGroups);
+const msFormat = function(v) {
+    v = Math.max(0, parseInt(v)||0);
+    if (v < 60000) return Math.round(v/1000)+'s';
+    let m = Math.floor(v/60000);
+    if (m < 60) return m+'m';
+    return Math.floor(m/60)+'h '+(m%60)+'m';
+};
+
+function openDomainModal(domain) {
+    const dg = domainData.find(d => d.domain === domain);
+    if (!dg) return;
+    document.getElementById('modalDomainTitle').textContent = (dg.ai ? '🤖 ' : '🌐 ') + dg.domain;
+    document.getElementById('modalDomainSub').textContent = dg.count + ' sessions · ' + msFormat(dg.active_ms) + ' active time';
+    const body = document.getElementById('modalDomainBody');
+    body.innerHTML = dg.sessions.map(s => `
+        <div style="padding:.85rem 1.5rem;border-bottom:1px solid #f3f4f6">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
+                <div>
+                    <div style="font-weight:700;font-size:.88rem;color:#111">${s.started_at ? new Date(s.started_at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'}</div>
+                    <div style="font-size:.75rem;color:#6b7280;margin-top:.15rem">${s.ended_at ? '→ ' + new Date(s.ended_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : 'In progress'}</div>
+                </div>
+                <div style="display:flex;gap:.75rem;flex-wrap:wrap">
+                    <span style="font-size:.8rem;font-weight:700;color:#4f46e5"><i class="bi bi-clock"></i> ${msFormat(s.active_ms)}</span>
+                    <span style="font-size:.8rem;color:#374151">${s.page_count||0} pages</span>
+                    <span style="font-size:.8rem;color:#374151">${s.click_count||0} clicks</span>
+                </div>
+            </div>
+        </div>
+    `).join('');
+    document.getElementById('domainModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDomainModal() {
+    document.getElementById('domainModal').style.display = 'none';
+    document.body.style.overflow = '';
 }
 </script>
 @endsection

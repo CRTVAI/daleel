@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrackWave Admin | Management Portal</title>
+    <title>Dallel AI Admin | Management Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -277,13 +277,19 @@
         <aside class="admin-sidebar">
             <div class="sidebar-brand">
                 <div class="brand-logo"><i class="bi bi-rocket-takeoff-fill"></i></div>
-                <span class="brand-text">CRTVAI ADMIN</span>
+                <span class="brand-text">DALLEL AI ADMIN</span>
             </div>
 
             <div class="menu-label">Main Menu</div>
             <ul class="sidebar-menu">
                 <li class="menu-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <a href="{{ route('admin.dashboard') }}"><i class="bi bi-grid-1x2-fill"></i> Overview</a>
+                </li>
+                 <li class="menu-item {{ request()->routeIs('admin.tools.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.tools.index') }}"><i class="bi bi-cpu-fill"></i> Connected Tools</a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.profile-options.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.profile-options.index') }}"><i class="bi bi-list-check"></i> Profile Options</a>
                 </li>
                 <li class="menu-item {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
                     <a href="{{ route('admin.users.index') }}"><i class="bi bi-people-fill"></i> User Management</a>
@@ -294,9 +300,10 @@
                 <li class="menu-item {{ request()->routeIs('admin.courses.index') ? 'active' : '' }}">
                     <a href="{{ route('admin.courses.index') }}"><i class="bi bi-collection-play-fill"></i> Course Library</a>
                 </li>
+               
             </ul>
 
-            <div class="menu-label mt-4">System</div>
+            <!-- <div class="menu-label mt-4">System</div>
             <ul class="sidebar-menu">
                 <li class="menu-item {{ request()->routeIs('admin.analytics') ? 'active' : '' }}">
                     <a href="{{ route('admin.analytics') }}"><i class="bi bi-bar-chart-line-fill"></i> Analytics</a>
@@ -307,7 +314,7 @@
                 <li class="menu-item {{ request()->routeIs('admin.settings') ? 'active' : '' }}">
                     <a href="{{ route('admin.settings') }}"><i class="bi bi-gear-fill"></i> Settings</a>
                 </li>
-            </ul>
+            </ul> -->
 
             <div class="p-4 mt-auto">
                 <form action="{{ route('logout') }}" method="POST">
@@ -337,7 +344,7 @@
                         </div>
                     </div>
                     <ul class="dropdown-menu dropdown-menu-end border-0 shadow-lg mt-2 rounded-4 p-2" style="min-width: 200px;">
-                        <li><a class="dropdown-item rounded-3 small fw-semibold py-2" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>My Profile</a></li>
+                        <!-- <li><a class="dropdown-item rounded-3 small fw-semibold py-2" href="{{ route('profile.edit') }}"><i class="bi bi-person me-2"></i>My Profile</a></li> -->
                         <li><hr class="dropdown-divider opacity-50"></li>
                         <li>
                             <form action="{{ route('logout') }}" method="POST">

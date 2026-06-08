@@ -6,6 +6,7 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
+use App\Models\Course;
 
 class ContentSeeder extends Seeder
 {
@@ -14,7 +15,64 @@ class ContentSeeder extends Seeder
         DB::statement('SET FOREIGN_KEY_CHECKS=0;');
         DB::table('user_video_progress')->truncate();
         DB::table('contents')->truncate();
+        DB::table('courses')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+
+        // Create the standard courses
+        $courses = [
+            'AI & ML' => Course::create([
+                'title' => 'AI & Machine Learning Foundations',
+                'description' => 'A comprehensive introduction to machine learning, neural networks, LLMs, and prompt engineering.',
+                'category' => 'AI & ML',
+                'status' => 'active',
+                'thumbnail' => 'https://images.unsplash.com/photo-1677442136019-21780ecad995?w=800&q=80',
+            ]),
+            'Web Development' => Course::create([
+                'title' => 'Full-Stack Web Development Bootcamp',
+                'description' => 'Master modern frontend and backend development with HTML, CSS, JavaScript, React, Node.js, and APIs.',
+                'category' => 'Web Development',
+                'status' => 'active',
+                'thumbnail' => 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?w=800&q=80',
+            ]),
+            'Data Science' => Course::create([
+                'title' => 'Data Science & Analytical Engineering',
+                'description' => 'Learn SQL, Python, Pandas, Tableau, and Machine Learning models to analyze and visualize complex datasets.',
+                'category' => 'Data Science',
+                'status' => 'active',
+                'thumbnail' => 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&q=80',
+            ]),
+            'Design' => Course::create([
+                'title' => 'Modern UI/UX Design & Typography',
+                'description' => 'Explore professional design systems, prototyping, wireframing, color theory, and UX research methods.',
+                'category' => 'Design',
+                'status' => 'active',
+                'thumbnail' => 'https://images.unsplash.com/photo-1586717791821-3f44a563eb4c?w=800&q=80',
+            ]),
+            'Productivity' => Course::create([
+                'title' => 'Ultrafast Productivity Masterclass',
+                'description' => 'Unlock maximum remote work efficiency using Notion, Obsidian, Zapier automations, and ChatGPT.',
+                'category' => 'Productivity',
+                'status' => 'active',
+                'thumbnail' => 'https://images.unsplash.com/photo-1506784983877-45594efa4cbe?w=800&q=80',
+            ]),
+            'Marketing' => Course::create([
+                'title' => 'High-Conversion Digital Marketing',
+                'description' => 'Learn SEO, social media growth, email marketing, Google Ads, and Facebook Ads strategies.',
+                'category' => 'Marketing',
+                'status' => 'active',
+                'thumbnail' => 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=800&q=80',
+            ]),
+        ];
+
+        // Keep track of how many lessons we've added to each course
+        $courseCounts = [
+            'AI & ML' => 0,
+            'Web Development' => 0,
+            'Data Science' => 0,
+            'Design' => 0,
+            'Productivity' => 0,
+            'Marketing' => 0,
+        ];
 
         $videos = [
             // ── AI & ML ──────────────────────────────────────────────
@@ -264,25 +322,51 @@ class ContentSeeder extends Seeder
 
             /*
             |--------------------------------------------------------------------------
+            | Course & Module Mapping
+            |--------------------------------------------------------------------------
+            */
+            $course_id = null;
+            $section_part_label = null;
+            $sort_order = 0;
+
+            if (isset($courses[$category]) && $courseCounts[$category] < 8) {
+                $course_id = $courses[$category]->id;
+                $courseCounts[$category]++;
+                $sort_order = $courseCounts[$category];
+
+                if ($sort_order <= 3) {
+                    $section_part_label = 'Module 1: Getting Started';
+                } elseif ($sort_order <= 6) {
+                    $section_part_label = 'Module 2: Practical Core Skills';
+                } else {
+                    $section_part_label = 'Module 3: Advanced Applications';
+                }
+            }
+
+            /*
+            |--------------------------------------------------------------------------
             | Insert Data
             |--------------------------------------------------------------------------
             */
 
             $inserts[] = [
-                'title'            => $videoData['title'] ?? $title,
-                'video_url'        => "https://www.youtube.com/watch?v={$yt_id}",
-                'youtube_id'       => $yt_id,
-                'duration_seconds' => (int) $duration,
-                'thumbnail'        => "https://img.youtube.com/vi/{$yt_id}/hqdefault.jpg",
-                'description'      => "A professional {$skill_level}-level {$category} course covering: {$tags}.",
-                'tags'             => $tags,
-                'category'         => $category,
-                'skill_level'      => $skill_level,
-                'status'           => 'active',
-                'connected_tools'  => $connected_tools,
-                'slug'             => Str::slug($videoData['title'] ?? $title) . '-' . Str::random(5),
-                'created_at'       => $now,
-                'updated_at'       => $now,
+                'title'              => $videoData['title'] ?? $title,
+                'video_url'          => "https://www.youtube.com/watch?v={$yt_id}",
+                'youtube_id'         => $yt_id,
+                'duration_seconds'   => (int) $duration,
+                'thumbnail'          => "https://img.youtube.com/vi/{$yt_id}/hqdefault.jpg",
+                'description'        => "A professional {$skill_level}-level {$category} course covering: {$tags}.",
+                'tags'               => $tags,
+                'category'           => $category,
+                'skill_level'        => $skill_level,
+                'status'             => 'active',
+                'connected_tools'    => $connected_tools,
+                'slug'               => Str::slug($videoData['title'] ?? $title) . '-' . Str::random(5),
+                'course_id'          => $course_id,
+                'section_part_label' => $section_part_label,
+                'sort_order'         => $sort_order,
+                'created_at'         => $now,
+                'updated_at'         => $now,
             ];
 
             // Periodic insert for resilience and progress

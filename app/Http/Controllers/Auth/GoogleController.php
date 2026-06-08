@@ -52,12 +52,12 @@ class GoogleController extends Controller
                     'email' => $googleUser->email,
                     'google_id' => $googleUser->id,
                     'password' => null,
+                    'email_verified_at' => now(),
                 ]);
 
                 Auth::login($newUser);
                 
-                // New users go to profile to complete setup as per previous request
-                return redirect()->route('profile.edit')->with('status', 'welcome-complete-profile');
+                return redirect()->route('dashboard');
             }
         } catch (Exception $e) {
             return redirect()->route('login')->with('error', 'Something went wrong with Google Login. Please try again.');

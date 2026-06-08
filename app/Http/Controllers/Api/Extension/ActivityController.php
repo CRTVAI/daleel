@@ -7,6 +7,7 @@ use App\Models\ExtensionDevice;
 use App\Models\ExtensionMetricsSnapshot;
 use App\Models\ExtensionSession;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
 class ActivityController extends Controller
@@ -17,7 +18,7 @@ class ActivityController extends Controller
      */
     public function storeSession(Request $request)
     {
-        \Log::info('Extension Session API hit', $request->all());
+        Log::info('Extension Session API hit', $request->all());
         
         $user = $request->user();
         
@@ -60,27 +61,31 @@ class ActivityController extends Controller
         $started_at = is_numeric($validated['started_at']) ? date('Y-m-d H:i:s', $validated['started_at'] > 9999999999 ? $validated['started_at'] / 1000 : $validated['started_at']) : $validated['started_at'];
         $ended_at = is_numeric($validated['ended_at']) ? date('Y-m-d H:i:s', $validated['ended_at'] > 9999999999 ? $validated['ended_at'] / 1000 : $validated['ended_at']) : $validated['ended_at'];
 
-        $session = ExtensionSession::create([
-            'user_id' => $user->id,
-            'extension_device_id' => $device->id,
-            'session_id_from_ext' => $validated['session_id'],
-            'started_at' => $started_at,
-            'ended_at' => $ended_at,
-            'platform_type' => $validated['platform']['type'] ?? null,
-            'platform_domain' => $validated['platform']['domain'] ?? null,
-            'platform_category' => $validated['platform']['category'] ?? null,
-            'is_ai_tool' => $validated['platform']['is_ai_tool'] ?? false,
-            'active_ms' => $validated['usage']['active_ms'] ?? 0,
-            'idle_ms' => $validated['usage']['idle_ms'] ?? 0,
-            'open_ms' => $validated['usage']['open_ms'] ?? 0,
-            'click_count' => $validated['usage']['click_count'] ?? 0,
-            'interaction_count' => $validated['usage']['interaction_count'] ?? 0,
-            'page_count' => $validated['usage']['page_count'] ?? 0,
-            'tab_switch_count' => $validated['usage']['tab_switch_count'] ?? 0,
-            'pages' => $validated['pages'] ?? null,
-            'local_signals' => $validated['local_signals'] ?? null,
-            'recommended_content_tags' => $validated['recommended_content_tags'] ?? null,
-        ]);
+        $session = ExtensionSession::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'extension_device_id' => $device->id,
+                'session_id_from_ext' => $validated['session_id'],
+            ],
+            [
+                'started_at' => $started_at,
+                'ended_at' => $ended_at,
+                'platform_type' => $validated['platform']['type'] ?? null,
+                'platform_domain' => $validated['platform']['domain'] ?? null,
+                'platform_category' => $validated['platform']['category'] ?? null,
+                'is_ai_tool' => $validated['platform']['is_ai_tool'] ?? false,
+                'active_ms' => $validated['usage']['active_ms'] ?? 0,
+                'idle_ms' => $validated['usage']['idle_ms'] ?? 0,
+                'open_ms' => $validated['usage']['open_ms'] ?? 0,
+                'click_count' => $validated['usage']['click_count'] ?? 0,
+                'interaction_count' => $validated['usage']['interaction_count'] ?? 0,
+                'page_count' => $validated['usage']['page_count'] ?? 0,
+                'tab_switch_count' => $validated['usage']['tab_switch_count'] ?? 0,
+                'pages' => $validated['pages'] ?? null,
+                'local_signals' => $validated['local_signals'] ?? null,
+                'recommended_content_tags' => $validated['recommended_content_tags'] ?? null,
+            ]
+        );
 
         return response()->json([
             'data' => [
@@ -96,7 +101,7 @@ class ActivityController extends Controller
      */
     public function storeMetricsSnapshot(Request $request)
     {
-        \Log::info('Extension Metrics Snapshot API hit', $request->all());
+        Log::info('Extension Metrics Snapshot API hit', $request->all());
 
         $user = $request->user();
         
@@ -126,22 +131,26 @@ class ActivityController extends Controller
 
         $captured_at = is_numeric($validated['captured_at']) ? date('Y-m-d H:i:s', $validated['captured_at'] > 9999999999 ? $validated['captured_at'] / 1000 : $validated['captured_at']) : $validated['captured_at'];
 
-        $snapshot = ExtensionMetricsSnapshot::create([
-            'user_id' => $user->id,
-            'extension_device_id' => $device->id,
-            'captured_at' => $captured_at,
-            'window_minutes' => $validated['window_minutes'] ?? 60,
-            'focus_score' => $validated['metrics']['focus_score'] ?? null,
-            'productivity_score' => $validated['metrics']['productivity_score'] ?? null,
-            'ai_adoption_score' => $validated['metrics']['ai_adoption_score'] ?? null,
-            'workflow_efficiency_score' => $validated['metrics']['workflow_efficiency_score'] ?? null,
-            'active_ms' => $validated['metrics']['active_ms'] ?? 0,
-            'idle_ms' => $validated['metrics']['idle_ms'] ?? 0,
-            'context_switch_count' => $validated['metrics']['context_switch_count'] ?? 0,
-            'tab_switches_per_hour' => $validated['metrics']['tab_switches_per_hour'] ?? 0,
-            'top_platforms' => $validated['top_platforms'] ?? null,
-            'detected_patterns' => $validated['detected_patterns'] ?? null,
-        ]);
+        $snapshot = ExtensionMetricsSnapshot::updateOrCreate(
+            [
+                'user_id' => $user->id,
+                'extension_device_id' => $device->id,
+                'captured_at' => $captured_at,
+            ],
+            [
+                'window_minutes' => $validated['window_minutes'] ?? 60,
+                'focus_score' => $validated['metrics']['focus_score'] ?? null,
+                'productivity_score' => $validated['metrics']['productivity_score'] ?? null,
+                'ai_adoption_score' => $validated['metrics']['ai_adoption_score'] ?? null,
+                'workflow_efficiency_score' => $validated['metrics']['workflow_efficiency_score'] ?? null,
+                'active_ms' => $validated['metrics']['active_ms'] ?? 0,
+                'idle_ms' => $validated['metrics']['idle_ms'] ?? 0,
+                'context_switch_count' => $validated['metrics']['context_switch_count'] ?? 0,
+                'tab_switches_per_hour' => $validated['metrics']['tab_switches_per_hour'] ?? 0,
+                'top_platforms' => $validated['top_platforms'] ?? null,
+                'detected_patterns' => $validated['detected_patterns'] ?? null,
+            ]
+        );
 
         // Optional: Update device's last active at
         $device->update(['last_active_at' => now()]);
@@ -155,7 +164,7 @@ class ActivityController extends Controller
     }
     public function storeDailyRollup(Request $request)
     {
-        \Log::info('Extension Daily Rollup API hit', $request->all());
+        Log::info('Extension Daily Rollup API hit', $request->all());
         $user = $request->user();
         
         $device = ExtensionDevice::where('user_id', $user->id)
@@ -203,7 +212,7 @@ class ActivityController extends Controller
 
     public function generateContextualRecommendation(Request $request)
     {
-        \Log::info('Extension Recommendation Request API hit', $request->all());
+        Log::info('Extension Recommendation Request API hit', $request->all());
         $user = $request->user();
         $device = ExtensionDevice::where('user_id', $user->id)->whereNull('revoked_at')->orderBy('last_active_at', 'desc')->first();
 
@@ -224,7 +233,7 @@ class ActivityController extends Controller
 
         if ($domain) {
             $keywords = $this->extractKeywords($domain);
-            \Log::info("Recommendation domain={$domain}, keywords=" . implode(',', $keywords));
+            Log::info("Recommendation domain={$domain}, keywords=" . implode(',', $keywords));
 
             // Exclude already completed/watched videos
             $completedIds = \App\Models\UserVideoProgress::where('user_id', $user->id)
@@ -265,7 +274,7 @@ class ActivityController extends Controller
                 }
 
                 if ($content) {
-                    \Log::info("Matched content '{$content->title}' via keyword '{$keyword}'");
+                    Log::info("Matched content '{$content->title}' via keyword '{$keyword}'");
                     break;
                 }
             }
@@ -282,7 +291,7 @@ class ActivityController extends Controller
             if (!$content) {
                 $content = \App\Models\Content::where('status', 'active')->inRandomOrder()->first();
             }
-            \Log::info('No tool-specific match, using random fallback');
+            Log::info('No tool-specific match, using random fallback');
         }
 
         $rec = \App\Models\ExtensionRecommendation::create([
@@ -368,7 +377,7 @@ class ActivityController extends Controller
 
     public function storeRecommendationEvent(Request $request)
     {
-        \Log::info('Extension Recommendation Event API hit', $request->all());
+        Log::info('Extension Recommendation Event API hit', $request->all());
         
         $validated = $request->validate([
             'recommendation_id' => 'required|exists:extension_recommendations,id',
@@ -387,5 +396,119 @@ class ActivityController extends Controller
         ]);
 
         return response()->json(['data' => ['saved' => true]], 201);
+    }
+
+    public function askHelp(Request $request)
+    {
+        $user = $request->user();
+        $deviceId = $request->header('X-Extension-Device-Id');
+        
+        Log::info("Mentor Help Request - User ID: {$user->id}, Is Employee: " . ($user->is_employee ? 'Yes' : 'No') . ", Header Device ID: {$deviceId}");
+        
+        $device = ExtensionDevice::where('user_id', $user->id)
+            ->when($deviceId, function($q) use ($deviceId) {
+                return $q->where('device_id', $deviceId);
+            })
+            ->whereNull('revoked_at')
+            ->orderBy('last_active_at', 'desc')
+            ->first();
+
+        Log::info("Mentor Help Request - Device Found: " . ($device ? $device->id : 'NOT FOUND'));
+
+        $validated = $request->validate([
+            'query' => 'required|string',
+            'url' => 'nullable|string',
+            'domain' => 'nullable|string',
+        ]);
+
+        $helpRequest = \App\Models\ExtensionHelpRequest::create([
+            'user_id' => $user->id,
+            'extension_device_id' => $device ? $device->id : null,
+            'query' => $validated['query'],
+            'url' => $validated['url'],
+            'domain' => $validated['domain'] ?? null,
+        ]);
+
+        // ── GPT-4o-mini Integration for Suggested Lessons ────────────────
+        $suggestedLessons = [];
+        $domain = $validated['domain'] ?? null;
+        
+        if ($domain) {
+            $keywords = $this->extractKeywords($domain);
+            
+            // Filter lessons by domain keywords first
+            $availableLessons = \App\Models\Content::where('status', 'active')
+                ->where(function($q) use ($keywords) {
+                    foreach ($keywords as $kw) {
+                        $q->orWhere('connected_tools', 'like', "%{$kw}%")
+                          ->orWhere('tags', 'like', "%{$kw}%")
+                          ->orWhere('category', 'like', "%{$kw}%")
+                          ->orWhere('title', 'like', "%{$kw}%");
+                    }
+                })
+                ->latest() // Prioritize newer content
+                ->limit(100) // Increased limit to provide better variety to GPT
+                ->get(['id', 'title', 'description']);
+
+            if ($availableLessons->isNotEmpty()) {
+                $apiKey = env('OPENAI_API_KEY');
+                
+                if ($apiKey) {
+                    try {
+                        $lessonContext = $availableLessons->map(fn($l) => "ID: {$l->id} | Title: {$l->title}")->implode("\n");
+                        
+                        $response = \Illuminate\Support\Facades\Http::withToken($apiKey)
+                            ->timeout(10)
+                            ->post('https://api.openai.com/v1/chat/completions', [
+                                'model' => 'gpt-4o-mini',
+                                'messages' => [
+                                    ['role' => 'system', 'content' => "You are an AI Mentor. Analyze the user's question and select the most relevant lessons from the provided list. Return a JSON object with a key 'ids' containing an array of relevant lesson IDs. Example: {\"ids\": [1, 2, 3]}. If none are relevant, return {\"ids\": []}."],
+                                    ['role' => 'user', 'content' => "Domain: {$domain}\nUser Question: {$validated['query']}\n\nAvailable Lessons:\n{$lessonContext}"]
+                                ],
+                                'response_format' => ['type' => 'json_object']
+                            ]);
+
+                        if ($response->successful()) {
+                            $data = $response->json();
+                            $content = json_decode($data['choices'][0]['message']['content'], true);
+                            $ids = $content['ids'] ?? $content; // Handle different JSON structures GPT might return
+                            
+                            if (is_array($ids)) {
+                                $suggestedLessons = \App\Models\Content::whereIn('id', $ids)
+                                    ->limit(5)
+                                    ->get(['id', 'title', 'thumbnail_url', 'category', 'duration_label'])
+                                    ->map(fn($l) => [
+                                        'id' => $l->id,
+                                        'title' => $l->title,
+                                        'thumbnail' => $l->thumbnail_url,
+                                        'category' => $l->category,
+                                        'duration' => $l->duration_label,
+                                        'url' => route('learn.watch', $l)
+                                    ]);
+                            }
+                        }
+                    } catch (\Exception $e) {
+                        Log::error("GPT Help Request Error: " . $e->getMessage());
+                    }
+                }
+
+                // Fallback to keyword relevance if AI fails or no key
+                if (empty($suggestedLessons)) {
+                    $suggestedLessons = $availableLessons->take(3)->map(fn($l) => [
+                        'id' => $l->id,
+                        'title' => $l->title,
+                        'url' => route('learn.watch', $l)
+                    ]);
+                }
+            }
+        }
+
+        return response()->json([
+            'data' => [
+                'saved' => true,
+                'help_request_id' => $helpRequest->id,
+                'suggested_lessons' => $suggestedLessons
+            ]
+        ], 201);
     }
 }

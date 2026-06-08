@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'CRTVAI Mentor')</title>
+    <title>@yield('title', 'Dallel AI Mentor')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -50,25 +50,36 @@
             margin-right: 60px;
         }
 
-        .brand-logo-neo {
-            width: 38px;
-            height: 38px;
-            background: var(--primary);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #fff;
+        .brand-mark {
+            display: grid;
+            width: 40px;
+            height: 40px;
+            place-items: center;
+            border-radius: 10px;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--primary), #8b5cf6);
+            font-size: 1rem;
             font-weight: 800;
-            font-size: 18px;
-            box-shadow: 0 4px 10px rgba(99, 102, 241, 0.2);
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
         }
 
-        .brand-name-neo {
+        .brand-copy {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.1;
+        }
+
+        .brand-copy strong {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 1.25rem;
             font-weight: 800;
-            font-size: 20px;
+            letter-spacing: -0.02em;
             color: var(--text-main);
-            letter-spacing: -0.04em;
+        }
+
+        .brand-copy small {
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
 
         .nav-links-center {
@@ -238,8 +249,11 @@
 <body>
     <nav class="navbar-main">
         <a href="{{ route('dashboard') }}" class="navbar-brand-neo">
-            <div class="brand-logo-neo">C</div>
-            <span class="brand-name-neo">CRTVAI</span>
+            <div class="brand-mark">DA</div>
+            <div class="brand-copy">
+                <strong>Dallel AI</strong>
+                <small>by Creative AI</small>
+            </div>
         </a>
 
         <div class="nav-links-center">
@@ -247,13 +261,15 @@
             <a href="{{ route('learn.explore') }}" class="nav-link-neo {{ Route::is('learn.explore') ? 'active' : '' }}">Learning Hub</a>
             <a href="{{ route('bookmarks') }}" class="nav-link-neo {{ Route::is('bookmarks') ? 'active' : '' }}">Bookmarks</a>
             <a href="{{ route('extension.install') }}" class="nav-link-neo {{ Route::is('extension.install') ? 'active' : '' }}">AI Extension</a>
-            <a href="{{ route('extension.data') }}" class="nav-link-neo {{ Route::is('extension.data') ? 'active' : '' }}">Data Viewer</a>
+            @if(auth()->user()->can_access_team)
+            <a href="{{ route('team.index') }}" class="nav-link-neo {{ Route::is('team.index') ? 'active' : '' }}">My Team</a>
+            @endif
         </div>
 
         <div class="navbar-actions">
             <a href="{{ route('learn.explore') }}" class="icon-btn-neo d-none d-md-flex"><i class="bi bi-search"></i></a>
             
-            <a href="{{ route('ask-ai') }}" class="btn-get-started d-none d-lg-block">
+            <a href="{{ route('ai.mentor') }}" class="btn-get-started d-none d-lg-block">
                 <i class="bi bi-stars me-2"></i> Ask AI Mentor
             </a>
 
@@ -283,23 +299,38 @@
     </nav>
 
     <main class="main-container-neo">
-        @if(auth()->user()->hasIncompleteProfile() && !Route::is('profile.edit'))
-            <div class="warning-bar-neo">
+        @if(!auth()->user()->hasVerifiedEmail())
+            <div class="warning-bar-neo mb-4">
                 <div class="d-flex align-items-center gap-3">
-                    <i class="bi bi-shield-exclamation fs-5"></i>
-                    <span>Enhance your experience! Complete your learning profile for tailored AI career guidance.</span>
+                    <i class="bi bi-envelope-exclamation fs-5 text-danger"></i>
+                    <span>Please verify your email to unlock full access to Dallel AI features.</span>
                 </div>
-                <a href="{{ route('profile.edit') }}" class="btn-complete-neo">Setup Profile</a>
+                <form action="{{ route('verification.send') }}" method="POST" class="d-inline">
+                    @csrf
+                    <button type="submit" class="btn-complete-neo">Resend Activation Email</button>
+                </form>
             </div>
         @endif
 
         @yield('content')
     </main>
 
+    <div id="onboarding-container">
+        @if(auth()->user()->hasVerifiedEmail() && auth()->user()->hasIncompleteProfile())
+            @include('components.onboarding-modal')
+        @endif
+    </div>
+
     <div class="toast-container-neo" id="toast-container"></div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            @if (session('status') === 'verification-link-sent')
+                showToast('A verification link has been sent to your email address.', 'success');
+            @endif
+        });
+
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
             const toast = document.createElement('div');

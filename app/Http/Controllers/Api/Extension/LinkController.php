@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\Extension;
 use App\Http\Controllers\Controller;
 use App\Models\ExtensionDevice;
 use App\Models\ExtensionVerificationCode;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -24,19 +25,31 @@ class LinkController extends Controller
             'extension_version' => 'nullable|string',
         ]);
 
-        $codeHash = hash('sha256', $request->verification_code);
+        $user = null;
 
-        $verificationCode = ExtensionVerificationCode::where('code_hash', $codeHash)
-            ->where('expires_at', '>', now())
+        // 1. Check if it's an Employee permanent code
+        $employeeUser = User::where('connection_code', $request->verification_code)
+            ->where('is_employee', true)
             ->first();
 
-        if (!$verificationCode) {
-            throw ValidationException::withMessages([
-                'verification_code' => ['Invalid or expired verification code.'],
-            ]);
-        }
+        if ($employeeUser) {
+            $user = $employeeUser;
+        } else {
+            // 2. Check if it's a temporary verification code (Individual)
+            $codeHash = hash('sha256', $request->verification_code);
 
-        $user = $verificationCode->user;
+            $verificationCode = ExtensionVerificationCode::where('code_hash', $codeHash)
+                ->where('expires_at', '>', now())
+                ->first();
+
+            if (!$verificationCode) {
+                throw ValidationException::withMessages([
+                    'verification_code' => ['Invalid or expired connection code.'],
+                ]);
+            }
+
+            $user = $verificationCode->user;
+        }
 
         // Create or update the device
         $device = ExtensionDevice::updateOrCreate(
@@ -50,8 +63,11 @@ class LinkController extends Controller
             ]
         );
 
-        // Delete the code (single-use)
-        $verificationCode->delete();
+        // Temporary individual verification codes are single-use.
+        // Employee connection codes stay stable until the manager regenerates them.
+        if (! $employeeUser) {
+            $verificationCode->delete();
+        }
 
         // Generate token
         $token = $user->createToken($request->device_name ?? 'Extension', [

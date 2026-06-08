@@ -23,6 +23,7 @@
                         <th class="border-0 text-muted small fw-bold py-3">EMAIL ADDRESS</th>
                         <th class="border-0 text-muted small fw-bold py-3">JOINED DATE</th>
                         <th class="border-0 text-muted small fw-bold py-3">STATUS</th>
+                        <th class="border-0 text-muted small fw-bold py-3 text-center">TEAM ACCESS</th>
                         <th class="border-0 text-muted small fw-bold py-3 text-end pe-4">ACTIONS</th>
                     </tr>
                 </thead>
@@ -48,6 +49,19 @@
                             </td>
                             <td>
                                 <span class="badge bg-success-light text-success px-3 py-2 rounded-pill">Active</span>
+                            </td>
+                            <td class="text-center">
+                                <form action="{{ route('admin.users.toggle-team', $user) }}" method="POST">
+                                    @csrf
+                                    @method('PATCH')
+                                    <div class="form-check form-switch d-flex justify-content-center mb-0">
+                                        <input class="form-check-input" type="checkbox" role="switch"
+                                               style="width: 2.5em; height: 1.3em; cursor: pointer;"
+                                               {{ $user->can_access_team ? 'checked' : '' }}
+                                               onchange="this.form.submit()"
+                                               title="{{ $user->can_access_team ? 'Revoke Team Access' : 'Grant Team Access' }}">
+                                    </div>
+                                </form>
                             </td>
                             <td class="text-end pe-4">
                                 <div class="d-flex justify-content-end gap-2">
@@ -113,14 +127,18 @@
                                                 <div class="col-md-6">
                                                     <label class="form-label small fw-700 text-muted">Experience Level</label>
                                                     <select name="experience_level" class="form-select rounded-3">
-                                                        <option value="Beginner" {{ $user->experience_level == 'Beginner' ? 'selected' : '' }}>Beginner</option>
-                                                        <option value="Intermediate" {{ $user->experience_level == 'Intermediate' ? 'selected' : '' }}>Intermediate</option>
-                                                        <option value="Advanced" {{ $user->experience_level == 'Advanced' ? 'selected' : '' }}>Advanced</option>
+                                                        @foreach($experienceLevels as $level)
+                                                            <option value="{{ $level->title }}" {{ $user->experience_level == $level->title ? 'selected' : '' }}>{{ $level->title }}</option>
+                                                        @endforeach
                                                     </select>
                                                 </div>
                                                 <div class="col-12">
                                                     <label class="form-label small fw-700 text-muted">Primary Goal</label>
-                                                    <input type="text" name="primary_goal" class="form-control rounded-3" value="{{ $user->primary_goal }}">
+                                                    <select name="primary_goal" class="form-select rounded-3">
+                                                        @foreach($learningGoals as $goal)
+                                                            <option value="{{ $goal->title }}" {{ $user->learning_goal == $goal->title ? 'selected' : '' }}>{{ $goal->title }}</option>
+                                                        @endforeach
+                                                    </select>
                                                 </div>
 
                                                 <div class="col-12 mt-2">
@@ -193,13 +211,14 @@
                     <div class="row g-4">
                         <!-- Profile Details -->
                         <div class="col-12">
-                            <h6 class="fw-800 small text-uppercase letter-spacing-1 mb-3 text-primary">1. Basic Information</h6>
+                            <h6 class="fw-800 small text-uppercase letter-spacing-1 mb-3 text-primary">Account Information</h6>
+                            <p class="text-muted small">Register a new user with basic credentials. They can complete their profile later.</p>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label class="form-label small fw-700 text-muted">Full Name</label>
                             <input type="text" name="name" class="form-control rounded-3" placeholder="e.g. Ahmed Hassan" required>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-12">
                             <label class="form-label small fw-700 text-muted">Email Address</label>
                             <input type="email" name="email" class="form-control rounded-3" placeholder="e.g. ahmed@example.com" required>
                         </div>
@@ -210,43 +229,6 @@
                         <div class="col-md-6">
                             <label class="form-label small fw-700 text-muted">Confirm Password</label>
                             <input type="password" name="password_confirmation" class="form-control rounded-3" placeholder="••••••••" required>
-                        </div>
-
-                        <!-- Preferences -->
-                        <div class="col-12 mt-2">
-                            <h6 class="fw-800 small text-uppercase letter-spacing-1 mb-2 text-primary">2. Learning & Preferences</h6>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-700 text-muted">Account Type</label>
-                            <select name="account_type" class="form-select rounded-3">
-                                <option value="Free Plan">Free Plan</option>
-                                <option value="Pro Plan">Pro Plan</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label small fw-700 text-muted">Experience Level</label>
-                            <select name="experience_level" class="form-select rounded-3">
-                                <option value="Beginner">Beginner</option>
-                                <option value="Intermediate">Intermediate</option>
-                                <option value="Advanced">Advanced</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small fw-700 text-muted">Primary Goal</label>
-                            <input type="text" name="primary_goal" class="form-control rounded-3" placeholder="e.g. Automate daily tasks">
-                        </div>
-
-                        <!-- Additional Details -->
-                        <div class="col-12 mt-2">
-                            <h6 class="fw-800 small text-uppercase letter-spacing-1 mb-2 text-primary">3. Work & Interests</h6>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small fw-700 text-muted">Work & Tools (Press enter after each)</label>
-                            <input type="text" name="tools" class="form-control tagify-input rounded-3" placeholder="Gmail, Notion, Slack">
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small fw-700 text-muted">Interests (Press enter after each)</label>
-                            <input type="text" name="interests" class="form-control tagify-input rounded-3" placeholder="AI Automation, Productivity">
                         </div>
                     </div>
                 </div>
