@@ -6,55 +6,140 @@
 <div class="dashboard-focus-modern">
     <!-- Top Row: Welcome Hero & Stats -->
     <div class="row g-5 mb-5">
-        <div class="col-xl-8">
-            <div class="hero-focus-card shadow-lg animate-slide-up">
+        <div class="col-xl-8 px-md-4">
+            <div class="hero-focus-card shadow-lg animate-slide-up rounded-5 overflow-hidden">
                 <div class="row align-items-center h-100">
-                    <div class="col-lg-7 p-4 p-xl-5">
-                        <div class="d-flex align-items-center gap-2 mb-4">
-                            <span class="focus-pill-tag" style="background: #000;">PRIMARY LEARNING GOAL</span>
-                            <span class="text-muted fw-800 small opacity-75">{{ date('M d, Y') }}</span>
-                        </div>
-                        
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <h1 class="fw-800 mb-0" style="font-size: 36px; letter-spacing: -0.05em; color: #000;">{{ Str::limit(auth()->user()->learning_goal ?? 'Set Your Goal', 25) }}</h1>
-                            <div class="d-flex gap-2">
-                                <button class="swiper-prev-recommended btn btn-light rounded-circle p-0 shadow-sm" style="width: 32px; height: 32px; border: 1px solid #eee;">
-                                    <i class="bi bi-chevron-left"></i>
-                                </button>
-                                <button class="swiper-next-recommended btn btn-light rounded-circle p-0 shadow-sm" style="width: 32px; height: 32px; border: 1px solid #eee;">
-                                    <i class="bi bi-chevron-right"></i>
-                                </button>
+                    <div class="col-12 p-3 p-xl-4 border-bottom border-light bg-white">
+                        <div class="d-flex justify-content-between align-items-center mx-4">
+                            <div>
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="text-primary fw-900" style="font-size: 10px; letter-spacing: 0.1em;">ACTIVE MISSION</span>
+                                    <div class="pulsing-dot-success"></div>
+                                </div>
+                                <h1 class="fw-900 mb-0" style="font-size: 24px; letter-spacing: -0.04em; color: #000;">{{ $user->learning_goal ?? 'Accelerate Your Tech Career' }}</h1>
+                            </div>
+                            <div class="text-end d-none d-md-block">
+                                <div class="text-muted fw-800" style="font-size: 10px; opacity: 0.5;">LIVE DATA ENGINE SYNC</div>
+                                <div class="text-dark fw-900 small">{{ date('D, M j') }}</div>
                             </div>
                         </div>
-                        <p class="text-dark opacity-75 mb-5 fw-600 fs-5" style="line-height: 1.5;">Your high-velocity roadmap to the tech industry. Master high-demand skills and build a professional-grade portfolio with AI-driven precision.</p>
-                        
-                        <!-- Recommendation Slider (Each slide is a full card) -->
-                        <div class="swiper recommendedSwiper">
-                            <div class="swiper-wrapper">
-                                @foreach($recommended as $content)
-                                <div class="swiper-slide">
-                                    <div class="recom-focus-card rounded-4 p-4 shadow-sm border border-light bg-white">
-                                        <div class="d-flex gap-4">
-                                            <div class="recom-thumb-focus rounded-4 shadow-sm overflow-hidden" style="width: 130px; height: 130px; flex-shrink: 0;">
-                                                <img src="{{ $content->thumbnail_url }}" class="w-100 h-100 object-fit-cover">
-                                                <div class="recom-play-overlay"><i class="bi bi-play-fill"></i></div>
+                    </div>
+                    
+                    <!-- Intelligence Grid (High-Fidelity Design) -->
+                    <div class="col-12 p-3 p-xl-4" style="background: #fdfdfe; position: relative; border-radius: 0 0 30px 30px;">
+                        @if($totalInteractions == 0 && collect($topDomains)->isEmpty())
+                        <!-- Ultra-Premium Ghost Overlay -->
+                        <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+                             style="background: url('{{ asset('images/dashboard/hero.png') }}') no-repeat center center; background-size: cover; z-index: 10; border-radius: 0 0 30px 30px;">
+                            <div class="position-absolute w-100 h-100" style="background: rgba(255, 255, 255, 0.5); backdrop-filter: blur(6px);"></div>
+                            <div class="text-center p-5 animate-slide-up position-relative" style="z-index: 11; max-width: 500px;">
+                                <div class="bg-white rounded-circle shadow-sm d-inline-flex align-items-center justify-content-center mb-4" style="width: 72px; height: 72px;">
+                                    <i class="bi bi-cpu text-primary h3 mb-0"></i>
+                                </div>
+                                <h4 class="fw-900 text-dark mb-2" style="letter-spacing: -0.02em;">INTELLIGENCE ENGINE IDLE</h4>
+                                <p class="text-muted small fw-700 mb-5">Connect your browser extension to unlock live productivity trends and website usage analysis.</p>
+                                
+                                <div class="d-flex justify-content-center gap-3">
+                                    <a href="{{ route('extension.install') }}" class="btn btn-primary rounded-pill px-4 py-2 fw-900 shadow-sm transition-hover" style="font-size: 13px; background: #4f46e5; border-color: #4f46e5;">
+                                        <i class="bi bi-download me-2"></i> DOWNLOAD BUNDLE
+                                    </a>
+                                    <a href="https://chrome.google.com/webstore" target="_blank" class="btn btn-outline-dark rounded-pill px-4 py-2 fw-900 shadow-sm transition-hover" style="font-size: 13px; background: #ffffff; color: #000; border-color: #000;">
+                                        <i class="bi bi-browser-chrome me-2"></i> WEB STORE
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="row g-3">
+                            <!-- Widget 1: Productivity -->
+                            <div class="col-lg-6">
+                                <div class="bg-white p-3 p-xl-4 rounded-4 border border-light h-100 transition-hover shadow-card">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="bg-success-subtle rounded-circle" style="width: 8px; height: 8px;"></div>
+                                            <span class="text-muted fw-900" style="font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;">Productivity Trends</span>
+                                            <div class="widget-info">
+                                                <span class="widget-info-btn">i</span>
+                                                <div class="widget-info-tip">📈 <strong>Productivity Trends (7 Days)</strong><br>Calculated from your daily <code>productivity_score</code> snapshots captured by the extension every 30 minutes. A score of 70+ is considered high performance.</div>
                                             </div>
-                                            <div class="flex-grow-1 d-flex flex-column justify-content-center">
-                                                <div class="text-primary fw-900 mb-1" style="font-size: 10px; letter-spacing: 0.1em;">START MASTERCLASS</div>
-                                                <h5 class="fw-800 text-dark mb-3 line-clamp-2" style="font-size: 18px; letter-spacing: -0.02em;">{{ $content->title }}</h5>
-                                                <a href="{{ route('learn.watch', $content) }}" class="btn-focus-link">
-                                                    Begin Learning Now <i class="bi bi-chevron-right ms-2"></i>
-                                                </a>
+                                        </div>
+                                        <i class="bi bi-graph-up text-success small opacity-50"></i>
+                                    </div>
+                                    <div style="height: 140px;"><canvas id="productivityTrendChart"></canvas></div>
+                                </div>
+                            </div>
+                            <!-- Widget 2: Website Usage -->
+                            <div class="col-lg-6">
+                                <div class="bg-white p-3 p-xl-4 rounded-4 border border-light h-100 transition-hover shadow-card">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="bg-primary-subtle rounded-circle" style="width: 8px; height: 8px;"></div>
+                                            <span class="text-muted fw-900" style="font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;">Top Websites (7D)</span>
+                                            <div class="widget-info">
+                                                <span class="widget-info-btn">i</span>
+                                                <div class="widget-info-tip">🌐 <strong>Top Websites (Last 7 Days)</strong><br>Aggregated from your browser extension sessions. Shows the domains where you spent the most <em>active</em> time — idle time is excluded. Measured in minutes.</div>
+                                            </div>
+                                        </div>
+                                        <i class="bi bi-globe text-primary small opacity-50"></i>
+                                    </div>
+                                    <div style="height: 140px;"><canvas id="websiteUsageChart"></canvas></div>
+                                </div>
+                            </div>
+                            <!-- Widget 3: AI Mix -->
+                            <div class="col-lg-6">
+                                <div class="bg-white p-3 p-xl-4 rounded-4 border border-light transition-hover h-100 shadow-card">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="bg-warning-subtle rounded-circle" style="width: 8px; height: 8px;"></div>
+                                            <span class="text-muted fw-900" style="font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;">AI Intelligence Mix</span>
+                                            <div class="widget-info">
+                                                <span class="widget-info-btn">i</span>
+                                                <div class="widget-info-tip">🤖 <strong>AI Intelligence Mix</strong><br>Compares hours spent on AI tools (ChatGPT, Claude, Gemini, GitHub Copilot) vs. all other sites. Sourced from <code>is_ai_tool</code> sessions in your extension data.</div>
+                                            </div>
+                                        </div>
+                                        <i class="bi bi-robot text-warning small opacity-50"></i>
+                                    </div>
+                                    <div class="d-flex align-items-center justify-content-center h-100 py-2">
+                                        <div style="height: 110px; width: 110px;"><canvas id="aiUsageChart"></canvas></div>
+                                        <div class="ms-4">
+                                            <div class="fw-900 text-dark h2 mb-0" style="letter-spacing: -0.05em;">{{ $aiUsage['ai'] }}h</div>
+                                            <div class="text-primary fw-900" style="font-size: 9px; letter-spacing: 0.05em;">AI POWERED HOURS</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Widget 4: Engagement -->
+                            <div class="col-lg-6">
+                                <div class="bg-white p-3 p-xl-4 rounded-4 shadow-card border-start" style="border-left: 5px solid #4f46e5 !important; border-top: 1px solid rgba(0,0,0,0.05); border-right: 1px solid rgba(0,0,0,0.05); border-bottom: 1px solid rgba(0,0,0,0.05);">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div class="bg-indigo-subtle rounded-circle" style="width: 8px; height: 8px;"></div>
+                                            <span class="text-muted fw-900" style="font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase;">System Engagement</span>
+                                            <div class="widget-info">
+                                                <span class="widget-info-btn">i</span>
+                                                <div class="widget-info-tip">👆 <strong>System Engagement (Today)</strong><br>Total clicks and tab switches recorded by the extension today via <code>interaction_count</code>. Intensity % = interactions ÷ 1000 × 100. Higher = more active session.</div>
+                                            </div>
+                                        </div>
+                                        <i class="bi bi-fingerprint text-primary small opacity-50"></i>
+                                    </div>
+                                    <div class="py-2">
+                                        <div class="row align-items-center">
+                                            <div class="col-6">
+                                                <div class="h1 fw-900 mb-0 text-primary" style="letter-spacing: -0.05em;">{{ $totalInteractions }}</div>
+                                                <div class="text-muted fw-800" style="font-size: 10px;">Interactions Today</div>
+                                            </div>
+                                            <div class="col-6 text-end">
+                                                <div class="small fw-900 mb-2 text-dark" style="font-size: 10px;">{{ round(min(($totalInteractions/1000)*100, 100)) }}% INTENSITY</div>
+                                                <div class="progress" style="height: 8px; background: #f1f5f9; border-radius: 10px;">
+                                                    <div class="progress-bar bg-primary shadow-sm" style="width: {{ min(($totalInteractions/1000)*100, 100) }}%; border-radius: 10px;"></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                                @endforeach
                             </div>
                         </div>
-                    </div>
-                    <div class="col-lg-5 d-none d-lg-block text-end pe-5">
-                        <img src="{{ asset('images/dashboard/hero.png') }}" class="img-fluid floating-hero-img" style="max-height: 320px;" alt="Learning Illustration">
                     </div>
                 </div>
             </div>
@@ -352,7 +437,8 @@
     </div>
     @endif
 
-    <!-- Middle Grid: Career Readiness & Trending -->
+
+    <!-- Career Readiness & Trending Row -->
     <div class="row mb-5" style="background: #f8fafc; padding: 20px; border-radius: 20px;">
         <div class="col-lg-6">
             <div class="card-focus shadow-sm h-100 animate-slide-up delay-5 border-0" style="background: linear-gradient(135deg, #ffffff 0%, #f0f9ff 100%);">
@@ -627,6 +713,18 @@
         width: 52px; height: 52px; border-radius: 16px; display: flex;
         align-items: center; justify-content: center; font-size: 24px;
     }
+    .pulsing-dot-success {
+        width: 8px; height: 8px; background: #10b981; border-radius: 50%; display: inline-block;
+        box-shadow: 0 0 0 rgba(16, 185, 129, 0.4); animation: pulse-green 2s infinite;
+    }
+    @keyframes pulse-green {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+    }
+    .bg-light-soft { background: #f8fafc; }
+    .bg-white-soft { background: #ffffff; }
+    .transition-hover:hover { transform: translateY(-3px); transition: all 0.3s ease; }
     .bg-sky { background: #f0f9ff; color: #0369a1; }
     .bg-blue { background: #eff6ff; color: #2563eb; }
     .bg-teal { background: #f0fdfa; color: #0d9488; }
@@ -720,39 +818,148 @@
     .swiper-slide {
         height: auto;
     }
-    .card-focus, .short-card-focus, .course-card-focus {
-        height: 100%;
+    /* Browser Intelligence Styles */
+    .domain-stat-item { padding: 5px 0; }
+    .shadow-inner { box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
+    .card-focus {
+        background: #fff;
+        border: 1px solid var(--focus-border);
+        border-radius: 24px;
+        transition: 0.3s;
     }
+    .hover-lift:hover { transform: translateY(-5px); }
+    .transition-all { transition: all 0.3s ease; }
 
-    /* Trending Categories Neo */
-    .cat-card-neo {
-        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    /* Widget Info Tooltip */
+    .widget-info { position: relative; display: inline-flex; align-items: center; }
+    .widget-info-btn {
+        width: 14px; height: 14px; border-radius: 50%;
+        background: #f1f5f9; border: 1px solid #e2e8f0;
+        font-size: 8px; font-weight: 900; color: #94a3b8;
+        display: inline-flex; align-items: center; justify-content: center;
+        cursor: default; flex-shrink: 0; transition: all 0.2s;
     }
-    .cat-card-neo:hover {
-        transform: translateY(-8px) scale(1.02);
-        border-color: var(--focus-primary) !important;
-        box-shadow: 0 15px 30px rgba(79, 70, 229, 0.1);
+    .widget-info-btn:hover { background: #4f46e5; color: #fff; border-color: #4f46e5; }
+    .widget-info-tip {
+        display: none; position: absolute; bottom: calc(100% + 8px); left: 50%;
+        transform: translateX(-50%);
+        background: #0f172a; color: #e2e8f0;
+        font-size: 10px; font-weight: 600; line-height: 1.5;
+        padding: 8px 12px; border-radius: 8px; width: 220px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.18); z-index: 99; text-align: left;
+        pointer-events: none;
     }
-    .cat-card-neo:hover .cat-icon-box {
-        transform: rotate(10deg);
+    .widget-info-tip::after {
+        content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+        border: 5px solid transparent; border-top-color: #0f172a;
     }
-    
-    .tool-logo-container {
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .card-focus:hover .tool-logo-container {
-        transform: scale(1.1) rotate(5deg);
-        background: #ffffff !important;
-        border-color: var(--focus-primary) !important;
-        box-shadow: 0 10px 20px rgba(79, 70, 229, 0.08);
-    }
+    .widget-info:hover .widget-info-tip { display: block; }
 </style>
 @endsection
 
 @section('scripts')
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Global Chart Defaults
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.color = '#64748b';
+
+        // 1. Productivity Trends (7D) — Sharp Filled Gradient
+        const prodCtx = document.getElementById('productivityTrendChart');
+        if (prodCtx) {
+            const prodGradient = prodCtx.getContext('2d').createLinearGradient(0, 0, 0, 140);
+            prodGradient.addColorStop(0, 'rgba(16, 185, 129, 0.35)');
+            prodGradient.addColorStop(1, 'rgba(16, 185, 129, 0.0)');
+            new Chart(prodCtx, {
+                type: 'line',
+                data: {
+                    labels: @json(collect($scoreTrends)->pluck('day')),
+                    datasets: [{
+                        label: 'Productivity',
+                        data: @json(collect($scoreTrends)->pluck('productivity')),
+                        borderColor: '#10b981',
+                        backgroundColor: prodGradient,
+                        fill: true,
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#10b981',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: true, mode: 'index', intersect: false } },
+                    scales: { 
+                        y: { display: false, min: 0, max: 110 }, 
+                        x: { display: false } 
+                    }
+                }
+            });
+        }
+
+        // 2. Website Usage — Bold Filled Bars
+        const webCtx = document.getElementById('websiteUsageChart');
+        if (webCtx) {
+            new Chart(webCtx, {
+                type: 'bar',
+                indexAxis: 'y',
+                data: {
+                    labels: @json(collect($topDomains)->map(fn($d) => Str::limit($d->domain, 14))),
+                    datasets: [{
+                        data: @json(collect($topDomains)->map(fn($d) => round($d->total_ms / 60000))),
+                        backgroundColor: ['#4f46e5', '#6366f1', '#8b5cf6', '#ec4899', '#f59e0b'],
+                        borderRadius: 6,
+                        barThickness: 14
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => ` ${ctx.raw} min` } }
+                    },
+                    scales: { 
+                        x: { display: false, beginAtZero: true }, 
+                        y: { 
+                            grid: { display: false },
+                            ticks: { font: { size: 10, weight: '700' }, color: '#334155' }
+                        } 
+                    }
+                }
+            });
+        }
+
+        // 3. AI Usage — Sharp Bold Donut
+        const aiUsageCtx = document.getElementById('aiUsageChart');
+        if (aiUsageCtx) {
+            new Chart(aiUsageCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['AI Tools', 'Other'],
+                    datasets: [{
+                        data: [@json($aiUsage['ai']), @json($aiUsage['non_ai'])],
+                        backgroundColor: ['#4f46e5', '#e2e8f0'],
+                        borderColor: ['#4f46e5', '#e2e8f0'],
+                        borderWidth: 2,
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    cutout: '70%',
+                    plugins: { 
+                        legend: { display: false },
+                        tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}h` } }
+                    }
+                }
+            });
+        }
+
         // Tracks Swiper
         new Swiper('.tracksSwiper', {
             slidesPerView: 1,

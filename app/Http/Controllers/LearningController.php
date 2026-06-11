@@ -12,7 +12,7 @@ class LearningController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth')->except(['watch']);
+        $this->middleware('auth')->except(['watch', 'explore']);
     }
 
     /**
@@ -149,18 +149,23 @@ class LearningController extends Controller
         $user = Auth::user();
         $type = $request->get('type', 'video'); // default to videos
         
-         // 1. Get Recommendations (Most watched globally among user's most used tools)
-        $sessionStats = \App\Models\ExtensionSession::where('user_id', $user->id)
-            ->selectRaw('platform_domain as domain, sum(active_ms) as total_active_ms')
-            ->groupBy('platform_domain')
-            ->get()
-            ->keyBy(fn($item) => strtolower(trim($item->domain)));
+        // 1. Get Recommendations (Most watched globally among user's most used tools)
+        $sessionStats = collect();
+        $browsingStats = collect();
 
-        $browsingStats = \App\Models\BrowsingHistory::where('user_id', $user->id)
-            ->selectRaw('domain, sum(duration) as total_duration')
-            ->groupBy('domain')
-            ->get()
-            ->keyBy(fn($item) => strtolower(trim($item->domain)));
+        if ($user) {
+            $sessionStats = \App\Models\ExtensionSession::where('user_id', $user->id)
+                ->selectRaw('platform_domain as domain, sum(active_ms) as total_active_ms')
+                ->groupBy('platform_domain')
+                ->get()
+                ->keyBy(fn($item) => strtolower(trim($item->domain)));
+
+            $browsingStats = \App\Models\BrowsingHistory::where('user_id', $user->id)
+                ->selectRaw('domain, sum(duration) as total_duration')
+                ->groupBy('domain')
+                ->get()
+                ->keyBy(fn($item) => strtolower(trim($item->domain)));
+        }
 
         $allTools = \App\Models\Tool::where('status', 'active')->get();
         $toolDomainMap = [
@@ -206,7 +211,7 @@ class LearningController extends Controller
 
         $recommendedItems = collect();
 
-        if (!empty($usedToolNames)) {
+        if ($user && !empty($usedToolNames)) {
             // Find active videos connected to the user's top used tools that they haven't watched yet
             $matchedContents = Content::active()
                 ->where('type', 'video')
@@ -228,10 +233,13 @@ class LearningController extends Controller
 
         // Fallback/Padded items to guarantee 20 recommendations: match declared onboarding interests sorted by popularity
         if ($recommendedItems->count() < 20) {
-            $interests = (array) ($user->interests ?? []);
+            $interests = $user ? (array) ($user->interests ?? []) : [];
             $fallbackQuery = Content::active()
-                ->where('type', 'video')
-                ->whereNotIn('id', $user->videoProgress()->pluck('content_id'));
+                ->where('type', 'video');
+            
+            if ($user) {
+                $fallbackQuery->whereNotIn('id', $user->videoProgress()->pluck('content_id'));
+            }
 
             if (!empty($interests)) {
                 $fallbackQuery->where(function($q) use ($interests) {
@@ -340,6 +348,10 @@ class LearningController extends Controller
 
         $categories = Content::active()->distinct()->pluck('category')->sort()->values();
         $connectedTools = \App\Models\Tool::where('status', 'active')->orderBy('name')->get();
+
+        if (\Illuminate\Support\Facades\Route::currentRouteName() === 'videos.public') {
+            return view('videos', compact('items', 'categories', 'type', 'recommendedItems', 'connectedTools'));
+        }
 
         return view('learn.explore', compact('items', 'categories', 'type', 'recommendedItems', 'connectedTools'));
     }

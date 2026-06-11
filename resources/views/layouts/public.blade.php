@@ -10,22 +10,21 @@
   @yield('styles')
 </head>
 <body>
-  <header class="site-nav">
+  <header class="site-nav glass">
     <div class="container nav-inner">
       <a class="brand" href="/" aria-label="Dallel AI home">
-        <span class="brand-mark">DA</span>
-        <span class="brand-copy"><strong>Dallel AI</strong><small>by Creative AI</small></span>
+        <span class="brand-mark shadow-sm">DA</span>
+        <span class="brand-copy"><strong style="font-weight: 900; letter-spacing: -0.03em;">Dallel AI</strong><small class="fw-800 text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.05em; opacity: 0.8;">The Learning Layer</small></span>
       </a>
       <nav class="nav-links" id="siteNavLinks" aria-label="Public pages">
-        <a href="{{ url('how-it-works') }}">How It Works</a>
-        <a href="{{ url('videos') }}">Lessons</a>
-        <a href="{{ url('enterprise') }}">Enterprise</a>
-        <a href="{{ url('success-stories') }}">Success Stories</a>
-        <a href="{{ url('pricing') }}">Pricing</a>
+        <a href="{{ url('how-it-works') }}" class="fw-700">How It Works</a>
+        <a href="{{ url('videos') }}" class="fw-700">Lessons</a>
+        <a href="{{ url('enterprise') }}" class="fw-700">Contact Us</a>
+        <a href="{{ url('pricing') }}" class="fw-700">Pricing</a>
       </nav>
       <div class="nav-actions">
-        <a class="btn secondary" href="{{ route('login') }}">Login</a>
-        <a class="btn primary" href="{{ route('register') }}">Start Free</a>
+        <a class="btn secondary px-4" href="{{ route('login') }}" style="height: 42px; font-size: 0.85rem;">Login</a>
+        <a class="btn primary px-4" href="{{ route('register') }}" style="height: 42px; font-size: 0.85rem;">Get Started</a>
       </div>
       <button class="menu-toggle" id="siteMenuToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="siteNavLinks">
         <span></span><span></span><span></span>
@@ -41,11 +40,12 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <a class="brand" href="/"><span class="brand-mark">DA</span><span class="brand-copy"><strong>Dallel AI</strong><small>by Creative AI</small></span></a>
+          <a class="brand" href="/"><span class="brand-mark shadow-sm">DA</span><span class="brand-copy"><strong style="color: white; font-weight: 900; letter-spacing: -0.03em;">Dallel AI</strong><small style="color: #64748b; font-weight: 800; text-transform: uppercase; font-size: 0.6rem;">The Learning Layer</small></span></a>
           <p>AI lessons matched to daily tasks, repeated work, and real workplace goals.</p>
           <form class="newsletter">
             <input aria-label="Email for AI tips" placeholder="Get AI workflow tips">
             <button class="btn primary" type="submit">Join</button>
+            <div class="form-message" id="newsletterMsg">Thanks! You're subscribed.</div>
           </form>
         </div>
         <div>
@@ -87,7 +87,6 @@
   </footer>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="{{ asset('site.js') }}"></script>
   <script>
     // Initialize standard nav logic since we are not using SPA for this page
     const toggle = document.getElementById("siteMenuToggle");

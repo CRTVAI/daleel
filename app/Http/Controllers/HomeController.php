@@ -181,6 +181,107 @@ class HomeController extends Controller
             'active_hours_today' => round($todayActiveMs / (1000 * 60 * 60), 1)
         ];
 
+        // NEW: Advanced Extension Intelligence for "Pro" Dashboard
+        $topDomains = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->where('started_at', '>=', now()->subDays(7))
+            ->selectRaw('platform_domain as domain, sum(active_ms) as total_ms, platform_category as category, MAX(is_ai_tool) as is_ai')
+            ->groupBy('platform_domain', 'platform_category')
+            ->orderByDesc('total_ms')
+            ->limit(5)
+            ->get();
+
+        $weeklyExtensionTrend = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $ms = \App\Models\ExtensionSession::where('user_id', $user->id)
+                ->whereDate('started_at', $date)
+                ->sum('active_ms');
+            
+            $weeklyExtensionTrend[] = [
+                'day' => now()->subDays($i)->format('D'),
+                'hours' => round($ms / (1000 * 60 * 60), 2)
+            ];
+        }
+
+        // 1. Hourly Activity (Latest Active Day Fallback)
+        $latestSession = \App\Models\ExtensionSession::where('user_id', $user->id)->latest('started_at')->first();
+        $activeDay = $latestSession ? \Carbon\Carbon::parse($latestSession->started_at)->startOfDay() : today();
+
+        $hourlyActivity = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->whereDate('started_at', $activeDay)
+            ->selectRaw('HOUR(started_at) as hour, sum(active_ms) as active, sum(idle_ms) as idle')
+            ->groupBy('hour')
+            ->get()
+            ->keyBy('hour');
+            
+        $todayHourlyData = [];
+        for ($h = 0; $h < 24; $h++) {
+            $todayHourlyData[] = [
+                'hour' => $h,
+                'active' => round(($hourlyActivity[$h]->active ?? 0) / (1000 * 60), 1),
+                'idle' => round(($hourlyActivity[$h]->idle ?? 0) / (1000 * 60), 1)
+            ];
+        }
+
+        // 2. 7-Day Productivity/Focus Trends (with raw session fallback)
+        $dailyRollups = \App\Models\ExtensionDailyRollup::where('user_id', $user->id)
+            ->where('date', '>=', now()->subDays(7))
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        // Also aggregate raw snapshot scores per day as fallback
+        $rawDailyScores = \App\Models\ExtensionMetricsSnapshot::where('user_id', $user->id)
+            ->where('captured_at', '>=', now()->subDays(7))
+            ->selectRaw('DATE(captured_at) as snap_date, AVG(productivity_score) as avg_prod, AVG(focus_score) as avg_focus')
+            ->groupBy('snap_date')
+            ->get()
+            ->keyBy('snap_date');
+
+        $scoreTrends = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = now()->subDays($i)->format('Y-m-d');
+            $rollup = $dailyRollups->get($date);
+            $raw    = $rawDailyScores->get($date);
+
+            $scoreTrends[] = [
+                'day'        => now()->subDays($i)->format('D'),
+                // Prefer rollup, fallback to raw snapshot average, else 0
+                'productivity' => $rollup?->productivity_score_avg
+                                ?? ($raw ? round($raw->avg_prod) : 0),
+                'focus'      => $rollup?->focus_score_avg
+                                ?? ($raw ? round($raw->avg_focus) : 0),
+            ];
+        }
+
+        // 3. AI Usage Breakdown (Last 7 Days)
+        $aiStats = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->where('started_at', '>=', now()->subDays(7))
+            ->selectRaw('is_ai_tool, sum(active_ms) as total_ms')
+            ->groupBy('is_ai_tool')
+            ->get();
+        
+        $aiUsage = [
+            'ai' => round(($aiStats->where('is_ai_tool', true)->first()->total_ms ?? 0) / (1000 * 60 * 60), 1),
+            'non_ai' => round(($aiStats->where('is_ai_tool', false)->first()->total_ms ?? 0) / (1000 * 60 * 60), 1)
+        ];
+
+        // 4. System Engagement: clicks + tab switches on the active day (most accurate measure)
+        $engagementRow = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->whereDate('started_at', $activeDay)
+            ->selectRaw('SUM(click_count) as total_clicks, SUM(tab_switch_count) as total_switches, SUM(interaction_count) as total_interactions')
+            ->first();
+
+        $totalInteractions = ($engagementRow->total_clicks ?? 0)
+                           + ($engagementRow->total_switches ?? 0)
+                           + ($engagementRow->total_interactions ?? 0);
+
+        // 5. User Stats Summary
+        $extensionStats = [
+            'focus_score' => end($scoreTrends)['focus'] ?? 0,
+            'productivity_score' => end($scoreTrends)['productivity'] ?? 0,
+        ];
+
         // Learning Activity Chart Data (last 7 days)
         $dailyActivity = [];
         for ($i = 6; $i >= 0; $i--) {
@@ -283,7 +384,13 @@ class HomeController extends Controller
             'connectedTools',
             'behaviorRecommended',
             'hasBrowsingHistory',
-            'hasTrackedUsage'
+            'hasTrackedUsage',
+            'topDomains',
+            'weeklyExtensionTrend',
+            'todayHourlyData',
+            'scoreTrends',
+            'aiUsage',
+            'totalInteractions'
         ))->with([
             'learningGoals' => \App\Models\LearningGoal::orderBy('title')->get(),
             'experienceLevels' => \App\Models\ExperienceLevel::orderBy('title')->get(),

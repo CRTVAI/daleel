@@ -5,7 +5,7 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome', ['page' => 'home']);
+    return view('home');
 });
 
 Route::get('/enterprise', function () {
@@ -14,18 +14,20 @@ Route::get('/enterprise', function () {
 
 Route::get('/{page}', function ($page) {
     $validPages = [
-        'how-it-works', 'videos', 'enterprise', 'success-stories', 'pricing',
+        'how-it-works', 'enterprise', 'success-stories', 'pricing',
         'about', 'contact', 'blog', 'tools-directory', 'help-center',
         'terms', 'privacy', 'cookies', 'learning-paths', 'chrome-extension',
         'lesson'
     ];
     
     if (in_array($page, $validPages)) {
-        return view('welcome', ['page' => $page]);
+        return view($page);
     }
     
     abort(404);
-})->where('page', '^(?!admin|user|dashboard|login|register|logout|forgot-password|reset-password|verify-email|profile|integrations|bookmarks|progress|activity-history|ai-mentor|learn|clear-cache|team|extension-setup|extension-data|api).*$');
+})->where('page', '^(?!admin|user|dashboard|login|register|logout|forgot-password|reset-password|verify-email|profile|integrations|bookmarks|progress|activity-history|ai-mentor|learn|clear-cache|team|extension-setup|extension-data|api|videos).*$');
+
+Route::get('/videos', [App\Http\Controllers\LearningController::class, 'explore'])->name('videos.public');
 
 Route::get('/clear-cache', function () {
     Artisan::call('optimize:clear');
