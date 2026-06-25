@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dallel AI Admin</title>
+    <title>Daleel AI Admin</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -90,7 +90,7 @@
                     <div class="bg-primary rounded-3 p-2 shadow-sm" style="background: var(--accent-gradient) !important;">
                         <i class="bi bi-water text-white fs-5"></i>
                     </div>
-                    <span class="fs-5 fw-bold letter-spacing-n1">Dallel AI</span>
+                    <span class="fs-5 fw-bold letter-spacing-n1">Daleel AI</span>
                 </div>
             </div>
             <nav class="sidebar-nav">
@@ -99,6 +99,9 @@
                 </a>
                 <a href="{{ route('activity.history') }}" class="nav-link {{ request()->routeIs('activity.history') ? 'active' : '' }}">
                     <i class="bi bi-clock-history"></i> Activity History
+                </a>
+                <a href="{{ route('roadmap') }}" class="nav-link {{ request()->routeIs('roadmap') ? 'active' : '' }}">
+                    <i class="bi bi-map"></i> My Roadmaps
                 </a>
                 @if(Auth::user()->is_admin)
                 <a href="#" class="nav-link">

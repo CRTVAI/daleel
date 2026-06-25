@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Dallel AI | Chrome Extension')
+@section('title', 'Daleel AI | Chrome Extension')
 
 @section('content')
 <section class="page-hero">

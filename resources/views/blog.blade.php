@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Dallel AI | Resources')
+@section('title', 'Daleel AI | Resources')
 
 @section('content')
 <section class="page-hero">

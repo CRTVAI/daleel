@@ -19,6 +19,10 @@ Route::post('/login', [ApiAuthController::class, 'login']);
 Route::post('/extension/link', [\App\Http\Controllers\Api\Extension\LinkController::class, 'link']);
 
 // External Content Ingestion (Public API)
+Route::post('/external/categories', [\App\Http\Controllers\Api\ExternalCategoryController::class, 'store']);
+Route::get('/external/categories', [\App\Http\Controllers\Api\ExternalCategoryController::class, 'index']);
+Route::get('/external/tools', [\App\Http\Controllers\Api\ExternalToolController::class, 'index']);
+Route::post('/external/tools', [\App\Http\Controllers\Api\ExternalToolController::class, 'store']);
 Route::post('/external/content', [\App\Http\Controllers\Api\ExternalContentController::class, 'store']);
 
 // Protected routes

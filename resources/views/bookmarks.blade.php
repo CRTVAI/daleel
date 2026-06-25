@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'My Bookmarks — Dallel AI')
+@section('title', 'My Bookmarks — Daleel AI')
 
 @section('content')
 <div class="bookmarks-container">

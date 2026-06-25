@@ -26,6 +26,9 @@ class Content extends Model
         'section_part_label',
         'sort_order',
         'connected_tools',
+        'category_id',
+        'reference_url',
+        'video_duration',
     ];
 
     protected $casts = [
@@ -69,7 +72,8 @@ class Content extends Model
 
         // 2. If it's a YouTube video, get the HQ thumbnail
         if ($this->youtube_id) {
-            return "https://img.youtube.com/vi/{$this->youtube_id}/maxresdefault.jpg";
+            // hqdefault is more reliable than maxresdefault which may not exist for all videos
+            return "https://img.youtube.com/vi/{$this->youtube_id}/hqdefault.jpg";
         }
 
         // 3. Last resort fallback
@@ -114,6 +118,11 @@ class Content extends Model
         return $this->belongsTo(Course::class);
     }
 
+    public function category_rel()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
     // ── Scopes ─────────────────────────────────────────────────
 
     protected static function booted()
@@ -122,7 +131,7 @@ class Content extends Model
             if (!$content->slug) {
                 $content->slug = \Illuminate\Support\Str::slug($content->title);
             }
-            if (!$content->youtube_id) {
+            if (!$content->youtube_id && $content->video_url && (str_contains($content->video_url, 'youtube') || str_contains($content->video_url, 'youtu.be'))) {
                 $content->youtube_id = $content->extractYoutubeId($content->video_url);
             }
         });
@@ -131,8 +140,10 @@ class Content extends Model
             if ($content->isDirty('title') && !$content->isDirty('slug')) {
                 $content->slug = \Illuminate\Support\Str::slug($content->title);
             }
-            if ($content->isDirty('video_url')) {
+            if ($content->isDirty('video_url') && (str_contains($content->video_url, 'youtube') || str_contains($content->video_url, 'youtu.be'))) {
                 $content->youtube_id = $content->extractYoutubeId($content->video_url);
+            } else if ($content->isDirty('video_url')) {
+                $content->youtube_id = null; // Reset if not a YouTube URL
             }
         });
     }

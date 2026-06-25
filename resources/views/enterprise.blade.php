@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Contact Us | Dallel AI')
+@section('title', 'Contact Us | Daleel AI')
 
 @section('styles')
 <style>
@@ -318,6 +318,97 @@
     font-weight: 500;
 }
 
+.alert-error-custom {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #991B1B;
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    font-weight: 500;
+}
+
+.success-popup-backdrop {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.42);
+    backdrop-filter: blur(6px);
+    z-index: 1080;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.24s ease, visibility 0.24s ease;
+}
+
+.success-popup-backdrop.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.success-popup {
+    width: min(440px, 100%);
+    background: #FFFFFF;
+    border-radius: 24px;
+    padding: 34px 30px 30px;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.24);
+    border: 1px solid rgba(255, 255, 255, 0.7);
+    transform: translateY(16px) scale(0.96);
+    transition: transform 0.24s ease;
+}
+
+.success-popup-backdrop.show .success-popup {
+    transform: translateY(0) scale(1);
+}
+
+.success-popup-icon {
+    width: 70px;
+    height: 70px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    color: #047857;
+    background: linear-gradient(135deg, #D1FAE5, #ECFDF5);
+    box-shadow: 0 16px 32px rgba(16, 185, 129, 0.18);
+    margin-bottom: 20px;
+}
+
+.success-popup h3 {
+    color: var(--text);
+    font-size: 24px;
+    font-weight: 850;
+    margin-bottom: 10px;
+}
+
+.success-popup p {
+    color: var(--text-secondary);
+    font-size: 15px;
+    line-height: 1.65;
+    margin-bottom: 24px;
+}
+
+.success-popup-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 46px;
+    padding: 12px 24px;
+    border: 0;
+    border-radius: var(--radius-md);
+    background: linear-gradient(135deg, var(--primary), #8B5CF6);
+    color: #FFFFFF;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 12px 24px rgba(99, 102, 241, 0.24);
+}
+
+.success-popup-close:hover {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED);
+}
+
 /* ==================== ANIMATIONS ==================== */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
@@ -348,6 +439,11 @@
     .contact-form-card {
         padding: 24px 20px;
     }
+
+    .success-popup {
+        padding: 30px 22px 24px;
+        border-radius: 20px;
+    }
 }
 </style>
 @endsection
@@ -368,38 +464,49 @@
                 <!-- Contact Form -->
                 <div class="col-lg-7">
                     <div class="contact-form-card">
-                        <form id="enterpriseContactForm" class="contact-form">
+                        <form id="enterpriseContactForm" class="contact-form" method="POST" action="{{ route('enterprise.contact.send') }}">
+                            @csrf
                             <h2 class="mb-2">Send us a message</h2>
                             <p class="text-muted mb-4" style="font-size: 15px;">Fill out the form below and we'll get back to you within 24 hours.</p>
+
+                            @if ($errors->any())
+                                <div class="alert-error-custom mb-4">
+                                    Please check the form and try again.
+                                </div>
+                            @endif
                             
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <div class="field mb-3">
                                         <label for="name" class="form-label">Full Name</label>
-                                        <input type="text" id="name" class="form-control" placeholder="John Doe" required>
+                                        <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="John Doe" required>
+                                        @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="field mb-3">
                                         <label for="email" class="form-label">Work Email</label>
-                                        <input type="email" id="email" class="form-control" placeholder="john@company.com" required>
+                                        <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="john@company.com" required>
+                                        @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="field mb-3">
                                         <label for="subject" class="form-label">Subject</label>
-                                        <select id="subject" class="form-select">
-                                            <option value="enterprise">Enterprise Solutions</option>
-                                            <option value="support">Technical Support</option>
-                                            <option value="partnership">Partnership Inquiry</option>
-                                            <option value="other">Other</option>
+                                        <select id="subject" name="subject" class="form-select @error('subject') is-invalid @enderror" required>
+                                            <option value="enterprise" @selected(old('subject') === 'enterprise')>Enterprise Solutions</option>
+                                            <option value="support" @selected(old('subject') === 'support')>Technical Support</option>
+                                            <option value="partnership" @selected(old('subject') === 'partnership')>Partnership Inquiry</option>
+                                            <option value="other" @selected(old('subject') === 'other')>Other</option>
                                         </select>
+                                        @error('subject')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </div>
                                 </div>
                                 <div class="col-md-12">
                                     <div class="field mb-4">
                                         <label for="message" class="form-label">Message</label>
-                                        <textarea id="message" class="form-control" rows="5" placeholder="Tell us how we can help..." required></textarea>
+                                        <textarea id="message" name="message" class="form-control @error('message') is-invalid @enderror" rows="5" placeholder="Tell us how we can help..." required>{{ old('message') }}</textarea>
+                                        @error('message')<div class="invalid-feedback">{{ $message }}</div>@enderror
                                     </div>
                                 </div>
                             </div>
@@ -410,13 +517,6 @@
                                 </svg>
                                 Send Message
                             </button>
-                            <div id="formSuccess" class="alert-success-custom mt-4 d-none">
-                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="vertical-align: middle; margin-right: 8px;">
-                                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                                </svg>
-                                Thank you! Your message has been sent. We'll get back to you shortly.
-                            </div>
                         </form>
                     </div>
                 </div>
@@ -436,7 +536,7 @@
                                 </div>
                                 <div>
                                     <h5 class="fw-700 mb-1" style="font-size: 16px;">Email Us</h5>
-                                    <p class="text-muted mb-0" style="font-size: 15px;">hello@dallel.ai</p>
+                                    <p class="text-muted mb-0" style="font-size: 15px;">hello@Daleel.ai</p>
                                     <p class="text-muted" style="font-size: 13px;">Response time: < 24 hours</p>
                                 </div>
                             </div>
@@ -490,6 +590,20 @@
             </div>
         </div>
     </section>
+
+    <div id="successPopup" class="success-popup-backdrop {{ session('enterprise_contact_success') ? 'show' : '' }}" role="dialog" aria-modal="true" aria-labelledby="successPopupTitle">
+        <div class="success-popup">
+            <div class="success-popup-icon" aria-hidden="true">
+                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <h3 id="successPopupTitle">Message Sent Successfully</h3>
+            <p>Thank you for reaching out. Your email has been sent to our team, and we will get back to you shortly.</p>
+            <button type="button" class="success-popup-close" id="successPopupClose">Great, thanks</button>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -497,45 +611,44 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('enterpriseContactForm');
+    const popup = document.getElementById('successPopup');
+    const popupClose = document.getElementById('successPopupClose');
+
+    function closeSuccessPopup() {
+        if (popup) {
+            popup.classList.remove('show');
+        }
+    }
     
     if (form) {
         form.addEventListener('submit', function(e) {
-            e.preventDefault();
             const btn = form.querySelector('button[type="submit"]');
-            const success = document.getElementById('formSuccess');
             
-            // Disable button and show loading state
             btn.disabled = true;
-            const originalHTML = btn.innerHTML;
             btn.innerHTML = `
                 <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 18px; height: 18px;"></span>
                 <span class="ms-2">Sending...</span>
             `;
-            
-            // Simulate API call
-            setTimeout(() => {
-                // Show success message
-                success.classList.remove('d-none');
-                form.reset();
-                
-                // Reset button
-                btn.innerHTML = `
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                        <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                    </svg>
-                    Message Sent!
-                `;
-                
-                // Re-enable button after a delay
-                setTimeout(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = originalHTML;
-                    success.classList.add('d-none');
-                }, 4000);
-            }, 1500);
         });
     }
+
+    if (popupClose) {
+        popupClose.addEventListener('click', closeSuccessPopup);
+    }
+
+    if (popup) {
+        popup.addEventListener('click', function(e) {
+            if (e.target === popup) {
+                closeSuccessPopup();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeSuccessPopup();
+        }
+    });
 });
 </script>
 @endsection

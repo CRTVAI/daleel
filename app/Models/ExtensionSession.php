@@ -46,8 +46,8 @@ class ExtensionSession extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function extensionDevice()
+    public function device()
     {
-        return $this->belongsTo(ExtensionDevice::class);
+        return $this->belongsTo(ExtensionDevice::class, 'extension_device_id');
     }
 }

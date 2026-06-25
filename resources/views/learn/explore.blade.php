@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Learning Hub — Explore — Dallel AI')
+@section('title', 'Library — Explore — Daleel AI')
 
 @section('styles')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
@@ -426,16 +426,16 @@
             <p class="opacity-75 fs-6 fw-600">Access our premium catalog of video tutorials and complete masterclasses.</p>
         </div>
 
-        <form method="GET" action="{{ route('learn.explore') }}" class="search-container-premium">
+        <form method="GET" action="{{ route('search.advanced') }}" class="search-container-premium">
             <input type="hidden" name="type" value="{{ $type }}">
-            <input type="hidden" name="category" value="{{ request('category') }}">
+            <input type="hidden" name="category_id" value="{{ request('category_id') }}">
             
             <i class="bi bi-search search-icon-premium"></i>
             <input type="text" name="search" value="{{ request('search') }}" 
                    class="search-input-premium" placeholder="Search by title, category, tag, or connected browser tool...">
             
             @if(request('search'))
-                <a href="{{ route('learn.explore', ['type' => $type, 'category' => request('category')]) }}" 
+                <a href="{{ route('learn.explore', ['type' => $type, 'category_id' => request('category_id')]) }}" 
                    class="position-absolute end-0 top-50 translate-middle-y me-3 text-muted">
                     <i class="bi bi-x-circle-fill"></i>
                 </a>
@@ -489,10 +489,10 @@
     {{-- Category Pills --}}
     <div class="topic-slider animate-slide-up delay-1">
         <a href="{{ route('learn.explore', ['type' => $type, 'search' => request('search')]) }}" 
-           class="topic-pill {{ !request('category') ? 'active' : '' }}">All Subjects</a>
+           class="topic-pill {{ !request('category_id') ? 'active' : '' }}">All Subjects</a>
         @foreach($categories as $cat)
-            <a href="{{ route('learn.explore', ['type' => $type, 'category' => $cat, 'search' => request('search')]) }}" 
-               class="topic-pill {{ request('category') == $cat ? 'active' : '' }}">{{ $cat }}</a>
+            <a href="{{ route('learn.explore', ['type' => $type, 'category_id' => $cat->id, 'search' => request('search')]) }}" 
+               class="topic-pill {{ request('category_id') == $cat->id ? 'active' : '' }}">{{ $cat->name }}</a>
         @endforeach
     </div>
 
@@ -527,7 +527,7 @@
                             <div class="premium-thumb">
                                 <img src="{{ $item->thumbnail_url }}" alt="{{ $item->title }}">
                                 <div class="premium-card-overlay">
-                                    <span class="premium-badge">{{ $item->category }}</span>
+                                    <span class="premium-badge">{{ $item->category_rel->name ?? $item->category }}</span>
                                     @if($item->connected_tools && is_array($item->connected_tools))
                                         @foreach($item->connected_tools as $tool)
                                             <span class="tool-connection-badge"><i class="bi bi-cpu"></i> {{ ucfirst($tool) }}</span>
@@ -561,8 +561,9 @@
             <h4 class="fw-800 text-dark mb-0">
                 @if(request('search'))
                     Search results for "{{ request('search') }}"
-                @elseif(request('category'))
-                    All {{ request('category') }} {{ $type === 'course' ? 'Courses' : 'Lessons' }}
+                @elseif(request('category_id'))
+                    @php $currentCat = $categories->where('id', request('category_id'))->first(); @endphp
+                    All {{ $currentCat->name ?? 'Category' }} {{ $type === 'course' ? 'Courses' : 'Lessons' }}
                 @else
                     All Available {{ $type === 'course' ? 'Courses' : 'Lessons' }}
                 @endif
@@ -583,7 +584,7 @@
                                 <div class="premium-thumb">
                                     <img src="{{ $item->thumbnail }}" alt="{{ $item->title }}">
                                     <div class="premium-card-overlay">
-                                        <span class="premium-badge">{{ $item->category }}</span>
+                                        <span class="premium-badge">{{ $item->category_rel->name ?? $item->category }}</span>
                                     </div>
                                 </div>
                                 <div class="premium-body">
@@ -607,7 +608,7 @@
                                 <div class="premium-thumb">
                                     <img src="{{ $item->thumbnail_url }}" alt="{{ $item->title }}">
                                     <div class="premium-card-overlay">
-                                        <span class="premium-badge">{{ $item->category }}</span>
+                                        <span class="premium-badge">{{ $item->category_rel->name ?? $item->category }}</span>
                                         @if($item->connected_tools && is_array($item->connected_tools))
                                             @foreach($item->connected_tools as $tool)
                                                 <span class="tool-connection-badge"><i class="bi bi-cpu"></i> {{ ucfirst($tool) }}</span>

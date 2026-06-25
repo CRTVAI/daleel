@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'AI Extension Setup — Dallel AI')
+@section('title', 'AI Extension Setup — Daleel AI')
 
 @section('styles')
 <style>
@@ -217,7 +217,7 @@
                 </div>
                 <h1 class="display-4 fw-800 mb-3" style="letter-spacing: -0.05em;">Take AI Intelligence Anywhere with Our Chrome Extension</h1>
                 <p class="fs-5 opacity-75 mb-5 fw-500" style="max-width: 600px; line-height: 1.6;">
-                    Analyze web content, extract insights, and connect your workflow directly to the Dallel AI ecosystem. Our custom-built extension brings the power of your AI Mentor to every tab you visit.
+                    Analyze web content, extract insights, and connect your workflow directly to the Daleel AI ecosystem. Our custom-built extension brings the power of your AI Mentor to every tab you visit.
                 </p>
                 <div class="d-flex flex-wrap gap-3">
                     <a href="#" class="install-btn-large">
@@ -268,7 +268,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h3 class="fw-800 text-dark mb-2" style="font-size: 1.8rem; letter-spacing:-0.03em;">Activity Data Viewer</h3>
-                <p class="text-muted fw-600 mb-0">Insights gathered securely from your Dallel AI browser extension.</p>
+                <p class="text-muted fw-600 mb-0">Insights gathered securely from your Daleel AI browser extension.</p>
             </div>
             <form method="POST" action="{{ route('extension.data.reset') }}" onsubmit="return confirm('Are you sure you want to permanently wipe all your tracked extension data? This cannot be undone.');">
                 @csrf
@@ -451,7 +451,10 @@
                             </div>
                             <div>
                                 <div class="sess-domain">{{ $dg['domain'] }}</div>
-                                <div class="sess-time">{{ $dg['count'] }} session{{ $dg['count']!==1?'s':'' }}{{ $dg['category'] ? ' · '.ucfirst($dg['category']) : '' }}{{ $dg['ai'] ? ' · AI Tool' : '' }}</div>
+                                <div class="sess-time">
+                                    {{ $dg['count'] }} session{{ $dg['count']!==1?'s':'' }}{{ $dg['category'] ? ' · '.ucfirst($dg['category']) : '' }}{{ $dg['ai'] ? ' · AI Tool' : '' }}
+                                    <span class="text-muted ms-1" style="font-size: 11px;">(Devices: {{ $dg['sessions']->pluck('device.device_name')->filter()->unique()->join(', ') ?: 'Unknown' }})</span>
+                                </div>
                             </div>
                         </div>
                         <div class="d-flex align-items-center gap-3">
@@ -477,7 +480,12 @@
                 @foreach($rollups->take(20) as $r)
                 <div class="roll-grid">
                     <div><div style="font-weight:800;font-size:.88rem;color:#111">{{ $r->date->format('M d') }}</div><div style="font-size:.72rem;color:#6b7280">{{ $r->date->format('l') }}</div></div>
-                    <div><div style="font-weight:800">{{ $ms($r->total_active_ms) }}</div><div style="font-size:.72rem;color:#6b7280">of {{ $ms($r->total_open_ms) }} open</div></div>
+                    <div>
+                        <div style="font-weight:800">{{ $ms($r->total_active_ms) }}</div>
+                        <div style="font-size:.72rem;color:#6b7280" title="Source: {{ $r->device->device_name ?? 'Individual' }}">
+                            via {{ Str::limit($r->device->device_name ?? 'Individual', 12) }}
+                        </div>
+                    </div>
                     <div style="font-weight:800">{{ $r->sessions_count }}</div>
                     <div style="display:flex;gap:.3rem;flex-wrap:wrap">
                         @if($r->focus_score_avg!==null)<span class="snap-pill" style="background:{{ $r->focus_score_avg>=70?'#f0fdf4':'#fffbeb' }};color:{{ $r->focus_score_avg>=70?'#15803d':'#b45309' }}">🎯 {{ $r->focus_score_avg }}</span>@endif
@@ -496,7 +504,12 @@
                 <div class="ev-box-head"><div><h3>📷 Metrics Snapshots</h3><p>Captured every 30 minutes while you browse.</p></div><span class="pill pill-green">{{ $snapshots->count() }} snapshots</span></div>
                 @forelse($snapshots->take(30) as $snap)
                 <div class="snap-row">
-                    <div class="snap-time"><i class="bi bi-camera me-2 text-muted"></i> {{ $snap->captured_at?->format('M d, Y · H:i') ?? '—' }} &nbsp;<span class="pill pill-gray">{{ $snap->window_minutes ?? 60 }}-min window</span></div>
+                    <div class="snap-time">
+                        <i class="bi bi-camera me-2 text-muted"></i> 
+                        {{ $snap->captured_at?->format('M d, Y · H:i') ?? '—' }} &nbsp;
+                        <span class="pill pill-gray">{{ $snap->window_minutes ?? 60 }}-min window</span>
+                        <span class="pill pill-purple" style="font-size: 10px;">{{ $snap->device->device_name ?? 'Unknown Device' }}</span>
+                    </div>
                     <div class="snap-pills">
                         @if($snap->focus_score!==null)<span class="snap-pill" style="background:{{ $snap->focus_score>=70?'#f0fdf4':'#fffbeb' }};color:{{ $snap->focus_score>=70?'#15803d':'#b45309' }}">🎯 Focus: {{ $snap->focus_score }}/100</span>@endif
                         @if($snap->productivity_score!==null)<span class="snap-pill" style="background:#f0f9ff;color:#0369a1">⚡ Productivity: {{ $snap->productivity_score }}/100</span>@endif
@@ -562,13 +575,13 @@
         <div class="row align-items-center">
             <div class="col-lg-6">
                 <h4 class="fw-800 text-dark mb-2">Your Unique Connection Key</h4>
-                <p class="text-muted small fw-600 mb-4 mb-lg-0">This key is required to authenticate your extension with your Dallel AI account. Keep it secure.</p>
+                <p class="text-muted small fw-600 mb-4 mb-lg-0">This key is required to authenticate your extension with your Daleel AI account. Keep it secure.</p>
             </div>
             <div class="col-lg-6 text-lg-end">
                 <div id="code-display-area" style="display: none;">
                     <div class="d-flex flex-column align-items-end gap-2">
                         <div class="connection-pill">
-                            <span id="key-text">Dallel AI-XXXXXX</span>
+                            <span id="key-text">Daleel AI-XXXXXX</span>
                             <button class="copy-btn" onclick="copyKey()">COPY KEY</button>
                         </div>
                         <span class="timer-badge" id="expiry-timer">Expires in 10:00</span>
@@ -776,7 +789,10 @@
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
                     <div>
                         <div style="font-weight:700;font-size:.88rem;color:#111">${s.started_at ? new Date(s.started_at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'}</div>
-                        <div style="font-size:.75rem;color:#6b7280;margin-top:.15rem">${s.ended_at ? '→ '+new Date(s.ended_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : 'In progress'}</div>
+                        <div style="font-size:.75rem;color:#6b7280;margin-top:.15rem">
+                            ${s.ended_at ? '→ '+new Date(s.ended_at).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : 'In progress'}
+                            <span class="ms-1 pill pill-gray" style="font-size: 10px; padding: 1px 6px;">${s.device ? s.device.device_name : 'No Device'}</span>
+                        </div>
                     </div>
                     <div style="display:flex;gap:.75rem;flex-wrap:wrap">
                         <span style="font-size:.8rem;font-weight:700;color:#4f46e5">⏱ ${evMs(s.active_ms)}</span>

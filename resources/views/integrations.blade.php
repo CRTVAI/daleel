@@ -32,7 +32,7 @@
                                 <i class="bi bi-puzzle-fill"></i>
                             </div>
                             <div>
-                                <h4 class="fw-800 mb-0" style="color: #000;">Dallel AI Mentor Extension</h4>
+                                <h4 class="fw-800 mb-0" style="color: #000;">Daleel AI Mentor Extension</h4>
                                 <span class="text-dark opacity-50 fw-800" style="font-size: 11px;">v1.2.0</span>
                             </div>
                         </div>
@@ -85,7 +85,7 @@
                                     <div class="d-flex justify-content-between mb-3">
                                         <div class="d-flex align-items-center gap-2">
                                             <div class="logo-mini"></div>
-                                            <span class="fw-800" style="font-size: 11px; color: #000;">Dallel AI Mentor</span>
+                                            <span class="fw-800" style="font-size: 11px; color: #000;">Daleel AI Mentor</span>
                                         </div>
                                         <i class="bi bi-three-dots text-dark" style="font-size: 11px;"></i>
                                     </div>
@@ -175,7 +175,7 @@
                 <div class="d-flex align-items-start gap-3 mb-4">
                     <i class="bi bi-check-circle-fill text-success mt-1"></i>
                     <div>
-                        <p class="small fw-800 mb-0" style="color: #000;">Dallel AI Mentor is connected</p>
+                        <p class="small fw-800 mb-0" style="color: #000;">Daleel AI Mentor is connected</p>
                         <p class="text-dark opacity-50" style="font-size: 11px;">Active: 2 mins ago</p>
                     </div>
                 </div>

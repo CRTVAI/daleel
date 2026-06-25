@@ -17,6 +17,10 @@ class LinkController extends Controller
      */
     public function link(Request $request)
     {
+        if (!$request->device_id) {
+            return response()->json(['message' => 'Extension did not provide a Device ID. Please refresh extension.'], 422);
+        }
+
         $request->validate([
             'verification_code' => 'required|string',
             'device_id' => 'required|string',
@@ -43,9 +47,7 @@ class LinkController extends Controller
                 ->first();
 
             if (!$verificationCode) {
-                throw ValidationException::withMessages([
-                    'verification_code' => ['Invalid or expired connection code.'],
-                ]);
+                return response()->json(['message' => 'Invalid or expired connection code.'], 422);
             }
 
             $user = $verificationCode->user;
@@ -64,9 +66,17 @@ class LinkController extends Controller
         );
 
         // Temporary individual verification codes are single-use.
-        // Employee connection codes stay stable until the manager regenerates them.
-        if (! $employeeUser) {
+        // Employee connection codes are also rotated after each successful link
+        // so the same code can NEVER be reused to link a second unauthorised device.
+        if (!$employeeUser) {
             $verificationCode->delete();
+        } else {
+            // Rotate the employee's connection code so it can't be reused
+            $newCode = $this->generateEmployeeCode();
+            $user->update([
+                'connection_code'           => $newCode,
+                'connection_code_issued_at' => now(),
+            ]);
         }
 
         // Generate token
@@ -121,5 +131,18 @@ class LinkController extends Controller
                 'unlinked' => true
             ]
         ]);
+    }
+
+    /**
+     * Generate a cryptographically unique employee code.
+     * Used both here (on post-link rotation) and by TeamController.
+     */
+    private function generateEmployeeCode(): string
+    {
+        do {
+            $code = 'EMP-' . strtoupper(\Illuminate\Support\Str::random(4)) . '-' . strtoupper(\Illuminate\Support\Str::random(4));
+        } while (\App\Models\User::where('connection_code', $code)->exists());
+
+        return $code;
     }
 }

@@ -34,6 +34,7 @@ class UserSeeder extends Seeder
                 'is_admin'         => false,
                 'learning_goal'    => 'Get a job in tech',
                 'experience_level' => 'Beginner',
+                'email_verified_at' => '2026-06-07 14:22:32',
                 'interests'        => json_encode(['Web Development', 'AI & ML']),
                 'created_at'       => now()->subDays(30),
                 'updated_at'       => now()->subDays(30),

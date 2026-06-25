@@ -149,13 +149,14 @@ class TeamController extends Controller
         $randomEmail = 'emp_' . Str::random(10) . '@crtvai.local';
         
         $employee = User::create([
-            'name' => $request->name,
-            'email' => $randomEmail,
-            'password' => Hash::make(Str::random(24)),
-            'parent_id' => Auth::id(),
-            'department_id' => $request->department_id,
-            'is_employee' => true,
-            'connection_code' => $this->generateUniqueCode(),
+            'name'                      => $request->name,
+            'email'                     => $randomEmail,
+            'password'                  => Hash::make(Str::random(24)),
+            'parent_id'                 => Auth::id(),
+            'department_id'             => $request->department_id,
+            'is_employee'               => true,
+            'connection_code'           => $this->generateUniqueCode(),
+            'connection_code_issued_at' => now(),
         ]);
 
         return back()->with('success', 'Employee created successfully.');
@@ -179,7 +180,8 @@ class TeamController extends Controller
         }
 
         $employee->update([
-            'connection_code' => $this->generateUniqueCode(),
+            'connection_code'           => $this->generateUniqueCode(),
+            'connection_code_issued_at' => now(),
         ]);
 
         return back()->with('success', 'Connection code regenerated successfully.');
@@ -344,6 +346,7 @@ class TeamController extends Controller
             return [];
         }
 
+        // Source of truth: deduplicated session data keyed by user
         $sessionTotals = DB::query()
             ->fromSub($this->dedupedSessionQuery($ids, $dateFilter, $range), 'deduped_sessions')
             ->selectRaw('user_id, sum(active_ms) as active_ms')
@@ -351,46 +354,34 @@ class TeamController extends Controller
             ->pluck('active_ms', 'user_id')
             ->toArray();
 
-        $rollupQuery = \App\Models\ExtensionDailyRollup::whereIn('user_id', $ids);
-        if ($dateFilter && $range === 'today') {
-            $rollupQuery->whereDate('date', $dateFilter);
-        } elseif ($dateFilter) {
-            $rollupQuery->where('date', '>=', $dateFilter);
-        }
+        // Fallback: daily rollups — used ONLY for users who have no sessions at all
+        // (e.g., older data or rollup-only syncs). Never added on top of sessions.
+        $usersWithNoSessions = $ids->filter(fn($id) => empty($sessionTotals[$id]))->values();
+        $rollupTotals = [];
 
-        $rollupTotals = $rollupQuery
-            ->selectRaw('user_id, sum(total_active_ms) as active_ms')
-            ->groupBy('user_id')
-            ->pluck('active_ms', 'user_id')
-            ->toArray();
-
-        $snapshotQuery = \App\Models\ExtensionMetricsSnapshot::whereIn('user_id', $ids);
-        if ($dateFilter && $range === 'today') {
-            $snapshotQuery->whereDate('captured_at', $dateFilter);
-        } elseif ($dateFilter) {
-            $snapshotQuery->where('captured_at', '>=', $dateFilter);
-        }
-
-        $snapshotTotals = [];
-        $snapshots = $snapshotQuery
-            ->orderByDesc('captured_at')
-            ->get(['user_id', 'active_ms']);
-
-        foreach ($snapshots as $snapshot) {
-            $snapshotTotals[$snapshot->user_id] ??= (int) $snapshot->active_ms;
+        if ($usersWithNoSessions->isNotEmpty()) {
+            $rollupQuery = \App\Models\ExtensionDailyRollup::whereIn('user_id', $usersWithNoSessions);
+            if ($dateFilter && $range === 'today') {
+                $rollupQuery->whereDate('date', $dateFilter);
+            } elseif ($dateFilter) {
+                $rollupQuery->where('date', '>=', $dateFilter);
+            }
+            $rollupTotals = $rollupQuery
+                ->selectRaw('user_id, sum(total_active_ms) as active_ms')
+                ->groupBy('user_id')
+                ->pluck('active_ms', 'user_id')
+                ->toArray();
         }
 
         return $ids
-            ->mapWithKeys(function ($userId) use ($sessionTotals, $rollupTotals, $snapshotTotals) {
-                return [
-                    $userId => max(
-                        (int) ($sessionTotals[$userId] ?? 0),
-                        (int) ($rollupTotals[$userId] ?? 0),
-                        (int) ($snapshotTotals[$userId] ?? 0)
-                    ),
-                ];
+            ->mapWithKeys(function ($userId) use ($sessionTotals, $rollupTotals) {
+                $sessionMs = (int) ($sessionTotals[$userId] ?? 0);
+                // Only use rollup when we truly have zero session granularity for this user
+                $fallbackMs = $sessionMs === 0 ? (int) ($rollupTotals[$userId] ?? 0) : 0;
+                return [$userId => $sessionMs + $fallbackMs];
             })
             ->toArray();
+
     }
 
     private function effectiveTopSites($userIds, $dateFilter = null, string $range = 'all', bool $includeVisitors = false)

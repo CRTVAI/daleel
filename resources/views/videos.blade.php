@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Video Lessons | Dallel AI')
+@section('title', 'Video Lessons | Daleel AI')
 
 @section('styles')
 <style>
@@ -384,7 +384,7 @@
         <div class="card bg-dark text-white p-5 rounded-5" style="background: linear-gradient(135deg, #0F172A, #1E293B); border: none;">
             <h2 class="fw-bold mb-3">Unlock the Full Learning Experience</h2>
             <p class="opacity-75 mb-4">Create a free account to track your progress, save bookmarks, and get personalized recommendations.</p>
-            <a href="{{ route('register') }}" class="btn btn-primary btn-lg px-5">Join Dallel AI Today</a>
+            <a href="{{ route('register') }}" class="btn btn-primary btn-lg px-5">Join Daleel AI Today</a>
         </div>
     </div>
 </div>

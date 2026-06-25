@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Profile Settings — Dallel AI')
+@section('title', 'Profile Settings — Daleel AI')
 
 @section('content')
 <div class="profile-settings-wrapper">
@@ -71,7 +71,7 @@
                             <i class="bi bi-stars fs-3"></i>
                         </div>
                     </div>
-                    <h4 class="fw-800 mb-2" style="letter-spacing: -0.5px;">Welcome to Dallel AI!</h4>
+                    <h4 class="fw-800 mb-2" style="letter-spacing: -0.5px;">Welcome to Daleel AI!</h4>
                     <p class="mb-0 mx-auto opacity-90 fw-500" style="max-width: 500px; font-size: 1.05rem; line-height: 1.6;">
                         Your account has been created successfully. Please take a moment to **complete your learning profile** below to help us tailor your experience.
                     </p>

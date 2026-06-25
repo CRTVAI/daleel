@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Dallel AI | Help Center')
+@section('title', 'Daleel AI | Help Center')
 
 @section('content')
 <section class="page-hero">
@@ -36,7 +36,7 @@
 @section('scripts')
 <script>
 const helpTopics = [
-  ["Getting Started", "How do recommendations work?", "Dallel AI uses your role, goals, selected tools, completed lessons, saved items, and optional workflow signals to recommend practical lessons."],
+  ["Getting Started", "How do recommendations work?", "Daleel AI uses your role, goals, selected tools, completed lessons, saved items, and optional workflow signals to recommend practical lessons."],
   ["Getting Started", "Can individuals use the platform?", "Yes. Individual learners can use role-based paths, video lessons, saved lessons, and the AI mentor without joining a company workspace."],
   ["Enterprise", "What can managers track?", "Managers can track progress, completed paths, AI readiness, adoption by department, and estimated productivity impact."],
   ["Enterprise", "Can we request custom training?", "Yes. Companies can request training content for internal tools, policies, departments, or workflows."],

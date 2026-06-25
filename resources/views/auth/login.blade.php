@@ -6,11 +6,6 @@
         <!-- Left Side: Login Form -->
         <div class="auth-form-section">
             <div class="auth-form-inner">
-                <a class="brand mb-5" href="/" style="display: flex; gap: 10px; text-decoration: none; align-items: center;">
-                    <span class="brand-mark">DA</span>
-                    <span class="brand-copy"><strong>Dallel AI</strong><small>by Creative AI</small></span>
-                </a>
-
                 <div class="auth-header mb-4">
                     <h1 class="auth-title">Sign In</h1>
                     <p class="auth-subtitle">Welcome back! Please enter your details.</p>

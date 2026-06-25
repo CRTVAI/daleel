@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'Dallel AI | AI Learning Matched to Your Daily Work')
+@section('title', 'Daleel AI | AI Learning Matched to Your Daily Work')
 
 @section('content')
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -28,7 +28,7 @@
         </h1>
         
         <p class="hero-description animate-slide-up">
-          Dallel AI doesn't just give you courses. We analyze your role, tools, and repeated tasks to recommend the exact AI workflows that save you hours every week.
+          Daleel AI doesn't just give you courses. We analyze your role, tools, and repeated tasks to recommend the exact AI workflows that save you hours every week.
         </p>
         
         <div class="hero-buttons animate-slide-up">
@@ -183,12 +183,12 @@
   
   <div class="container">
     <div class="section-header text-center">
-      <span class="section-badge">⚡ THE DALLEL METHOD</span>
+      <span class="section-badge">⚡ THE Daleel METHOD</span>
       <h2 class="section-title">
         Learning that adapts to your <span class="gradient-text">actual workday</span>
       </h2>
       <p class="section-subtitle">
-        Generic courses waste time. Dallel AI identifies the surgical AI workflows you need based on the tools you use and the tasks you perform in real-time.
+        Generic courses waste time. Daleel AI identifies the surgical AI workflows you need based on the tools you use and the tasks you perform in real-time.
       </p>
     </div>
     
@@ -272,7 +272,7 @@
           Build a high-performance <span class="gradient-text">AI Culture</span>
         </h2>
         <p class="section-subtitle" style="margin-left: 0; text-align: left;">
-          Dallel for Teams isn't just about individual growth. It's about collective intelligence. Share prompts, track department-wide ROI, and outpace your competitors.
+          Daleel for Teams isn't just about individual growth. It's about collective intelligence. Share prompts, track department-wide ROI, and outpace your competitors.
         </p>
         
         <div class="feature-cards">
@@ -516,7 +516,7 @@
     <div class="testimonials-grid">
       <div class="testimonial-card">
         <div class="testimonial-rating">★★★★★</div>
-        <p class="testimonial-text">"Dallel AI transformed how our team learns. Instead of generic courses, we get exactly what we need for our daily tools. Saved us 10+ hours per week."</p>
+        <p class="testimonial-text">"Daleel AI transformed how our team learns. Instead of generic courses, we get exactly what we need for our daily tools. Saved us 10+ hours per week."</p>
         <div class="testimonial-author">
           <img src="https://i.pravatar.cc/80?img=11" alt="Sarah Chen">
           <div>
@@ -580,7 +580,7 @@
             <span>Get Started Free</span>
             <i class="bi bi-arrow-right"></i>
           </a>
-          <p class="cta-note">No credit card required · 7-day free trial</p>
+          <p class="cta-note">No credit card required</p>
         </div>
       </div>
     </div>

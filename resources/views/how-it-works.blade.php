@@ -1,6 +1,6 @@
 @extends('layouts.public')
 
-@section('title', 'How It Works | Dallel AI')
+@section('title', 'How It Works | Daleel AI')
 
 @section('content')
 <!-- Re-linking fonts for consistency with home page -->
@@ -306,8 +306,8 @@
         <i class="bi bi-lightning-charge-fill"></i>
         AI-Powered Transformation
       </div>
-      <h1>How Dallel AI <span class="gradient-text">augments</span> your workday</h1>
-      <p class="lead">Stop spending weeks on generic courses. Dallel AI maps your real-world behavior to the exact AI skills you need to save time today.</p>
+      <h1>How Daleel AI <span class="gradient-text">augments</span> your workday</h1>
+      <p class="lead">Stop spending weeks on generic courses. Daleel AI maps your real-world behavior to the exact AI skills you need to save time today.</p>
       
       <div class="d-flex gap-3">
         <a href="{{ route('register') }}" class="btn btn-primary btn-lg px-5">Get Started Free</a>
@@ -378,7 +378,7 @@
         <div>
           <span class="section-label">Real-time Intelligence</span>
           <h2 class="mb-4">The "Learning Layer" that lives where you work</h2>
-          <p class="text-secondary mb-4">Unlike traditional LMS platforms that require you to leave your workflow, Dallel AI integrates directly into your browser. It identifies automation opportunities in real-time as you switch between tabs.</p>
+          <p class="text-secondary mb-4">Unlike traditional LMS platforms that require you to leave your workflow, Daleel AI integrates directly into your browser. It identifies automation opportunities in real-time as you switch between tabs.</p>
           
           <ul class="list-unstyled">
             <li class="mb-3 d-flex gap-3"><i class="bi bi-shield-check text-success"></i> <strong>Privacy-First:</strong> We track tool usage, not your private data.</li>
@@ -412,7 +412,7 @@
             <i class="bi bi-plus-lg faq-icon"></i>
           </button>
           <div class="faq-content">
-            Not at all. Dallel AI is designed for every professional. We provide the templates, the logic, and the video guides to help you go from beginner to AI-proficient in minutes.
+            Not at all. Daleel AI is designed for every professional. We provide the templates, the logic, and the video guides to help you go from beginner to AI-proficient in minutes.
           </div>
         </div>
         
@@ -434,7 +434,7 @@
     <div class="p-5 text-center bg-dark text-white rounded-5 shadow-xl" style="background: linear-gradient(135deg, #0F172A, #1E293B);">
       <h2 class="display-5 fw-bold mb-3">Ready to transform your workflow?</h2>
       <div class="d-flex justify-content-center gap-3">
-        <a href="{{ route('register') }}" class="btn btn-primary btn-lg px-5 py-3">Start Free Trial</a>
+        <a href="{{ route('register') }}" class="btn btn-primary btn-lg px-5 py-3">Join Now</a>
       </div>
     </div>
   </section>

@@ -1,13 +1,13 @@
 @extends('layouts.public')
 
-@section('title', 'Dallel AI | About')
+@section('title', 'Daleel AI | About')
 
 @section('content')
 <section class="page-hero">
   <div class="container hero-grid">
     <div>
       <p class="eyebrow">Company profile</p>
-      <h1>Dallel AI helps people learn AI through the work they already do</h1>
+      <h1>Daleel AI helps people learn AI through the work they already do</h1>
       <p class="lead">We are building a practical AI learning layer for professionals, teams, and enterprises that need measurable adoption, not random content.</p>
     </div>
   </div>
@@ -18,7 +18,7 @@
     <div>
       <p class="eyebrow">Company mission</p>
       <h2>Make AI useful at work for every role</h2>
-      <p class="lead">Dallel AI exists because most AI training is disconnected from the user's actual job. Our platform connects learning to role, tools, workflows, goals, and behavior so users can apply AI immediately.</p>
+      <p class="lead">Daleel AI exists because most AI training is disconnected from the user's actual job. Our platform connects learning to role, tools, workflows, goals, and behavior so users can apply AI immediately.</p>
       <div class="inline-actions"><a class="btn primary" href="{{ url('contact') }}">Partner With Us</a><a class="btn secondary" href="{{ url('enterprise') }}">Enterprise Training</a></div>
     </div>
     <div class="profile-card">

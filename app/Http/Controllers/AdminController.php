@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Content;
 use App\Models\Course;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
@@ -149,8 +150,8 @@ class AdminController extends Controller
         }
 
         // Category Filter
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
         }
 
         // Connected Tool Filter
@@ -216,16 +217,19 @@ class AdminController extends Controller
         ];
         
         $tools = \App\Models\Tool::where('status', 'active')->orderBy('name')->get();
-        return view('admin.contents.index', compact('contents', 'categories', 'courses', 'stats', 'usedTools', 'tools'));
+        $allCategories = Category::where('status', 'active')->orderBy('name')->get();
+
+        return view('admin.contents.index', compact('contents', 'categories', 'courses', 'stats', 'usedTools', 'tools', 'allCategories'));
     }
 
     public function contentStore(Request $request)
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'video_url' => 'required|url',
-            'video_url_ar' => 'nullable|url',
-            'category' => 'nullable|string',
+            'video_file' => 'required|file|mimes:mp4,mov,avi,wmv,m4v|max:204800', // 200MB max
+            'video_url' => 'nullable|url',
+            'thumbnail_base64' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id',
             'skill_level' => 'required|in:Beginner,Intermediate,Advanced',
             'course_id' => 'nullable|exists:courses,id',
             'section_part_label' => 'nullable|string|max:255',
@@ -239,20 +243,42 @@ class AdminController extends Controller
             'is_featured' => 'nullable|boolean',
         ]);
 
-        $data = $request->all();
+        $data = $request->except(['video_file', 'thumbnail_base64']);
         $data['is_featured'] = $request->has('is_featured');
         $data['language'] = $request->filled('video_url_ar') ? 'both' : 'en';
+        $data['duration_seconds'] = $request->get('duration_seconds', 0);
 
-        // Process connected tools (Tagify comma-separated string to array)
+        // Handle Video Upload to S3
+        if ($request->hasFile('video_file')) {
+            $uploadedFile = $request->file('video_file');
+            $path = $uploadedFile->store('direct-uploads/' . date('Y-m-d'), 's3');
+            $data['video_url'] = \Illuminate\Support\Facades\Storage::disk('s3')->url($path);
+            // Clean up the local temp file now that it's safely on S3
+            @unlink($uploadedFile->getRealPath());
+        }
+
+        // Handle Base64 Thumbnail (same as extension)
+        if ($request->filled('thumbnail_base64')) {
+            $imageData = $request->thumbnail_base64;
+            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                $imageData = substr($imageData, strpos($imageData, ',') + 1);
+                $type = strtolower($type[1]);
+                $imageData = base64_decode($imageData);
+
+                if ($imageData !== false) {
+                    $fileName = 'thumbnails/' . \Illuminate\Support\Str::slug($data['title']) . '-' . time() . '.' . $type;
+                    $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+                    \Illuminate\Support\Facades\Storage::disk($disk)->put($fileName, $imageData, 'public');
+                    $data['thumbnail'] = \Illuminate\Support\Facades\Storage::disk($disk)->url($fileName);
+                }
+            }
+        }
+
+        // Process connected tools
         if ($request->filled('connected_tools')) {
             $data['connected_tools'] = array_map('trim', explode(',', $request->connected_tools));
         } else {
             $data['connected_tools'] = [];
-        }
-
-        // Process tags (Standardized format)
-        if ($request->filled('tags')) {
-            $data['tags'] = $request->tags;
         }
 
         Content::create($data);
@@ -264,9 +290,10 @@ class AdminController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
-            'video_url' => 'required|url',
-            'video_url_ar' => 'nullable|url',
-            'category' => 'nullable|string',
+            'video_file' => 'nullable|file|mimes:mp4,mov,avi,wmv,m4v|max:204800',
+            'video_url' => 'nullable|url',
+            'thumbnail_base64' => 'nullable|string',
+            'category_id' => 'required|exists:categories,id',
             'skill_level' => 'required|in:Beginner,Intermediate,Advanced',
             'course_id' => 'nullable|exists:courses,id',
             'section_part_label' => 'nullable|string|max:255',
@@ -280,19 +307,37 @@ class AdminController extends Controller
             'is_featured' => 'nullable|boolean',
         ]);
 
-        $data = $request->all();
+        $data = $request->except(['video_file', 'thumbnail_base64']);
         $data['is_featured'] = $request->has('is_featured');
         $data['language'] = $request->filled('video_url_ar') ? 'both' : 'en';
+
+        // Handle Video Upload to S3
+        if ($request->hasFile('video_file')) {
+            $path = $request->file('video_file')->store('direct-uploads/' . date('Y-m-d'), 's3');
+            $data['video_url'] = \Illuminate\Support\Facades\Storage::disk('s3')->url($path);
+        }
+
+        // Handle Base64 Thumbnail
+        if ($request->filled('thumbnail_base64')) {
+            $imageData = $request->thumbnail_base64;
+            if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $type)) {
+                $imageData = substr($imageData, strpos($imageData, ',') + 1);
+                $type = strtolower($type[1]);
+                $imageData = base64_decode($imageData);
+
+                if ($imageData !== false) {
+                    $fileName = 'thumbnails/' . \Illuminate\Support\Str::slug($data['title']) . '-' . time() . '.' . $type;
+                    $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+                    \Illuminate\Support\Facades\Storage::disk($disk)->put($fileName, $imageData, 'public');
+                    $data['thumbnail'] = \Illuminate\Support\Facades\Storage::disk($disk)->url($fileName);
+                }
+            }
+        }
 
         if ($request->filled('connected_tools')) {
             $data['connected_tools'] = array_map('trim', explode(',', $request->connected_tools));
         } else {
             $data['connected_tools'] = [];
-        }
-
-        // Process tags
-        if ($request->filled('tags')) {
-            $data['tags'] = $request->tags;
         }
 
         $content->update($data);
@@ -446,5 +491,50 @@ class AdminController extends Controller
     {
         $level->delete();
         return redirect()->back()->with('success', 'Experience level deleted successfully.');
+    }
+
+    // Category Management
+    public function categoriesIndex()
+    {
+        $categories = Category::withCount(['contents', 'courses'])->orderBy('created_at', 'desc')->paginate(20);
+        return view('admin.categories.index', compact('categories'));
+    }
+
+    public function categoryStore(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name',
+            'status' => 'required|in:active,draft',
+        ]);
+
+        Category::create([
+            'name' => $request->name,
+            'slug' => \Illuminate\Support\Str::slug($request->name),
+            'status' => $request->status,
+        ]);
+
+        return redirect()->back()->with('success', 'Category created successfully.');
+    }
+
+    public function categoryUpdate(Request $request, Category $category)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255|unique:categories,name,'.$category->id,
+            'status' => 'required|in:active,draft',
+        ]);
+
+        $category->update([
+            'name' => $request->name,
+            'slug' => \Illuminate\Support\Str::slug($request->name),
+            'status' => $request->status,
+        ]);
+
+        return redirect()->back()->with('success', 'Category updated successfully.');
+    }
+
+    public function categoryDestroy(Category $category)
+    {
+        $category->delete();
+        return redirect()->back()->with('success', 'Category deleted successfully.');
     }
 }

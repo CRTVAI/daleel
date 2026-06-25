@@ -85,11 +85,11 @@
                                 <div class="row g-4">
                                     <div class="col-md-6 setting-item" data-search="platform name site title">
                                         <label class="form-label fw-bold text-muted small text-uppercase">Platform Name</label>
-                                        <input type="text" class="form-control rounded-3 border-light bg-light p-3 fw-semibold" value="Dallel AI">
+                                        <input type="text" class="form-control rounded-3 border-light bg-light p-3 fw-semibold" value="Daleel AI">
                                     </div>
                                     <div class="col-md-6 setting-item" data-search="support email contact">
                                         <label class="form-label fw-bold text-muted small text-uppercase">Support Email</label>
-                                        <input type="email" class="form-control rounded-3 border-light bg-light p-3 fw-semibold" value="support@dallel.ai">
+                                        <input type="email" class="form-control rounded-3 border-light bg-light p-3 fw-semibold" value="support@Daleel.ai">
                                     </div>
                                     <div class="col-md-12 setting-item" data-search="site description meta tags">
                                         <label class="form-label fw-bold text-muted small text-uppercase">Site Description</label>

@@ -6,14 +6,18 @@
         <!-- Left Side: Register Form -->
         <div class="auth-form-section">
             <div class="auth-form-inner">
-                <a class="brand mb-5" href="/" style="display: flex; gap: 10px; text-decoration: none; align-items: center;">
-                    <span class="brand-mark">DA</span>
-                    <span class="brand-copy"><strong>Dallel AI</strong><small>by Creative AI</small></span>
-                </a>
 
                 <div class="auth-header mb-4">
                     <h1 class="auth-title">Create account</h1>
-                    <p class="auth-subtitle">Start your 30-day free trial today.</p>
+                </div>
+
+                <a href="{{ route('auth.google') }}" class="btn-google w-100 mb-4">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20">
+                    Sign up with Google
+                </a>
+
+                <div class="divider mb-4">
+                    <span>OR</span>
                 </div>
 
                 <form method="POST" action="{{ route('register') }}" class="auth-form">
@@ -35,30 +39,38 @@
                         @enderror
                     </div>
 
-                    <div class="form-row-custom mb-3">
-                        <div class="form-group-custom flex-1">
+                    <div class="form-row-custom mb-2">
+                        <div class="form-group-custom flex-1 position-relative">
                             <label for="password">Password</label>
-                            <input id="password" type="password" class="@error('password') is-invalid @enderror" name="password" required autocomplete="new-password" placeholder="Create a password">
+                            <div class="position-relative">
+                                <input id="password" type="password" class="@error('password') is-invalid @enderror" name="password" required autocomplete="new-password" placeholder="Create a password" style="padding-right: 40px;">
+                                <i class="bi bi-eye-slash position-absolute end-0 top-50 translate-middle-y me-3 toggle-password" style="cursor: pointer; color: #667085;" onclick="togglePasswordVisibility('password', this)"></i>
+                            </div>
                             @error('password')
                                 <span class="error-message">{{ $message }}</span>
                             @enderror
                         </div>
 
-                        <div class="form-group-custom flex-1">
+                        <div class="form-group-custom flex-1 position-relative">
                             <label for="password-confirm">Confirm password</label>
-                            <input id="password-confirm" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="Confirm password">
+                            <div class="position-relative">
+                                <input id="password-confirm" type="password" name="password_confirmation" required autocomplete="new-password" placeholder="Confirm password" style="padding-right: 40px;">
+                                <i class="bi bi-eye-slash position-absolute end-0 top-50 translate-middle-y me-3 toggle-password" style="cursor: pointer; color: #667085;" onclick="togglePasswordVisibility('password-confirm', this)"></i>
+                            </div>
                         </div>
                     </div>
-                    <p class="input-hint mb-4">Must be at least 8 characters.</p>
+                    <p class="input-hint mb-4" style="font-size: 12px;">Must be at least 8 characters.</p>
 
-                    <button type="submit" class="btn-submit w-100 mb-3">
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" name="terms" id="terms" required {{ old('terms') ? 'checked' : '' }}>
+                        <label class="form-check-label ms-2" for="terms" style="font-size: 14px; font-weight: 500; color: #344054;">
+                            I agree to the <a href="{{ route('terms') }}" class="text-primary text-decoration-none">Terms</a> and <a href="{{ route('privacy') }}" class="text-primary text-decoration-none">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-submit w-100 mb-4">
                         Get started
                     </button>
-
-                    <a href="{{ route('auth.google') }}" class="btn-google w-100 mb-4">
-                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20">
-                        Sign up with Google
-                    </a>
 
                     <p class="auth-footer-text">
                         Already have an account? <a href="{{ route('login') }}">Log in</a>
@@ -271,6 +283,26 @@
         text-decoration: none;
     }
 
+    /* Divider */
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: #98A2B3;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+
+    .divider::before, .divider::after {
+        content: '';
+        flex: 1;
+        border-bottom: 1px solid #EAECF0;
+    }
+
+    .divider span {
+        padding: 0 16px;
+    }
+
     /* Visual Section */
     .auth-visual-section {
         flex: 1;
@@ -354,4 +386,21 @@
         margin-top: 4px;
     }
 </style>
+@endsection
+
+@section('scripts')
+<script>
+    function togglePasswordVisibility(inputId, icon) {
+        const input = document.getElementById(inputId);
+        if (input.type === "password") {
+            input.type = "text";
+            icon.classList.remove('bi-eye-slash');
+            icon.classList.add('bi-eye');
+        } else {
+            input.type = "password";
+            icon.classList.remove('bi-eye');
+            icon.classList.add('bi-eye-slash');
+        }
+    }
+</script>
 @endsection

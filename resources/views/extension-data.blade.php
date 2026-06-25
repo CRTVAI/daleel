@@ -125,7 +125,7 @@
     <div class="ev-hero">
         <div>
             <h1>📊 Extension Activity Viewer</h1>
-            <p>All data your Dallel AI browser extension has tracked — private to your account only.</p>
+            <p>All data your Daleel AI browser extension has tracked — private to your account only.</p>
         </div>
         <div class="d-flex align-items-center gap-2 flex-wrap">
             @if($hasData)

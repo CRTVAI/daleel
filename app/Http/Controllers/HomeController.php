@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\BrowsingHistory;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class HomeController extends Controller
 {
@@ -158,6 +159,14 @@ class HomeController extends Controller
                 ->get();
         }
 
+        // Absolute Last Lesson (regardless of completion)
+        $lastLessonProgress = $user->videoProgress()
+            ->has('content')
+            ->with('content')
+            ->orderByDesc('last_watched_at')
+            ->first();
+        $lastLesson = $lastLessonProgress ? $lastLessonProgress->content : null;
+
         // Stats
         $totalWatchSeconds  = $user->totalWatchSeconds();
         $completedCount     = $user->completedVideosCount();
@@ -171,14 +180,35 @@ class HomeController extends Controller
         $focusScore = $latestSnapshot ? $latestSnapshot->focus_score : 0;
         $productivityScore = $latestSnapshot ? $latestSnapshot->productivity_score : 0;
         
-        $todayActiveMs = \App\Models\ExtensionSession::where('user_id', $user->id)
+        // ACCURACY FIX: Temporal Deduplication
+        // Instead of summing (which causes 2x-3x inflation if multiple browsers are open),
+        // we count unique minutes where ANY session was active.
+        $sessionsToday = \App\Models\ExtensionSession::where('user_id', $user->id)
             ->whereDate('started_at', today())
-            ->sum('active_ms');
+            ->get(['started_at', 'ended_at', 'active_ms']);
+
+        $activeMinutes = [];
+        foreach ($sessionsToday as $s) {
+            if (!$s->started_at || !$s->ended_at) continue;
+            
+            $start = $s->started_at->timestamp;
+            $end = $s->ended_at->timestamp;
+            
+            // Round to nearest minute buckets
+            $startBucket = floor($start / 60) * 60;
+            $endBucket = ceil($end / 60) * 60;
+            
+            for ($t = $startBucket; $t < $endBucket; $t += 60) {
+                $activeMinutes[$t] = true;
+            }
+        }
+        
+        $dedupedActiveMs = count($activeMinutes) * 60 * 1000;
         
         $extensionStats = [
             'focus_score' => $focusScore,
             'productivity_score' => $productivityScore,
-            'active_hours_today' => round($todayActiveMs / (1000 * 60 * 60), 1)
+            'active_hours_today' => round($dedupedActiveMs / (1000 * 60 * 60), 1)
         ];
 
         // NEW: Advanced Extension Intelligence for "Pro" Dashboard
@@ -191,15 +221,35 @@ class HomeController extends Controller
             ->get();
 
         $weeklyExtensionTrend = [];
+        $weeklySessions = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->where('started_at', '>=', now()->subDays(6)->startOfDay())
+            ->get(['started_at', 'ended_at']);
+
         for ($i = 6; $i >= 0; $i--) {
             $date = now()->subDays($i)->format('Y-m-d');
-            $ms = \App\Models\ExtensionSession::where('user_id', $user->id)
-                ->whereDate('started_at', $date)
-                ->sum('active_ms');
+            $dayStart = now()->subDays($i)->startOfDay()->timestamp;
+            $dayEnd = now()->subDays($i)->endOfDay()->timestamp;
+            
+            $activeMinutes = [];
+            foreach ($weeklySessions as $s) {
+                if (!$s->started_at || !$s->ended_at) continue;
+                
+                $start = max($dayStart, $s->started_at->timestamp);
+                $end = min($dayEnd, $s->ended_at->timestamp);
+                
+                if ($start >= $end) continue;
+                
+                $startBucket = floor($start / 60) * 60;
+                $endBucket = ceil($end / 60) * 60;
+                
+                for ($t = $startBucket; $t < $endBucket; $t += 60) {
+                    $activeMinutes[$t] = true;
+                }
+            }
             
             $weeklyExtensionTrend[] = [
                 'day' => now()->subDays($i)->format('D'),
-                'hours' => round($ms / (1000 * 60 * 60), 2)
+                'hours' => round((count($activeMinutes) * 60) / 3600, 2)
             ];
         }
 
@@ -207,21 +257,36 @@ class HomeController extends Controller
         $latestSession = \App\Models\ExtensionSession::where('user_id', $user->id)->latest('started_at')->first();
         $activeDay = $latestSession ? \Carbon\Carbon::parse($latestSession->started_at)->startOfDay() : today();
 
-        $hourlyActivity = \App\Models\ExtensionSession::where('user_id', $user->id)
+        $daySessions = \App\Models\ExtensionSession::where('user_id', $user->id)
             ->whereDate('started_at', $activeDay)
-            ->selectRaw('HOUR(started_at) as hour, sum(active_ms) as active, sum(idle_ms) as idle')
-            ->groupBy('hour')
-            ->get()
-            ->keyBy('hour');
+            ->get(['started_at', 'ended_at', 'active_ms', 'idle_ms']);
+
+        $hourlyActive = array_fill(0, 24, 0);
+        $hourlyIdle = array_fill(0, 24, 0);
+
+        foreach ($daySessions as $s) {
+            if (!$s->started_at || !$s->ended_at) continue;
+            
+            $startHour = (int) $s->started_at->format('G');
+            $endHour = (int) $s->ended_at->format('G');
+            
+            // For heatmaps, we use a slightly simpler aggregation to keep performance high
+            // but we still cap it to 60 minutes per hour to prevent inflation
+            for ($h = $startHour; $h <= $endHour; $h++) {
+                $hourlyActive[$h] += ($s->active_ms / 60000);
+                $hourlyIdle[$h] += ($s->idle_ms / 60000);
+            }
+        }
             
         $todayHourlyData = [];
         for ($h = 0; $h < 24; $h++) {
             $todayHourlyData[] = [
                 'hour' => $h,
-                'active' => round(($hourlyActivity[$h]->active ?? 0) / (1000 * 60), 1),
-                'idle' => round(($hourlyActivity[$h]->idle ?? 0) / (1000 * 60), 1)
+                'active' => round(min(60, $hourlyActive[$h]), 1),
+                'idle' => round(min(60, $hourlyIdle[$h]), 1)
             ];
         }
+
 
         // 2. 7-Day Productivity/Focus Trends (with raw session fallback)
         $dailyRollups = \App\Models\ExtensionDailyRollup::where('user_id', $user->id)
@@ -303,11 +368,11 @@ class HomeController extends Controller
         $allTools = \App\Models\Tool::where('status', 'active')->get();
         
         $sessionStats = \App\Models\ExtensionSession::where('user_id', $user->id)
-            ->selectRaw('platform_domain as domain, sum(active_ms) as total_active_ms')
+            ->select('platform_domain', DB::raw('count(*) as count'), DB::raw('sum(active_ms) as total_active_ms'))
             ->groupBy('platform_domain')
             ->get()
             ->keyBy(function($item) {
-                return strtolower(trim($item->domain));
+                return strtolower(trim($item->platform_domain));
             });
 
         $browsingStats = \App\Models\BrowsingHistory::where('user_id', $user->id)
@@ -370,6 +435,11 @@ class HomeController extends Controller
             $connectedTools = $allTools->take(6)->values();
         }
 
+        // Current Roadmap (most recently active)
+        $currentRoadmap = \App\Models\UserRoadmap::where('user_id', $user->id)
+            ->latest('updated_at')
+            ->first();
+
         return view('user-dashboard', compact(
             'featured',
             'shorts',
@@ -390,7 +460,9 @@ class HomeController extends Controller
             'todayHourlyData',
             'scoreTrends',
             'aiUsage',
-            'totalInteractions'
+            'totalInteractions',
+            'lastLesson',
+            'currentRoadmap'
         ))->with([
             'learningGoals' => \App\Models\LearningGoal::orderBy('title')->get(),
             'experienceLevels' => \App\Models\ExperienceLevel::orderBy('title')->get(),
@@ -456,17 +528,21 @@ class HomeController extends Controller
 
         // Data Viewer data (embedded in setup page)
         $sessions = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->with('device')
             ->orderBy('started_at', 'desc')->get();
-
+            
         $snapshots = \App\Models\ExtensionMetricsSnapshot::where('user_id', $user->id)
+            ->with('device')
             ->orderBy('captured_at', 'desc')->get();
-
+            
         $rollups = \App\Models\ExtensionDailyRollup::where('user_id', $user->id)
+            ->with('device') // In case of older records
             ->orderBy('date', 'desc')->get();
-
+            
         $recommendations = \App\Models\ExtensionRecommendation::where('user_id', $user->id)
             ->with(['events' => fn($q) => $q->orderBy('occurred_at', 'desc')])
             ->orderBy('created_at', 'desc')->get();
+
 
         $helpRequestsQuery = \App\Models\ExtensionHelpRequest::query();
         
@@ -476,8 +552,14 @@ class HomeController extends Controller
         
         $helpRequests = $helpRequestsQuery->with('user')->orderBy('created_at', 'desc')->get();
 
+        // Calculate Today's Active Time using actual Active MS from sessions
+        // We filter for sessions that were active at some point today
         $todayActiveMs = \App\Models\ExtensionSession::where('user_id', $user->id)
-            ->whereDate('started_at', today())->sum('active_ms');
+            ->where(function($q) {
+                $q->whereDate('started_at', today())
+                  ->orWhereDate('updated_at', today());
+            })
+            ->sum('active_ms');
 
         $domainGroups = $sessions
             ->groupBy(fn($s) => $s->platform_domain ?: 'Unknown')

@@ -30,6 +30,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'department_id',
         'is_employee',
         'connection_code',
+        'connection_code_issued_at',
         'can_access_team',
     ];
 
@@ -45,10 +46,11 @@ class User extends Authenticatable implements MustVerifyEmail
             'password'          => 'hashed',
             'interests'         => 'array',
             'connections'       => 'array',
-            'is_admin'          => 'boolean',
-            'is_employee'       => 'boolean',
-            'can_access_team'   => 'boolean',
-            'last_activity_at'  => 'datetime',
+            'is_admin'                   => 'boolean',
+            'is_employee'                => 'boolean',
+            'can_access_team'            => 'boolean',
+            'last_activity_at'           => 'datetime',
+            'connection_code_issued_at'  => 'datetime',
         ];
     }
 
@@ -150,5 +152,14 @@ class User extends Authenticatable implements MustVerifyEmail
     public function hasIncompleteProfile(): bool
     {
         return empty($this->learning_goal) || empty($this->experience_level) || empty($this->interests);
+    }
+    /**
+     * Send the email verification notification.
+     *
+     * @return void
+     */
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new \App\Notifications\VerifyEmailCustom);
     }
 }

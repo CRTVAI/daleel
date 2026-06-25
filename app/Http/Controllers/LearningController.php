@@ -28,7 +28,7 @@ class LearningController extends Controller
             // Get or create progress record
             $progress = UserVideoProgress::firstOrCreate(
                 ['user_id' => $user->id, 'content_id' => $content->id],
-                ['watched_seconds' => 0, 'duration_seconds' => $content->duration_seconds, 'completion_percent' => 0]
+                ['watched_seconds' => 0, 'duration_seconds' => $content->duration_seconds ?? 0, 'completion_percent' => 0]
             );
         }
 
@@ -67,7 +67,7 @@ class LearningController extends Controller
             if ($user) {
                 $watchedIds = $user->videoProgress()->pluck('content_id');
                 $recommended = Content::active()
-                    ->where('category', $content->category)
+                    ->where('category_id', $content->category_id)
                     ->where('id', '!=', $content->id)
                     ->whereNotIn('id', $watchedIds)
                     ->limit(5)
@@ -77,7 +77,7 @@ class LearningController extends Controller
             if ($recommended->isEmpty()) {
                 $recommended = Content::active()
                     ->where(function($q) use ($content) {
-                        $q->where('category', $content->category);
+                        $q->where('category_id', $content->category_id);
                         if ($content->tags) $q->orWhere('tags', 'like', "%{$content->tags}%");
                     })
                     ->where('id', '!=', $content->id)
@@ -116,7 +116,7 @@ class LearningController extends Controller
         $request->validate([
             'content_id'      => 'required|exists:contents,id',
             'watched_seconds' => 'required|integer|min:0',
-            'duration_seconds'=> 'required|integer|min:1',
+            'duration_seconds'=> 'required|integer|min:0',
         ]);
 
         $user = Auth::user();
@@ -141,11 +141,13 @@ class LearningController extends Controller
         return response()->json(['status' => 'ok', 'completion_percent' => $percent]);
     }
 
-    /**
-     * Browse all content (explore page) - filtered by user interests by default.
-     */
     public function explore(Request $request)
     {
+        // --- SMART REDIRECT: Catch old search requests and upgrade to AI Search ---
+        if ($request->filled('search')) {
+            return redirect()->route('search.advanced', ['search' => $request->search]);
+        }
+
         $user = Auth::user();
         $type = $request->get('type', 'video'); // default to videos
         
@@ -272,8 +274,8 @@ class LearningController extends Controller
         // 2. All Items (Filtered, Ranked, and Paginated)
         $query = ($type === 'course') ? Course::where('status', 'active') : Content::active();
 
-        if ($request->filled('category')) {
-            $query->where('category', $request->category);
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
         }
 
         if ($request->filled('level') && $type === 'video') {
@@ -346,7 +348,7 @@ class LearningController extends Controller
         );
         $items->withQueryString();
 
-        $categories = Content::active()->distinct()->pluck('category')->sort()->values();
+        $categories = \App\Models\Category::active()->orderBy('name')->get();
         $connectedTools = \App\Models\Tool::where('status', 'active')->orderBy('name')->get();
 
         if (\Illuminate\Support\Facades\Route::currentRouteName() === 'videos.public') {
@@ -354,5 +356,116 @@ class LearningController extends Controller
         }
 
         return view('learn.explore', compact('items', 'categories', 'type', 'recommendedItems', 'connectedTools'));
+    }
+
+    /**
+     * Show the detailed learning roadmap.
+     */
+    public function roadmap()
+    {
+        $user = Auth::user();
+        
+        // 1. Get usage stats from extension for sorting
+        $sessionStats = collect();
+        $browsingStats = collect();
+
+        if ($user) {
+            $sessionStats = \App\Models\ExtensionSession::where('user_id', $user->id)
+                ->selectRaw('platform_domain as domain, sum(active_ms) as total_active_ms')
+                ->groupBy('platform_domain')
+                ->get()
+                ->keyBy(fn($item) => strtolower(trim($item->domain)));
+
+            $browsingStats = \App\Models\BrowsingHistory::where('user_id', $user->id)
+                ->selectRaw('domain, sum(duration) as total_duration')
+                ->groupBy('domain')
+                ->get()
+                ->keyBy(fn($item) => strtolower(trim($item->domain)));
+        }
+
+        $allTools = \App\Models\Tool::where('status', 'active')->get();
+        $toolDomainMap = [
+            'ChatGPT' => ['chatgpt', 'chatgpt.com', 'openai'],
+            'Notion'  => ['notion', 'notion.so', 'notion.com'],
+            'Slack'   => ['slack', 'slack.com'],
+            'Zapier'  => ['zapier', 'zapier.com'],
+            'Gmail'   => ['gmail', 'gmail.com', 'mail.google.com'],
+            'YouTube' => ['youtube', 'youtube.com'],
+            'GitHub'  => ['github', 'github.com'],
+            'Figma'   => ['figma', 'figma.com'],
+        ];
+
+        // 2. Map and score tools by usage
+        $toolsWithScores = $allTools->map(function($tool) use ($sessionStats, $browsingStats, $toolDomainMap) {
+            $totalSeconds = 0;
+            $toolName = strtolower($tool->name);
+            $mappedDomains = $toolDomainMap[$tool->name] ?? [$toolName . '.com'];
+
+            foreach ($mappedDomains as $domain) {
+                if (isset($sessionStats[$domain])) {
+                    $totalSeconds += ($sessionStats[$domain]->total_active_ms / 1000);
+                }
+                if (isset($browsingStats[$domain])) {
+                    $totalSeconds += $browsingStats[$domain]->total_duration;
+                }
+            }
+            $tool->usage_seconds = $totalSeconds;
+            return $tool;
+        })->sortByDesc('usage_seconds');
+
+        // 3. Build roadmap data based on sorted tools
+        $roadmapData = $toolsWithScores->map(function($tool) use ($user) {
+            $contents = Content::whereJsonContains('connected_tools', $tool->name)
+                ->where('type', 'video')
+                ->orderBy('created_at', 'asc')
+                ->get();
+            
+            $totalCount = $contents->count();
+            if ($totalCount === 0) return null;
+
+            $completedIds = $user->videoProgress()->where('completed', true)->pluck('content_id')->toArray();
+            $completedCount = $contents->whereIn('id', $completedIds)->count();
+            
+            $contents = $contents->map(function($content) use ($completedIds) {
+                $content->is_completed = in_array($content->id, $completedIds);
+                return $content;
+            });
+
+            return [
+                'tool' => $tool,
+                'contents' => $contents,
+                'total' => $totalCount,
+                'completed' => $completedCount,
+                'percent' => round(($completedCount / $totalCount) * 100)
+            ];
+        })->filter()->values();
+
+        // Overall stats
+        $allContents = Content::where('type', 'video')->get();
+        $totalLessons = $allContents->count();
+        $lessonsCompleted = $user->videoProgress()->where('completed', true)->count();
+        $overallProgress = $totalLessons > 0 ? round(($lessonsCompleted / $totalLessons) * 100) : 0;
+
+        // Current Lesson (last one interacted with OR next in roadmap)
+        $lastProgress = $user->videoProgress()->has('content')->with('content')->orderByDesc('last_watched_at')->first();
+        
+        if ($lastProgress) {
+            $currentLesson = $lastProgress->content;
+        } else {
+            // Find the very first lesson of the first tool as a default
+            $firstTool = $roadmapData->first();
+            $currentLesson = $firstTool ? $firstTool['contents']->first() : Content::active()->first();
+        }
+
+        // Find the specific Tool model for the current lesson focus
+        $currentTool = null;
+        if ($currentLesson && !empty($currentLesson->connected_tools)) {
+            $toolName = is_array($currentLesson->connected_tools) ? $currentLesson->connected_tools[0] : json_decode($currentLesson->connected_tools)[0] ?? null;
+            if ($toolName) {
+                $currentTool = \App\Models\Tool::where('name', $toolName)->first();
+            }
+        }
+
+        return view('roadmap', compact('roadmapData', 'overallProgress', 'lessonsCompleted', 'totalLessons', 'currentLesson', 'currentTool'));
     }
 }

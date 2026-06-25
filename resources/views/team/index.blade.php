@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', 'Team Telemetry - Dallel AI')
+@section('title', 'Team Telemetry - Daleel AI')
 
 @section('styles')
 <style>
@@ -583,12 +583,29 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <span class="code-chip"
-                                          onclick="navigator.clipboard.writeText('{{ $emp->connection_code }}'); showToast('Code copied!');"
-                                          title="Click to copy">
-                                        {{ $emp->connection_code }}
-                                        <i class="bi bi-clipboard"></i>
-                                    </span>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="code-chip"
+                                              onclick="navigator.clipboard.writeText('{{ $emp->connection_code }}'); showToast('Code copied!');"
+                                              title="Click to copy">
+                                            {{ $emp->connection_code }}
+                                            <i class="bi bi-clipboard"></i>
+                                        </span>
+                                        <form action="{{ route('team.employees.regenerate-code', $emp) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-light p-1" title="Regenerate Key" onclick="return confirm('Regenerate key? The current extension will need to be re-linked.');">
+                                                <i class="bi bi-arrow-clockwise text-muted" style="font-size: 0.75rem;"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div style="font-size: 10px; margin-top: 3px;">
+                                        @if($emp->connection_code_issued_at)
+                                            <span class="{{ $emp->connection_code_issued_at->diffInDays(now()) > 30 ? 'text-warning fw-bold' : 'text-muted' }}">
+                                                Issued {{ $emp->connection_code_issued_at->diffForHumans() }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted italic">Legacy key</span>
+                                        @endif
+                                    </div>
                                 </td>
                                 <td>
                                     <span class="time-chip">{{ $ms($empActiveMs[$emp->id] ?? 0) }}</span>
@@ -737,7 +754,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const originalSyncHtml = syncBtn.innerHTML;
 
         window.addEventListener('message', function (event) {
-            if (event.source !== window || !event.data || event.data.type !== 'Dallel AI_EXTENSION_SYNC_RESULT') {
+            if (event.source !== window || !event.data || event.data.type !== 'Daleel AI_EXTENSION_SYNC_RESULT') {
                 return;
             }
 
@@ -759,7 +776,7 @@ document.addEventListener('DOMContentLoaded', function () {
             syncBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Syncing...';
 
             window.postMessage({
-                type: 'Dallel AI_EXTENSION_SYNC_NOW',
+                type: 'Daleel AI_EXTENSION_SYNC_NOW',
                 source: 'team-page',
                 requestedAt: new Date().toISOString(),
             }, window.location.origin);

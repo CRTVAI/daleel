@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'Dallel AI Mentor')</title>
+    <title>@yield('title', 'Daleel AI Mentor')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -162,9 +162,8 @@
         }
         .avatar-neo:hover { transform: scale(1.05); }
 
-        /* Content Container */
         .main-container-neo {
-            padding: 60px 0;
+            padding: 20px 0;
             max-width: 1440px;
             margin: 0 auto;
             width: 90%;
@@ -176,7 +175,7 @@
             border: 1px solid #fee2e2;
             border-radius: 20px;
             padding: 16px 28px;
-            margin-bottom: 50px;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -251,15 +250,16 @@
         <a href="{{ route('dashboard') }}" class="navbar-brand-neo">
             <div class="brand-mark">DA</div>
             <div class="brand-copy">
-                <strong>Dallel AI</strong>
+                <strong>Daleel AI</strong>
                 <small>by Creative AI</small>
             </div>
         </a>
 
         <div class="nav-links-center">
             <a href="{{ route('dashboard') }}" class="nav-link-neo {{ Route::is('dashboard') ? 'active' : '' }}">Home</a>
-            <a href="{{ route('learn.explore') }}" class="nav-link-neo {{ Route::is('learn.explore') ? 'active' : '' }}">Learning Hub</a>
+            <a href="{{ route('learn.explore') }}" class="nav-link-neo {{ Route::is('learn.explore') ? 'active' : '' }}">Library</a>
             <a href="{{ route('bookmarks') }}" class="nav-link-neo {{ Route::is('bookmarks') ? 'active' : '' }}">Bookmarks</a>
+            <a href="{{ route('roadmap') }}" class="nav-link-neo {{ Request::is('roadmap*') ? 'active' : '' }}">Roadmaps</a>
             <a href="{{ route('extension.install') }}" class="nav-link-neo {{ Route::is('extension.install') ? 'active' : '' }}">AI Extension</a>
             @if(auth()->user()->can_access_team)
             <a href="{{ route('team.index') }}" class="nav-link-neo {{ Route::is('team.index') ? 'active' : '' }}">My Team</a>
@@ -267,6 +267,42 @@
         </div>
 
         <div class="navbar-actions">
+            @auth
+            @php $userRoadmaps = \App\Models\UserRoadmap::where('user_id', Auth::id())->latest()->take(5)->get(); @endphp
+            <div class="dropdown d-none d-md-block">
+                <a href="#" class="icon-btn-neo position-relative" data-bs-toggle="dropdown">
+                    <i class="bi bi-map"></i>
+                    @if($userRoadmaps->count() > 0)
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" style="font-size: 9px; padding: 3px 6px;">
+                            {{ $userRoadmaps->count() }}
+                        </span>
+                    @endif
+                </a>
+                <div class="dropdown-menu dropdown-menu-end border-0 shadow-2xl mt-3 rounded-4 p-3" style="min-width: 300px;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="fw-800 text-dark opacity-50 px-2 small">ACTIVE ROADMAPS</span>
+                        <a href="{{ route('roadmap') }}" class="text-primary small fw-bold text-decoration-none">View All</a>
+                    </div>
+                    @forelse($userRoadmaps as $rm)
+                        <a class="dropdown-item rounded-3 p-2 mb-2" href="{{ route('roadmap.show', $rm) }}">
+                            <div class="d-flex flex-column gap-1">
+                                <div class="d-flex justify-content-between">
+                                    <span class="small fw-bold text-dark">{{ \Illuminate\Support\Str::limit($rm->title, 30) }}</span>
+                                    <span class="small fw-800 text-primary">{{ $rm->progress }}%</span>
+                                </div>
+                                <div class="progress" style="height: 5px; background: #f1f5f9; border-radius: 10px;">
+                                    <div class="progress-bar bg-primary" style="width: {{ $rm->progress }}%"></div>
+                                </div>
+                            </div>
+                        </a>
+                    @empty
+                        <div class="text-center py-3">
+                            <p class="text-muted small mb-0">No roadmaps generated yet.</p>
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+            @endauth
             <a href="{{ route('learn.explore') }}" class="icon-btn-neo d-none d-md-flex"><i class="bi bi-search"></i></a>
             
             <a href="{{ route('ai.mentor') }}" class="btn-get-started d-none d-lg-block">
@@ -303,7 +339,7 @@
             <div class="warning-bar-neo mb-4">
                 <div class="d-flex align-items-center gap-3">
                     <i class="bi bi-envelope-exclamation fs-5 text-danger"></i>
-                    <span>Please verify your email to unlock full access to Dallel AI features.</span>
+                    <span>Please verify your email to unlock full access to Daleel AI features.</span>
                 </div>
                 <form action="{{ route('verification.send') }}" method="POST" class="d-inline">
                     @csrf

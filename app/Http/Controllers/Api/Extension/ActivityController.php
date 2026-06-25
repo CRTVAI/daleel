@@ -16,25 +16,40 @@ class ActivityController extends Controller
      * POST /api/extension/sessions
      * Save a session summary sent from the extension
      */
+    /**
+     * Resolve the specific extension device from the X-Extension-Device-Id header.
+     * Falls back to the most-recently-active device if the header is absent (legacy clients).
+     */
+    private function resolveDevice(Request $request): ?ExtensionDevice
+    {
+        $user     = $request->user();
+        $deviceId = $request->header('X-Extension-Device-Id');
+
+        $query = ExtensionDevice::where('user_id', $user->id)->whereNull('revoked_at');
+
+        if ($deviceId) {
+            // Prefer the exact device that sent this request
+            $device = (clone $query)->where('device_id', $deviceId)->first();
+            if ($device) {
+                return $device;
+            }
+            // Header present but device not found — reject so we don't silently misattribute data
+            return null;
+        }
+
+        // Legacy: no header — fall back to latest active (backwards compat)
+        return $query->orderBy('last_active_at', 'desc')->first();
+    }
+
     public function storeSession(Request $request)
     {
         Log::info('Extension Session API hit', $request->all());
-        
-        $user = $request->user();
-        
-        // Sanctum tokens can tell us the device ID if we set it up, but for now 
-        // we can fetch the active device for the user. (Ideally, the token ID or
-        // token abilities relate to the specific device. Let's find the current device).
-        // A simple fallback: take the first active device or require it in headers/payload.
-        
-        // For security and simplicity, assume the user only has 1 active extension or find the latest
-        $device = ExtensionDevice::where('user_id', $user->id)
-            ->whereNull('revoked_at')
-            ->orderBy('last_active_at', 'desc')
-            ->first();
+
+        $user   = $request->user();
+        $device = $this->resolveDevice($request);
 
         if (!$device) {
-            return response()->json(['message' => 'No active extension device found for user.'], 403);
+            return response()->json(['message' => 'No active extension device found for user. Ensure X-Extension-Device-Id header is sent.'], 403);
         }
 
         $validated = $request->validate([
@@ -103,15 +118,11 @@ class ActivityController extends Controller
     {
         Log::info('Extension Metrics Snapshot API hit', $request->all());
 
-        $user = $request->user();
-        
-        $device = ExtensionDevice::where('user_id', $user->id)
-            ->whereNull('revoked_at')
-            ->orderBy('last_active_at', 'desc')
-            ->first();
+        $user   = $request->user();
+        $device = $this->resolveDevice($request);
 
         if (!$device) {
-            return response()->json(['message' => 'No active extension device found for user.'], 403);
+            return response()->json(['message' => 'No active extension device found for user. Ensure X-Extension-Device-Id header is sent.'], 403);
         }
 
         $validated = $request->validate([
@@ -165,13 +176,12 @@ class ActivityController extends Controller
     public function storeDailyRollup(Request $request)
     {
         Log::info('Extension Daily Rollup API hit', $request->all());
-        $user = $request->user();
-        
-        $device = ExtensionDevice::where('user_id', $user->id)
-            ->whereNull('revoked_at')->orderBy('last_active_at', 'desc')->first();
+
+        $user   = $request->user();
+        $device = $this->resolveDevice($request);
 
         if (!$device) {
-            return response()->json(['message' => 'No active extension device found for user.'], 403);
+            return response()->json(['message' => 'No active extension device found for user. Ensure X-Extension-Device-Id header is sent.'], 403);
         }
 
         $validated = $request->validate([
@@ -190,9 +200,12 @@ class ActivityController extends Controller
         ]);
 
         $rollup = \App\Models\ExtensionDailyRollup::updateOrCreate(
-            ['user_id' => $user->id, 'date' => $validated['date']],
             [
+                'user_id' => $user->id, 
                 'extension_device_id' => $device->id,
+                'date' => $validated['date']
+            ],
+            [
                 'timezone' => $validated['timezone'] ?? null,
                 'total_active_ms' => $validated['summary']['total_active_ms'] ?? 0,
                 'total_idle_ms' => $validated['summary']['total_idle_ms'] ?? 0,

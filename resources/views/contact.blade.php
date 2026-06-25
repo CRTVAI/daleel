@@ -1,13 +1,13 @@
 @extends('layouts.public')
 
-@section('title', 'Dallel AI | Contact')
+@section('title', 'Daleel AI | Contact')
 
 @section('content')
 <section class="page-hero">
   <div class="container hero-grid">
     <div>
       <p class="eyebrow">Contact</p>
-      <h1>Book a demo or talk to the Dallel AI team</h1>
+      <h1>Book a demo or talk to the Daleel AI team</h1>
       <p class="lead">Tell us about your company, training goals, and AI adoption needs.</p>
       <div class="hero-actions">
         <a class="btn primary" href="{{ route('register') }}">Start Free</a>

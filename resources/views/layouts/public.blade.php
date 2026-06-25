@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>@yield('title', 'Dallel AI')</title>
+  <title>@yield('title', 'Daleel AI')</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <link rel="stylesheet" href="{{ asset('site.css') }}">
@@ -12,9 +12,9 @@
 <body>
   <header class="site-nav glass">
     <div class="container nav-inner">
-      <a class="brand" href="/" aria-label="Dallel AI home">
+      <a class="brand" href="/" aria-label="Daleel AI home">
         <span class="brand-mark shadow-sm">DA</span>
-        <span class="brand-copy"><strong style="font-weight: 900; letter-spacing: -0.03em;">Dallel AI</strong><small class="fw-800 text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.05em; opacity: 0.8;">The Learning Layer</small></span>
+        <span class="brand-copy"><strong style="font-weight: 900; letter-spacing: -0.03em;">Daleel AI</strong><small class="fw-800 text-uppercase" style="font-size: 0.6rem; letter-spacing: 0.05em; opacity: 0.8;">The Learning Layer</small></span>
       </a>
       <nav class="nav-links" id="siteNavLinks" aria-label="Public pages">
         <a href="{{ url('how-it-works') }}" class="fw-700">How It Works</a>
@@ -40,7 +40,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <a class="brand" href="/"><span class="brand-mark shadow-sm">DA</span><span class="brand-copy"><strong style="color: white; font-weight: 900; letter-spacing: -0.03em;">Dallel AI</strong><small style="color: #64748b; font-weight: 800; text-transform: uppercase; font-size: 0.6rem;">The Learning Layer</small></span></a>
+          <a class="brand" href="/"><span class="brand-mark shadow-sm">DA</span><span class="brand-copy"><strong style="color: white; font-weight: 900; letter-spacing: -0.03em;">Daleel AI</strong><small style="color: #64748b; font-weight: 800; text-transform: uppercase; font-size: 0.6rem;">The Learning Layer</small></span></a>
           <p>AI lessons matched to daily tasks, repeated work, and real workplace goals.</p>
           <form class="newsletter">
             <input aria-label="Email for AI tips" placeholder="Get AI workflow tips">
@@ -73,14 +73,14 @@
           <h3>Company</h3>
           <a href="{{ url('about') }}">About</a>
           <a href="{{ url('pricing') }}">Pricing</a>
-          <a href="{{ url('contact') }}">hello@dallel.ai</a>
+          <a href="{{ url('contact') }}">hello@Daleel.ai</a>
           <a href="{{ url('terms') }}">Terms</a>
           <a href="{{ url('privacy') }}">Privacy Policy</a>
           <a href="{{ url('cookies') }}">Cookie Policy</a>
         </div>
       </div>
       <div class="footer-bottom">
-        <span>Copyright 2026 Dallel AI by Creative AI. All rights reserved.</span>
+        <span>Copyright 2026 Daleel AI by Creative AI. All rights reserved.</span>
         <span>LinkedIn | X | YouTube</span>
       </div>
     </div>

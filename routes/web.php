@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\EnterpriseContactController;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Route;
 
@@ -12,20 +13,17 @@ Route::get('/enterprise', function () {
     return view('enterprise');
 });
 
-Route::get('/{page}', function ($page) {
-    $validPages = [
-        'how-it-works', 'enterprise', 'success-stories', 'pricing',
-        'about', 'contact', 'blog', 'tools-directory', 'help-center',
-        'terms', 'privacy', 'cookies', 'learning-paths', 'chrome-extension',
-        'lesson'
-    ];
-    
-    if (in_array($page, $validPages)) {
-        return view($page);
-    }
-    
-    abort(404);
-})->where('page', '^(?!admin|user|dashboard|login|register|logout|forgot-password|reset-password|verify-email|profile|integrations|bookmarks|progress|activity-history|ai-mentor|learn|clear-cache|team|extension-setup|extension-data|api|videos).*$');
+Route::get('/terms', function () {
+    return view('terms');
+})->name('terms');
+
+Route::get('/privacy', function () {
+    return view('privacy');
+})->name('privacy');
+
+Route::post('/enterprise/contact', [EnterpriseContactController::class, 'send'])->name('enterprise.contact.send');
+
+
 
 Route::get('/videos', [App\Http\Controllers\LearningController::class, 'explore'])->name('videos.public');
 
@@ -61,6 +59,12 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/contents', [App\Http\Controllers\AdminController::class, 'contentStore'])->name('admin.contents.store');
     Route::put('/admin/contents/{content}', [App\Http\Controllers\AdminController::class, 'contentUpdate'])->name('admin.contents.update');
     Route::delete('/admin/contents/{content}', [App\Http\Controllers\AdminController::class, 'contentDestroy'])->name('admin.contents.destroy');
+
+    // Category Management
+    Route::get('/admin/categories', [App\Http\Controllers\AdminController::class, 'categoriesIndex'])->name('admin.categories.index');
+    Route::post('/admin/categories', [App\Http\Controllers\AdminController::class, 'categoryStore'])->name('admin.categories.store');
+    Route::put('/admin/categories/{category}', [App\Http\Controllers\AdminController::class, 'categoryUpdate'])->name('admin.categories.update');
+    Route::delete('/admin/categories/{category}', [App\Http\Controllers\AdminController::class, 'categoryDestroy'])->name('admin.categories.destroy');
     Route::get('/admin/courses', [App\Http\Controllers\AdminController::class, 'coursesIndex'])->name('admin.courses.index');
     Route::post('/admin/courses', [App\Http\Controllers\AdminController::class, 'courseStore'])->name('admin.courses.store');
     Route::get('/admin/courses/{course}/manage', [App\Http\Controllers\AdminController::class, 'manageCourseContents'])->name('admin.courses.manage');
@@ -79,6 +83,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
 // Protected User Routes
 Route::middleware(['auth'])->group(function () {
     Route::get('/user/dashboard', [App\Http\Controllers\HomeController::class, 'userIndex'])->name('user.dashboard');
+    Route::get('/roadmap', [App\Http\Controllers\LearningController::class, 'roadmap'])->name('roadmap');
     Route::get('/extension-setup', [App\Http\Controllers\HomeController::class, 'extensionSetup'])->name('extension.install');
     Route::get('/extension-data', [App\Http\Controllers\HomeController::class, 'extensionData'])->name('extension.data');
     Route::post('/extension-data/reset', [App\Http\Controllers\HomeController::class, 'resetExtensionData'])->name('extension.data.reset');
@@ -104,9 +109,19 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/onboarding/store', [App\Http\Controllers\OnboardingController::class, 'store'])->name('onboarding.store');
 });
 
-// ── AI MENTOR PUBLIC ACCESS ──
+// ── AI MENTOR & SEARCH ──
 Route::get('/ai-mentor', [App\Http\Controllers\AiController::class, 'mentor'])->name('ai.mentor');
+Route::get('/search/advanced', [App\Http\Controllers\AdvancedSearchController::class, 'search'])->name('search.advanced');
 Route::get('/learn/{content}', [App\Http\Controllers\LearningController::class, 'watch'])->name('learn.watch');
+
+// ── ROADMAP WIZARD (Single Page) ──
+Route::middleware(['auth'])->group(function () {
+    Route::get('/roadmap', [App\Http\Controllers\RoadmapController::class, 'index'])->name('roadmap');
+    Route::get('/roadmap/wizard', [App\Http\Controllers\RoadmapController::class, 'wizard'])->name('roadmap.wizard');
+    Route::get('/roadmap/{roadmap}', [App\Http\Controllers\RoadmapController::class, 'show'])->name('roadmap.show');
+    Route::post('/roadmap/api/categories', [App\Http\Controllers\RoadmapController::class, 'getFocusCategories'])->name('roadmap.api.categories');
+    Route::post('/roadmap/api/generate', [App\Http\Controllers\RoadmapController::class, 'generateRoadmap'])->name('roadmap.api.generate');
+});
 
 // Public JSON API for static site video library
 Route::get('/api/public/videos', function () {
@@ -159,3 +174,18 @@ Route::middleware('auth')->group(function () {
 
 Route::get('/activity-history', [App\Http\Controllers\HomeController::class, 'activityHistory'])->middleware(['auth', 'verified'])->name('activity.history');
 require __DIR__.'/auth.php';
+
+Route::get('/{page}', function ($page) {
+    $validPages = [
+        'how-it-works', 'enterprise', 'success-stories', 'pricing',
+        'about', 'contact', 'blog', 'tools-directory', 'help-center',
+        'terms', 'privacy', 'cookies', 'learning-paths', 'chrome-extension',
+        'lesson'
+    ];
+    
+    if (in_array($page, $validPages)) {
+        return view($page);
+    }
+    
+    abort(404);
+})->where('page', '^(?!admin|user|dashboard|login|register|roadmap|logout|forgot-password|reset-password|verify-email|profile|integrations|bookmarks|progress|activity-history|ai-mentor|learn|clear-cache|team|extension-setup|extension-data|api|videos).*$');

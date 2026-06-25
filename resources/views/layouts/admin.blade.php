@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dallel AI Admin | Management Portal</title>
+    <title>Daleel AI Admin | Management Portal</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -277,7 +277,7 @@
         <aside class="admin-sidebar">
             <div class="sidebar-brand">
                 <div class="brand-logo"><i class="bi bi-rocket-takeoff-fill"></i></div>
-                <span class="brand-text">DALLEL AI ADMIN</span>
+                <span class="brand-text">Daleel AI ADMIN</span>
             </div>
 
             <div class="menu-label">Main Menu</div>
@@ -296,6 +296,9 @@
                 </li>
                 <li class="menu-item {{ request()->routeIs('admin.contents.index') ? 'active' : '' }}">
                     <a href="{{ route('admin.contents.index') }}"><i class="bi bi-play-circle-fill"></i> Content Library</a>
+                </li>
+                <li class="menu-item {{ request()->routeIs('admin.categories.index') ? 'active' : '' }}">
+                    <a href="{{ route('admin.categories.index') }}"><i class="bi bi-grid-fill"></i> Category Library</a>
                 </li>
                 <li class="menu-item {{ request()->routeIs('admin.courses.index') ? 'active' : '' }}">
                     <a href="{{ route('admin.courses.index') }}"><i class="bi bi-collection-play-fill"></i> Course Library</a>
@@ -370,6 +373,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    @stack('modals')
     @yield('scripts')
 </body>
 </html>

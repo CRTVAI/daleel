@@ -12,6 +12,7 @@ class Course extends Model
         'description',
         'thumbnail',
         'category',
+        'category_id',
         'status',
     ];
 
@@ -23,11 +24,21 @@ class Course extends Model
         return $this->hasMany(Content::class)->orderBy('sort_order');
     }
 
+    public function category_rel()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
+
     /**
      * Get content grouped by section/part label.
      */
     public function getGroupedContentsAttribute()
     {
         return $this->contents->groupBy('section_part_label');
+    }
+
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active');
     }
 }

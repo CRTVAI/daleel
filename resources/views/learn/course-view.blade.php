@@ -1,6 +1,6 @@
 @extends('layouts.user')
 
-@section('title', $course->title . ' — Dallel AI')
+@section('title', $course->title . ' — Daleel AI')
 
 @section('styles')
 <style>

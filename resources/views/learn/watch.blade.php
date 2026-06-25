@@ -1,6 +1,6 @@
 @extends(auth()->check() ? 'layouts.user' : 'layouts.public')
 
-@section('title', $content->title . ' — Dallel AI')
+@section('title', $content->title . ' — Daleel AI')
 
 @section('styles')
 @if(!auth()->check())
@@ -231,6 +231,91 @@
     .lesson-num-circle { width: 28px; height: 28px; border-radius: 8px; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
     .btn-bookmark { width: 42px; height: 42px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #64748b; transition: all 0.2s; }
     .btn-bookmark.active { background: #000; border-color: #000; color: #fff; }
+
+    /* Like/Dislike & Report Buttons */
+    .interaction-controls {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .btn-interact {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        color: #64748b;
+        transition: all 0.2s;
+    }
+
+    .btn-interact:hover {
+        background: #fff;
+        color: var(--plyr-color-main);
+        border-color: var(--plyr-color-main);
+        transform: translateY(-2px);
+    }
+
+    .btn-like.active { background: #12B76A; border-color: #12B76A; color: #fff; }
+    .btn-dislike.active { background: #F04438; border-color: #F04438; color: #fff; }
+
+    .btn-report-outdated {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: #94a3b8;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        margin-top: 1.5rem;
+        transition: color 0.2s;
+    }
+
+    .btn-report-outdated:hover {
+        color: #F04438;
+    }
+
+    /* Lesson Info Sections */
+    .lesson-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .lesson-meta-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .meta-label {
+        font-weight: 800;
+        color: #1e1b4b;
+        text-transform: uppercase;
+        font-size: 0.7rem;
+        letter-spacing: 0.05em;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .meta-label i {
+        color: var(--plyr-color-main);
+        font-size: 1rem;
+    }
+
+    .meta-value {
+        color: #475569;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        font-weight: 500;
+    }
 </style>
 @endif
 @endsection
@@ -244,7 +329,13 @@
             <div class="col-lg-8">
                 <div class="watch-hero">
                     <div class="player-shadow">
-                        <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="{{ $content->youtube_id }}"></div>
+                        @if($content->video_url && (str_contains($content->video_url, 'amazonaws.com') || str_ends_with($content->video_url, '.mp4')))
+                            <video id="player" playsinline controls data-poster="{{ $content->thumbnail_url }}">
+                                <source src="{{ $content->video_url }}" type="video/mp4" />
+                            </video>
+                        @else
+                            <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="{{ $content->youtube_id }}"></div>
+                        @endif
                     </div>
                 </div>
 
@@ -275,16 +366,39 @@
             </div>
 
             <div class="col-lg-4">
-                <div class="sidebar-label">Up Next</div>
-                @foreach($recommended as $rec)
-                <a href="{{ route('learn.watch', $rec) }}" class="rec-card-mini">
-                    <img src="{{ $rec->thumbnail_url }}" class="rec-thumb-mini" alt="{{ $rec->title }}">
-                    <div class="rec-body-mini">
-                        <h4>{{ $rec->title }}</h4>
-                        <span>{{ $rec->category }}</span>
+                @if($course)
+                    <div class="sidebar-label">Course Curriculum</div>
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                        <div class="card-header bg-dark text-white py-3 px-3">
+                            <div class="small opacity-75 fw-bold text-uppercase" style="font-size: 10px; letter-spacing: 0.05em;">Playing from Course</div>
+                            <h6 class="fw-bold mb-0 text-truncate" title="{{ $course->title }}">{{ $course->title }}</h6>
+                        </div>
+                        <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
+                            @foreach($course->contents as $lesson)
+                                <a href="{{ route('learn.watch', $lesson) }}" class="rec-card-mini border-0 rounded-0 m-0 border-bottom {{ $lesson->id == $content->id ? 'bg-light' : '' }}" style="padding: 15px;">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="lesson-num-circle @if($lesson->id == $content->id) bg-primary text-white @endif">{{ $loop->iteration }}</div>
+                                        <div>
+                                            <h4 class="small fw-bold mb-0 {{ $lesson->id == $content->id ? 'text-primary' : '' }}">{{ $lesson->title }}</h4>
+                                            @if($lesson->duration_label)<span class="text-muted" style="font-size: 10px;">{{ $lesson->duration_label }}</span>@endif
+                                        </div>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
                     </div>
-                </a>
-                @endforeach
+                @else
+                    <div class="sidebar-label">Up Next</div>
+                    @foreach($recommended as $rec)
+                    <a href="{{ route('learn.watch', $rec) }}" class="rec-card-mini">
+                        <img src="{{ $rec->thumbnail_url }}" class="rec-thumb-mini" alt="{{ $rec->title }}">
+                        <div class="rec-body-mini">
+                            <h4>{{ $rec->title }}</h4>
+                            <span>{{ $rec->category }}</span>
+                        </div>
+                    </a>
+                    @endforeach
+                @endif
 
                 <div class="card bg-dark text-white p-4 rounded-4 mt-5 border-0 shadow-lg mb-5" style="height: 375px; background: linear-gradient(135deg, #1E1B4B, #312E81);">
                     <h5 class="fw-bold mb-3">Track your progress</h5>
@@ -323,7 +437,13 @@
         <div class="col-lg-8">
             <div class="player-wrapper mb-4">
                 <div id="player-wrap">
-                    <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="{{ $content->youtube_id }}"></div>
+                    @if($content->video_url && (str_contains($content->video_url, 'amazonaws.com') || str_ends_with($content->video_url, '.mp4')))
+                        <video id="player" playsinline controls data-poster="{{ $content->thumbnail_url }}">
+                            <source src="{{ $content->video_url }}" type="video/mp4" />
+                        </video>
+                    @else
+                        <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="{{ $content->youtube_id }}"></div>
+                    @endif
                 </div>
             </div>
 
@@ -340,41 +460,71 @@
             <div class="video-meta-card p-4 mb-4">
                 <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
                     <h1 class="h4 fw-bold mb-0">{{ $content->title }}</h1>
-                    <button class="btn btn-bookmark {{ auth()->user()->bookmarkedContents()->where('content_id', $content->id)->exists() ? 'active' : '' }}" onclick="toggleBookmark({{ $content->id }}, this)">
-                        <i class="bi {{ auth()->user()->bookmarkedContents()->where('content_id', $content->id)->exists() ? 'bi-bookmark-fill' : 'bi-bookmark' }}"></i>
-                    </button>
+                    <div class="d-flex gap-2">
+                        <div class="interaction-controls">
+                            <button class="btn-interact btn-like" onclick="toggleLike({{ $content->id }}, 'like', this)" title="Like">
+                                <i class="bi bi-hand-thumbs-up"></i>
+                            </button>
+                            <button class="btn-interact btn-dislike" onclick="toggleLike({{ $content->id }}, 'dislike', this)" title="Dislike">
+                                <i class="bi bi-hand-thumbs-down"></i>
+                            </button>
+                        </div>
+                        <button class="btn-bookmark {{ auth()->user()->bookmarkedContents()->where('content_id', $content->id)->exists() ? 'active' : '' }}" onclick="toggleBookmark({{ $content->id }}, this)">
+                            <i class="bi {{ auth()->user()->bookmarkedContents()->where('content_id', $content->id)->exists() ? 'bi-bookmark-fill' : 'bi-bookmark' }}"></i>
+                        </button>
+                    </div>
                 </div>
                 <p class="text-muted mb-0">{{ $content->description }}</p>
+
+                <div class="lesson-meta-grid">
+                    <div class="lesson-meta-item">
+                        <span class="meta-label"><i class="bi bi-briefcase"></i> Use Case</span>
+                        <span class="meta-value">Automating recurring professional workflows using specialized AI interactions and real-time behavioral mapping.</span>
+                    </div>
+                    <div class="lesson-meta-item">
+                        <span class="meta-label"><i class="bi bi-person-badge"></i> Role Relevance</span>
+                        <span class="meta-value">Essential for professionals looking to minimize cognitive load during tool-switching and repetitive digital tasks.</span>
+                    </div>
+                    <div class="lesson-meta-item">
+                        <span class="meta-label"><i class="bi bi-journal-check"></i> Lesson Outcome</span>
+                        <span class="meta-value">Competency in deploying modern AI strategies to save at least 15-20% of daily digital operation time.</span>
+                    </div>
+                </div>
+
+                <a href="#" class="btn-report-outdated" onclick="event.preventDefault(); reportOutdated({{ $content->id }})">
+                    <i class="bi bi-flag"></i> Report this content as outdated
+                </a>
             </div>
         </div>
 
         <div class="col-lg-4">
             <div class="sidebar-section">
-                @if($course && request('from') !== 'mentor')
+                @if($course)
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                         <div class="card-header bg-dark text-white py-3 px-4">
-                            <h6 class="fw-bold mb-1">Curriculum</h6>
-                            <div class="small opacity-75">{{ $course->title }}</div>
+                            <div class="small opacity-75 fw-bold text-uppercase mb-1" style="font-size: 11px;">Current Course</div>
+                            <h6 class="fw-bold mb-0 text-truncate" title="{{ $course->title }}">{{ $course->title }}</h6>
                         </div>
-                        <div class="card-body p-0">
+                        <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
                             @foreach($course->contents as $lesson)
                                 <a href="{{ route('learn.watch', $lesson) }}" class="curriculum-item d-flex align-items-center gap-3 py-3 px-4 text-decoration-none {{ $lesson->id == $content->id ? 'active' : '' }}">
-                                    <div class="lesson-num-circle">{{ $loop->iteration }}</div>
-                                    <div class="fw-bold small">{{ $lesson->title }}</div>
+                                    <div class="lesson-num-circle {{ $lesson->id == $content->id ? 'bg-primary text-white' : '' }}">{{ $loop->iteration }}</div>
+                                    <div class="fw-bold small text-truncate">{{ $lesson->title }}</div>
                                 </a>
                             @endforeach
                         </div>
                     </div>
+                @else
+                    <h6 class="fw-800 mb-3">Suggested Lessons</h6>
+                    @foreach($recommended as $rec)
+                    <a href="{{ route('learn.watch', $rec) }}" class="next-video-card text-decoration-none d-block mb-3">
+                        <div class="d-flex gap-3 align-items-center">
+                            <div class="next-thumb"><img src="{{ $rec->thumbnail_url }}"></div>
+                            <div class="fw-bold small text-dark line-clamp-2">{{ $rec->title }}</div>
+                        </div>
+                    </a>
+                    @endforeach
                 @endif
-                <h6 class="fw-800 mb-3">Suggested Lessons</h6>
-                @foreach($recommended as $rec)
-                <a href="{{ route('learn.watch', $rec) }}" class="next-video-card text-decoration-none d-block mb-3">
-                    <div class="d-flex gap-3 align-items-center">
-                        <div class="next-thumb"><img src="{{ $rec->thumbnail_url }}"></div>
-                        <div class="fw-bold small text-dark line-clamp-2">{{ $rec->title }}</div>
-                    </div>
-                </a>
-                @endforeach
             </div>
         </div>
     </div>
@@ -387,6 +537,7 @@
 <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 <script>
     const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
+    const isYoutube = document.querySelector('#player').dataset.plyrProvider === 'youtube';
     const player = new Plyr('#player', {
         youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
     });
@@ -451,6 +602,30 @@
                 icon.classList.replace('bi-bookmark-fill', 'bi-bookmark');
             }
         });
+    }
+    function toggleLike(contentId, type, btn) {
+        const controls = btn.closest('.interaction-controls');
+        const likeBtn = controls.querySelector('.btn-like');
+        const dislikeBtn = controls.querySelector('.btn-dislike');
+        
+        if (type === 'like') {
+            likeBtn.classList.toggle('active');
+            dislikeBtn.classList.remove('active');
+            // Simulated sentiment toast
+            if (typeof showToast !== 'undefined') showToast(likeBtn.classList.contains('active') ? 'Liked' : 'Removed Like', 'success');
+        } else {
+            dislikeBtn.classList.toggle('active');
+            likeBtn.classList.remove('active');
+            if (typeof showToast !== 'undefined') showToast(dislikeBtn.classList.contains('active') ? 'Disliked' : 'Removed Dislike', 'info');
+        }
+    }
+
+    function reportOutdated(contentId) {
+        if (typeof showToast !== 'undefined') {
+            showToast('Thank you for reporting. Our team will review this lesson.', 'success');
+        } else {
+            alert('Thank you for reporting. Our team will review this lesson.');
+        }
     }
 </script>
 @endsection

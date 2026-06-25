@@ -14,7 +14,7 @@
             <!-- Step 0: Welcome -->
             <div class="onboarding-step active" data-step="0">
                 <div class="onboarding-content text-center">
-                    <h2 class="fw-800 mb-3">Welcome to Dallel AI</h2>
+                    <h2 class="fw-800 mb-3">Welcome to Daleel AI</h2>
                     <p class="text-muted mb-5 px-lg-5">Complete this brief configuration to unlock a learning experience tailored specifically to your professional goals.</p>
                     
                     <!-- Professional Estimation Tag -->
