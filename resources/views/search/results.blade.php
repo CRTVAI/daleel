@@ -411,7 +411,7 @@
     </div>
     
     {{-- ── AI LOGIC DEBUG (Step-by-Step) ── --}}
-    @if(config('app.debug') && isset($debug))
+    <!-- @if(config('app.debug') && isset($debug))
         <div class="row justify-content-center mb-5">
             <div class="col-lg-10">
                 <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
@@ -480,7 +480,7 @@
                 </div>
             </div>
         </div>
-    @endif
+    @endif -->
 
 
     {{-- ── Results ── --}}

@@ -19,6 +19,7 @@ class ExtensionDevice extends Model
         'extension_version',
         'last_active_at',
         'revoked_at',
+        'token_id',
     ];
 
     protected $casts = [

@@ -19,46 +19,15 @@ class AdvancedSearchController extends Controller
     private const CACHE_TTL = 300; // 5 minutes
 
     /**
-     * Maximum items to send to GPT in a single request.
+     * Maximum items to send to GPT in step 2.
      */
     private const MAX_GPT_CANDIDATES = 50;
-
-    /**
-     * Signal words that strongly indicate a COURSE intent.
-     */
-    private const COURSE_SIGNALS = [
-        'learn', 'master', 'mastery', 'masterclass', 'course', 'guide',
-        'foundations', 'foundation', 'fundamentals', 'introduction', 'intro',
-        'beginner', 'basics', 'basic', 'bootcamp', 'curriculum', 'series',
-        'path', 'complete', 'full', 'training',
-        'from scratch', 'zero to hero', 'deep dive', 'comprehensive',
-    ];
-
-    /**
-     * Signal words that strongly indicate a ROADMAP intent.
-     */
-    private const ROADMAP_SIGNALS = [
-        'roadmap', 'become', 'pro', 'grow', 'succeed', 'career',
-        'improve my', 'automation agency', 'business', 'entrepreneur',
-        'skill path', 'learning path', 'journey',
-    ];
-
-    /**
-     * Signal words that strongly indicate a single VIDEO intent.
-     */
-    private const VIDEO_SIGNALS = [
-        'how to', 'how do', 'what is', 'what are', 'why is', 'why does',
-        'fix', 'solve', 'error', 'issue', 'problem', 'connect', 'integrate',
-        'create', 'build', 'make', 'write', 'generate', 'use', 'using',
-        'setup', 'set up', 'install', 'configure', 'difference between',
-        'tutorial', 'walkthrough', 'step by step', 'quick tip', 'explain',
-    ];
 
     /**
      * Tracks which matching method was used for debugging.
      */
     private ?string $lastMatchMethod = null;
-    
+
     /**
      * Store last GPT response for debugging.
      */
@@ -69,7 +38,7 @@ class AdvancedSearchController extends Controller
     // =========================================================================
 
     /**
-     * Main search handler with caching for the search data only (not the view).
+     * Main search handler.
      */
     public function search(Request $request)
     {
@@ -79,62 +48,64 @@ class AdvancedSearchController extends Controller
             return redirect()->route('learn.explore');
         }
 
-        // Don't cache if debug mode or development
+        // Don't cache in local/debug mode
         if (config('app.debug') || app()->environment('local')) {
             $searchData = $this->performSearch($query);
         } else {
-            // Cache only the search result DATA, not the view
             $cacheKey = 'search_result:' . md5(strtolower($query));
-            
             $searchData = Cache::remember($cacheKey, self::CACHE_TTL, function () use ($query) {
                 return $this->performSearch($query);
             });
         }
 
-        // Handle Redirects (Roadmap intent)
         if ($searchData instanceof \Illuminate\Http\RedirectResponse) {
             return $searchData;
         }
 
-        // Build the view with the cached data
         return $this->buildView($searchData);
     }
 
     /**
-     * Core search logic that returns data array or a redirect (cacheable).
+     * Core search logic.
      */
-    private function performSearch(string $query)
+    private function performSearch(string $rawQuery)
     {
-        // Reset tracking variables
         $this->lastMatchMethod = null;
         $this->lastGptResponse = null;
 
-        // ── STEP 1: Detect intent ──
-        $intent = $this->detectIntent($query);
+        // ── STEP 1: GPT Query Processor ──
+        // Load all active tool names so GPT only extracts known tools
+        $allToolNames = Tool::active()->pluck('name')->toArray();
 
-        Log::info('SmartSearch: Intent detected', [
-            'query' => $query,
-            'intent' => $intent,
+        $parsed = $this->gptParseQuery($rawQuery, $allToolNames);
+
+        Log::info('SmartSearch: Step 1 GPT parsed query', [
+            'raw_query'      => $rawQuery,
+            'fixed_query'    => $parsed['fixed_query'],
+            'query_type'     => $parsed['query_type'],
+            'tools'          => $parsed['tools_mentioned'],
+            'confidence'     => $parsed['confidence_score'],
         ]);
 
-        // Get all titles for debug display
-        $allCourses = Course::active()->get(['id', 'title']);
-        $allVideos = Content::active()->whereNull('course_id')->get(['id', 'title']);
+        $fixedQuery     = $parsed['fixed_query'];
+        $queryType      = $parsed['query_type'];      // 'single_video' | 'course' | 'roadmap'
+        $toolsMentioned = $parsed['tools_mentioned']; // e.g. ['Laravel', 'VS Code']
 
-        // ── STEP 2: Branch based on intent ──
-        if ($intent === 'roadmap') {
-            return $this->handleRoadmap($query, $intent);
+        // ── STEP 2: Branch based on query type ──
+        if ($queryType === 'roadmap') {
+            return $this->handleRoadmap($fixedQuery, $rawQuery, $toolsMentioned, $parsed);
         }
 
-        if ($intent === 'course') {
-            return $this->handleCourse($query, $intent, $allCourses, $allVideos);
+        if ($queryType === 'course') {
+            return $this->handleCourse($fixedQuery, $rawQuery, $toolsMentioned, $parsed);
         }
 
-        return $this->handleVideo($query, $intent, $allVideos, $allCourses);
+        // default: single_video
+        return $this->handleVideo($fixedQuery, $rawQuery, $toolsMentioned, $parsed);
     }
 
     /**
-     * Build the view from cached data.
+     * Build view from data array.
      */
     private function buildView(array $data): \Illuminate\View\View
     {
@@ -142,147 +113,170 @@ class AdvancedSearchController extends Controller
     }
 
     // =========================================================================
-    // INTENT DETECTION
+    // STEP 1 — GPT QUERY PROCESSOR
     // =========================================================================
 
     /**
-     * Detect search intent using signal words first, then GPT for ambiguous queries.
+     * Sends the raw query + full tool list to GPT.
+     * GPT fixes typos, classifies type, and extracts tools from the known list.
+     *
+     * Returns:
+     * [
+     *   'fixed_query'      => string,
+     *   'query_type'       => 'single_video'|'course'|'roadmap',
+     *   'tools_mentioned'  => string[],
+     *   'goals_intent'     => string,
+     *   'confidence_score' => float,
+     * ]
      */
-    private function detectIntent(string $query): string
+    private function gptParseQuery(string $rawQuery, array $allToolNames): array
     {
-        $lowerQuery = strtolower($query);
-        $matches = [];
+        $toolListStr = implode(', ', $allToolNames);
 
-        // Check for Roadmap signals
-        foreach (self::ROADMAP_SIGNALS as $signal) {
-            if (str_contains($lowerQuery, $signal)) {
-                $matches[] = 'roadmap';
-                break;
-            }
-        }
+        $systemPrompt = <<<SYSTEM
+You are an intelligent search query processor for a video learning platform.
+Your job is to understand the user's intent and return a structured JSON response.
+SYSTEM;
 
-        // Check for Course signals
-        foreach (self::COURSE_SIGNALS as $signal) {
-            if (str_contains($lowerQuery, $signal)) {
-                $matches[] = 'course';
-                break;
-            }
-        }
+        $userPrompt = <<<PROMPT
+USER QUERY: "{$rawQuery}"
 
-        // Check for Video signals
-        foreach (self::VIDEO_SIGNALS as $signal) {
-            if (str_contains($lowerQuery, $signal)) {
-                $matches[] = 'video';
-                break;
-            }
-        }
+AVAILABLE TOOLS IN OUR PLATFORM:
+{$toolListStr}
 
-        // 1. If only one intent matched, return it immediately (fast/free)
-        if (count(array_unique($matches)) === 1) {
-            return $matches[0];
-        }
+YOUR TASKS:
+1. Fix any spelling or typo mistakes in the query.
+2. Classify the request into ONE type:
+   - "single_video": User wants ONE specific tutorial/how-to video (e.g. "how to connect excel", "fix css error", "what is an API").
+   - "course": User wants to deeply learn a tool or topic (e.g. "Excel Masterclass", "learn Python", "how to master Laravel").
+   - "roadmap": User has a broad career/productivity goal (e.g. "become a pro", "grow my career", "learning path for automation").
+3. Extract ONLY tool names from the AVAILABLE TOOLS list that the user mentioned or clearly implied.
+4. Summarize the user's goal/intent in one short sentence.
+5. Give a confidence score (0.0–1.0) for your classification.
 
-        // 1.5 Conflict Resolution: "How to learn/master [X]" is almost always a COURSE intent
-        if (count($matches) >= 2 && in_array('course', $matches) && in_array('video', $matches)) {
-            if (preg_match('/\b(learn|master)\b/i', $lowerQuery)) {
-                return 'course';
-            }
-        }
+CRITICAL RULES:
+- "How to learn [Tool]" or "How to master [Tool]" → always "course".
+- Broad career/productivity goals (not tool-specific) → always "roadmap".
+- Specific how-to tasks → "single_video".
+- Only extract tools from the AVAILABLE TOOLS list. If no tool matches, return an empty array.
 
-        // 2. If NO signals matched OR MULTIPLE signals matched (conflict), use GPT
-        Log::info('SmartSearch: Conflict or unknown query, using GPT', [
-            'query' => $query,
-            'matches' => $matches,
-        ]);
-
-        return $this->askGptForIntent($query);
-    }
-
-    /**
-     * Uses GPT to classify the intent into 'video', 'course', or 'roadmap'.
-     */
-    private function askGptForIntent(string $query): string
-    {
-        $prompt = <<<PROMPT
-USER QUERY: "{$query}"
-
-TASK: Classify this intent into ONE of these three categories:
-
-1. 'video': (Specific technical task) - User wants to do ONE small thing right now. (e.g., "how to connect excel", "fix css", "how to use filters").
-2. 'course': (Topic Mastery) - User wants to learn a specific tool/course deeply. (e.g., "Excel Masterclass", "Learn Python", "How to learn GPT").
-3. 'roadmap': (Broad Growth/Goal) - User has a "Big Picture" career or productivity goal. (e.g., "How to grow in office", "Become a pro", "Succeed in my career", "learning path for automation").
-
-CRITICAL RULES: 
-- If the query is "How to learn [Tool Name]" or "How to master [Tool Name]", it is a 'course'.
-- If the query is about "GROWTH", "SUCCESS", "PRODUCTIVITY", "CAREER", or "BECOMING A PRO" (generalized, not tool-specific), it is a 'roadmap'.
-- When in doubt between 'course' and 'roadmap', pick 'course' if a single specific tool is mentioned.
-
-Reply with ONLY the word: 'video', 'course', or 'roadmap'.
+Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
+{
+  "fixed_query": "corrected query text",
+  "query_type": "single_video|course|roadmap",
+  "tools_mentioned": ["ToolA", "ToolB"],
+  "goals_intent": "short description of what the user wants",
+  "confidence_score": 0.95
+}
 PROMPT;
+
+        $fallback = [
+            'fixed_query'      => $rawQuery,
+            'query_type'       => 'single_video',
+            'tools_mentioned'  => [],
+            'goals_intent'     => $rawQuery,
+            'confidence_score' => 0.5,
+        ];
 
         try {
             $response = Http::withToken(config('services.openai.key'))
-                ->timeout(15)
+                ->timeout(20)
                 ->retry(2, 100)
                 ->post('https://api.openai.com/v1/chat/completions', [
                     'model'       => 'gpt-4o-mini',
-                    'max_tokens'  => 10,
+                    'max_tokens'  => 200,
                     'temperature' => 0,
                     'messages'    => [
-                        ['role' => 'system', 'content' => 'You are a search intent classifier. Reply with only one word.'],
-                        ['role' => 'user', 'content' => $prompt],
+                        ['role' => 'system', 'content' => $systemPrompt],
+                        ['role' => 'user',   'content' => $userPrompt],
                     ],
                 ]);
 
-            $answer = strtolower(trim($response->json('choices.0.message.content', 'video')));
-            
-            if (str_contains($answer, 'roadmap')) return 'roadmap';
-            if (str_contains($answer, 'course')) return 'course';
-            return 'video';
+            $content = trim($response->json('choices.0.message.content', ''));
+
+            // Strip markdown code fences if GPT wraps response
+            $content = preg_replace('/^```(?:json)?\s*/i', '', $content);
+            $content = preg_replace('/\s*```$/', '', $content);
+
+            $parsed = json_decode($content, true);
+
+            if (!is_array($parsed) || !isset($parsed['query_type'])) {
+                Log::warning('SmartSearch: Step 1 GPT returned invalid JSON', ['raw' => $content]);
+                return $fallback;
+            }
+
+            // Sanitize query_type
+            if (!in_array($parsed['query_type'], ['single_video', 'course', 'roadmap'])) {
+                $parsed['query_type'] = 'single_video';
+            }
+
+            // Ensure tools_mentioned is an array
+            if (!isset($parsed['tools_mentioned']) || !is_array($parsed['tools_mentioned'])) {
+                $parsed['tools_mentioned'] = [];
+            }
+
+            // Ensure fixed_query is a non-empty string
+            if (empty($parsed['fixed_query'])) {
+                $parsed['fixed_query'] = $rawQuery;
+            }
+
+            $parsed['confidence_score'] = (float) ($parsed['confidence_score'] ?? 0.5);
+            $parsed['goals_intent']     = $parsed['goals_intent'] ?? $rawQuery;
+
+            return $parsed;
 
         } catch (\Throwable $e) {
-            return 'video';
+            Log::error('SmartSearch: Step 1 GPT failed', ['error' => $e->getMessage()]);
+            return $fallback;
         }
     }
 
-    /**
-     * Handle Roadmap intent directly on the search results page.
-     */
-    private function handleRoadmap(string $query, string $intent): array
+    // =========================================================================
+    // ROADMAP HANDLER
+    // =========================================================================
+
+    private function handleRoadmap(string $fixedQuery, string $rawQuery, array $toolsMentioned, array $parsed): array
     {
         $allTools = Tool::active()->get(['id', 'name', 'description', 'logo']);
-        $selectedIds = $this->askGptToMatchTools($query, $allTools);
+        $selectedIds = $this->askGptToMatchTools($fixedQuery, $allTools);
 
         return [
-            'type'   => 'roadmap',
-            'query'  => $query,
-            'intent' => $intent,
-            'allTools' => $allTools,
+            'type'        => 'roadmap',
+            'query'       => $fixedQuery,
+            'intent'      => 'roadmap',
+            'allTools'    => $allTools,
             'selectedIds' => $selectedIds,
-            'debug'  => [
-                'type' => 'Roadmap Wizard Triggered',
-                'matched_tools_count' => count($selectedIds),
+            'debug'       => [
+                'type'                 => 'Roadmap Wizard Triggered',
+                'raw_query'            => $rawQuery,
+                'fixed_query'          => $fixedQuery,
+                'tools_mentioned'      => $toolsMentioned,
+                'goals_intent'         => $parsed['goals_intent'] ?? '',
+                'confidence'           => $parsed['confidence_score'] ?? 0,
+                'matched_tools_count'  => count($selectedIds),
             ],
         ];
     }
 
-    private function askGptToMatchTools($goal, $tools)
+    private function askGptToMatchTools($goal, $tools): array
     {
         $toolList = $tools->map(fn($t) => "ID:{$t->id} | Name:{$t->name}")->implode("\n");
         $cacheKey = 'roadmap_tools:' . md5($goal);
 
-        return Cache::remember($cacheKey, 3600, function() use ($goal, $toolList) {
-            $prompt = "GOAL: {$goal}\nTOOLS:\n{$toolList}\nSelect necessary tools to achieve the goal. Reply ONLY with comma-separated IDs.";
+        return Cache::remember($cacheKey, 3600, function () use ($goal, $toolList) {
+            $prompt = "GOAL: {$goal}\nTOOLS:\n{$toolList}\nSelect only the tools that are directly mentioned or absolutely essential to achieving the goal. Avoid selecting tangentially related tools (e.g. do not select Python for an Excel goal unless Python is explicitly mentioned or requested). Reply ONLY with the comma-separated IDs.";
             try {
                 $response = Http::withToken(config('services.openai.key'))
                     ->post('https://api.openai.com/v1/chat/completions', [
-                        'model' => 'gpt-4o-mini',
-                        'messages' => [['role' => 'user', 'content' => $prompt]],
+                        'model'       => 'gpt-4o-mini',
+                        'messages'    => [['role' => 'user', 'content' => $prompt]],
                         'temperature' => 0,
                     ]);
                 $ids = explode(',', preg_replace('/[^0-9,]/', '', $response->json('choices.0.message.content')));
-                return array_map('intval', $ids);
-            } catch (\Throwable $e) { return []; }
+                return array_map('intval', array_filter($ids));
+            } catch (\Throwable $e) {
+                return [];
+            }
         });
     }
 
@@ -290,75 +284,91 @@ PROMPT;
     // COURSE HANDLER
     // =========================================================================
 
-    /**
-     * Handle course-intent searches.
-     */
-    private function handleCourse(string $query, string $intent, $allCourses, $allVideos): array
+    private function handleCourse(string $fixedQuery, string $rawQuery, array $toolsMentioned, array $parsed): array
     {
-        // Format all course titles for debug display
-        $allCourseTitles = $allCourses->map(function ($course) {
-            return "ID:{$course->id} | {$course->title}";
-        })->implode("\n");
+        // ── Filter courses by extracted tools (if any) ──
+        $coursesQuery = Course::active();
+
+        if (!empty($toolsMentioned)) {
+            $coursesQuery->where(function ($q) use ($toolsMentioned) {
+                foreach ($toolsMentioned as $tool) {
+                    $q->orWhere('connected_tools', 'like', '%' . $tool . '%');
+                }
+            });
+        }
+
+        $filteredCourses = $coursesQuery->get(['id', 'title', 'connected_tools']);
+
+        // Fallback: if tool-filter yields nothing, search all courses
+        if ($filteredCourses->isEmpty() && !empty($toolsMentioned)) {
+            Log::info('SmartSearch: No tool-filtered courses found, using all courses', [
+                'tools' => $toolsMentioned,
+            ]);
+            $filteredCourses = Course::active()->get(['id', 'title', 'connected_tools']);
+        }
+
+        $allCourseTitles = $filteredCourses->map(fn($c) => "ID:{$c->id} | {$c->title}")->implode("\n");
 
         $debugBase = [
-            'intent' => $intent,
-            'full_list' => $allCourseTitles ?: 'No courses in database',
-            'candidates_count' => $allCourses->count(),
-            'timestamp' => now()->toDateTimeString(),
+            'intent'           => 'course',
+            'raw_query'        => $rawQuery,
+            'fixed_query'      => $fixedQuery,
+            'tools_mentioned'  => $toolsMentioned,
+            'goals_intent'     => $parsed['goals_intent'] ?? '',
+            'confidence'       => $parsed['confidence_score'] ?? 0,
+            'full_list'        => $allCourseTitles ?: 'No courses in database',
+            'candidates_count' => $filteredCourses->count(),
+            'timestamp'        => now()->toDateTimeString(),
         ];
 
-        if ($allCourses->isEmpty()) {
+        if ($filteredCourses->isEmpty()) {
             return [
                 'type'   => 'none',
-                'query'  => $query,
-                'intent' => $intent,
+                'query'  => $fixedQuery,
+                'intent' => 'course',
                 'debug'  => array_merge($debugBase, [
-                    'error' => 'No active courses in database',
-                    'raw_gpt' => 'N/A - Empty database',
-                    'picked_id' => 0,
+                    'error'    => 'No active courses in database',
+                    'raw_gpt'  => 'N/A - Empty database',
+                    'picked_id'=> 0,
                 ]),
             ];
         }
 
-        // Try hybrid matching
-        $pickedId = $this->hybridPick($query, $allCourses, 'course');
+        // ── Step 2: GPT picks the best match from filtered list ──
+        $pickedId = $this->hybridPick($fixedQuery, $filteredCourses, 'course');
 
         if (!$pickedId) {
-            // No course matched — try video as fallback
-            Log::info('SmartSearch: No course match, falling back to video', [
-                'query' => $query,
-            ]);
-            return $this->handleVideo($query, $intent, $allVideos, $allCourses);
+            // Fallback to video
+            Log::info('SmartSearch: No course match, falling back to video', ['query' => $fixedQuery]);
+            $allVideos = Content::active()->whereNull('course_id')->get(['id', 'title', 'connected_tools']);
+            return $this->handleVideo($fixedQuery, $rawQuery, $toolsMentioned, $parsed, $allVideos);
         }
 
-        // Fetch with relationships
         try {
             $course = Course::with([
-                'contents' => fn ($q) => $q->active()->orderBy('sort_order')->orderBy('id'),
+                'contents' => fn($q) => $q->active()->orderBy('sort_order')->orderBy('id'),
             ])->findOrFail($pickedId);
         } catch (ModelNotFoundException $e) {
-            Log::warning('SmartSearch: Course deleted between search and fetch', [
-                'course_id' => $pickedId,
-                'query' => $query,
-            ]);
-            return $this->handleVideo($query, $intent, $allVideos, $allCourses);
+            Log::warning('SmartSearch: Course deleted between search and fetch', ['course_id' => $pickedId]);
+            $allVideos = Content::active()->whereNull('course_id')->get(['id', 'title', 'connected_tools']);
+            return $this->handleVideo($fixedQuery, $rawQuery, $toolsMentioned, $parsed, $allVideos);
         }
 
         Log::info('SmartSearch: Course matched successfully', [
-            'course_id' => $pickedId,
+            'course_id'    => $pickedId,
             'course_title' => $course->title,
-            'query' => $query,
+            'query'        => $fixedQuery,
         ]);
 
         return [
             'type'   => 'course',
-            'query'  => $query,
+            'query'  => $fixedQuery,
             'course' => $course,
-            'intent' => $intent,
+            'intent' => 'course',
             'debug'  => array_merge($debugBase, [
                 'picked_id' => $pickedId,
-                'method' => $this->lastMatchMethod ?? 'unknown',
-                'raw_gpt' => $this->lastGptResponse ?? 'N/A',
+                'method'    => $this->lastMatchMethod ?? 'unknown',
+                'raw_gpt'   => $this->lastGptResponse ?? 'N/A',
             ]),
         ];
     }
@@ -367,97 +377,122 @@ PROMPT;
     // VIDEO HANDLER
     // =========================================================================
 
-    /**
-     * Handle video-intent searches.
-     */
-    private function handleVideo(string $query, string $intent, $allVideos, $allCourses = null): array
-    {
-        // Format all video titles for debug display
-        $allVideoTitles = $allVideos->map(function ($video) {
-            return "ID:{$video->id} | {$video->title}";
-        })->implode("\n");
+    private function handleVideo(
+        string  $fixedQuery,
+        string  $rawQuery,
+        array   $toolsMentioned,
+        array   $parsed,
+        $preloadedVideos = null
+    ): array {
+        // ── Filter videos by extracted tools (if any) ──
+        if ($preloadedVideos !== null) {
+            $filteredVideos = $preloadedVideos;
+        } else {
+            $videosQuery = Content::active()->whereNull('course_id');
+
+            if (!empty($toolsMentioned)) {
+                $videosQuery->where(function ($q) use ($toolsMentioned) {
+                    foreach ($toolsMentioned as $tool) {
+                        $q->orWhere('connected_tools', 'like', '%' . $tool . '%');
+                    }
+                });
+            }
+
+            $filteredVideos = $videosQuery->get(['id', 'title', 'connected_tools']);
+
+            // Fallback: if tool-filter yields nothing, search all videos
+            if ($filteredVideos->isEmpty() && !empty($toolsMentioned)) {
+                Log::info('SmartSearch: No tool-filtered videos found, using all videos', [
+                    'tools' => $toolsMentioned,
+                ]);
+                $filteredVideos = Content::active()->whereNull('course_id')->get(['id', 'title', 'connected_tools']);
+            }
+        }
+
+        $allVideoTitles = $filteredVideos->map(fn($v) => "ID:{$v->id} | {$v->title}")->implode("\n");
 
         $debugBase = [
-            'intent' => $intent,
-            'full_list' => $allVideoTitles ?: 'No standalone videos in database',
-            'candidates_count' => $allVideos->count(),
-            'timestamp' => now()->toDateTimeString(),
+            'intent'           => 'single_video',
+            'raw_query'        => $rawQuery,
+            'fixed_query'      => $fixedQuery,
+            'tools_mentioned'  => $toolsMentioned,
+            'goals_intent'     => $parsed['goals_intent'] ?? '',
+            'confidence'       => $parsed['confidence_score'] ?? 0,
+            'full_list'        => $allVideoTitles ?: 'No standalone videos in database',
+            'candidates_count' => $filteredVideos->count(),
+            'timestamp'        => now()->toDateTimeString(),
         ];
 
-        if ($allVideos->isEmpty()) {
+        if ($filteredVideos->isEmpty()) {
             return [
                 'type'   => 'none',
-                'query'  => $query,
-                'intent' => $intent,
+                'query'  => $fixedQuery,
+                'intent' => 'single_video',
                 'debug'  => array_merge($debugBase, [
-                    'error' => 'No standalone videos in database',
-                    'raw_gpt' => 'N/A - Empty database',
-                    'picked_id' => 0,
+                    'error'    => 'No standalone videos in database',
+                    'raw_gpt'  => 'N/A - Empty database',
+                    'picked_id'=> 0,
                 ]),
             ];
         }
 
-        // Try hybrid matching
-        $pickedId = $this->hybridPick($query, $allVideos, 'video');
+        // ── Step 2: GPT picks best match from filtered list ──
+        $pickedId = $this->hybridPick($fixedQuery, $filteredVideos, 'video');
 
         if (!$pickedId) {
             return [
                 'type'   => 'none',
-                'query'  => $query,
-                'intent' => $intent,
+                'query'  => $fixedQuery,
+                'intent' => 'single_video',
                 'debug'  => array_merge($debugBase, [
-                    'error' => 'No matching video found',
-                    'raw_gpt' => $this->lastGptResponse ?? 'N/A',
-                    'picked_id' => 0,
+                    'error'    => 'No matching video found',
+                    'raw_gpt'  => $this->lastGptResponse ?? 'N/A',
+                    'picked_id'=> 0,
                 ]),
             ];
         }
 
-        // Fetch with relationships
         try {
             $video = Content::with('course')->findOrFail($pickedId);
         } catch (ModelNotFoundException $e) {
-            Log::warning('SmartSearch: Video deleted between search and fetch', [
-                'video_id' => $pickedId,
-                'query' => $query,
-            ]);
+            Log::warning('SmartSearch: Video deleted between search and fetch', ['video_id' => $pickedId]);
             return [
                 'type'   => 'none',
-                'query'  => $query,
-                'intent' => $intent,
+                'query'  => $fixedQuery,
+                'intent' => 'single_video',
                 'debug'  => array_merge($debugBase, [
-                    'error' => 'Selected video no longer available',
-                    'raw_gpt' => $this->lastGptResponse ?? 'N/A',
-                    'picked_id' => $pickedId,
+                    'error'    => 'Selected video no longer available',
+                    'raw_gpt'  => $this->lastGptResponse ?? 'N/A',
+                    'picked_id'=> $pickedId,
                 ]),
             ];
         }
 
         Log::info('SmartSearch: Video matched successfully', [
-            'video_id' => $video->id,
+            'video_id'    => $video->id,
             'video_title' => $video->title,
-            'query' => $query,
+            'query'       => $fixedQuery,
         ]);
 
         return [
             'type'   => 'video',
-            'query'  => $query,
+            'query'  => $fixedQuery,
             'video'  => $video,
-            'intent' => $intent,
+            'intent' => 'single_video',
             'debug'  => array_merge($debugBase, [
                 'picked_id' => $pickedId,
-                'method' => $this->lastMatchMethod ?? 'unknown',
-                'raw_gpt' => $this->lastGptResponse ?? 'N/A',
+                'method'    => $this->lastMatchMethod ?? 'unknown',
+                'raw_gpt'   => $this->lastGptResponse ?? 'N/A',
             ]),
         ];
     }
 
     // =========================================================================
-    // HYBRID MATCHING
+    // HYBRID MATCHING (Step 2 inside video/course handlers)
     // =========================================================================
 
     /**
-     * Hybrid matching strategy:
+     * Hybrid matching strategy on a pre-filtered list:
      * 1. Exact match (free)
      * 2. Contains match (free)
      * 3. Levenshtein distance for typos (free)
@@ -469,72 +504,51 @@ PROMPT;
         $this->lastMatchMethod = 'none';
         $this->lastGptResponse = null;
 
-        // Strategy 1: Exact match (case-insensitive)
-        $exactMatch = $items->first(function ($item) use ($lowerQuery) {
-            return strtolower($item->title) === $lowerQuery;
-        });
-
+        // Strategy 1: Exact match
+        $exactMatch = $items->first(fn($item) => strtolower($item->title) === $lowerQuery);
         if ($exactMatch) {
             $this->lastMatchMethod = 'exact';
-            Log::info('SmartSearch: Exact match found', [
-                'query' => $query,
-                'matched' => $exactMatch->title,
-            ]);
+            Log::info('SmartSearch: Exact match found', ['query' => $query, 'matched' => $exactMatch->title]);
             return $exactMatch->id;
         }
 
-        // Strategy 2: Contains match (query is substring of title or vice versa)
+        // Strategy 2: Contains match
         $containsMatch = $items->first(function ($item) use ($lowerQuery) {
             $lowerTitle = strtolower($item->title);
             return str_contains($lowerTitle, $lowerQuery) || str_contains($lowerQuery, $lowerTitle);
         });
-
         if ($containsMatch) {
             $this->lastMatchMethod = 'contains';
-            Log::info('SmartSearch: Contains match found', [
-                'query' => $query,
-                'matched' => $containsMatch->title,
-            ]);
+            Log::info('SmartSearch: Contains match found', ['query' => $query, 'matched' => $containsMatch->title]);
             return $containsMatch->id;
         }
 
-        // Strategy 3: Levenshtein distance for obvious typos (distance < 3)
-        $closestMatch = null;
+        // Strategy 3: Levenshtein for typos (distance < 3)
+        $closestMatch    = null;
         $closestDistance = PHP_INT_MAX;
-
         foreach ($items as $item) {
             $itemTitle = strtolower($item->title);
-            
-            // Skip if length difference is too large (optimization)
-            if (abs(strlen($lowerQuery) - strlen($itemTitle)) > 5) {
-                continue;
-            }
-
+            if (abs(strlen($lowerQuery) - strlen($itemTitle)) > 5) continue;
             $distance = levenshtein($lowerQuery, $itemTitle);
-            
             if ($distance < 3 && $distance < $closestDistance) {
-                $closestMatch = $item;
+                $closestMatch    = $item;
                 $closestDistance = $distance;
             }
         }
-
         if ($closestMatch) {
             $this->lastMatchMethod = 'levenshtein';
             Log::info('SmartSearch: Levenshtein match found', [
-                'query' => $query,
+                'query'   => $query,
                 'matched' => $closestMatch->title,
-                'distance' => $closestDistance,
+                'distance'=> $closestDistance,
             ]);
             return $closestMatch->id;
         }
 
-        // Strategy 4: Fall back to GPT for semantic matching
+        // Strategy 4: GPT semantic matching
         $this->lastMatchMethod = 'gpt';
-        
-        // Format list for GPT
         $formattedList = $items->map(fn($item) => "ID:{$item->id} | {$item->title}")->implode("\n");
-        
-        // Truncate if too large
+
         if ($items->count() > self::MAX_GPT_CANDIDATES) {
             Log::warning('SmartSearch: List too large for GPT, pre-filtering', [
                 'total_items' => $items->count(),
@@ -545,7 +559,7 @@ PROMPT;
 
         $picked = $this->gptPick($query, $formattedList, $type);
         $this->lastGptResponse = $picked['raw'] ?? 'No Response';
-        
+
         return $picked['id'] ?? null;
     }
 
@@ -554,40 +568,33 @@ PROMPT;
      */
     private function keywordPreFilter(string $query, string $formattedList): string
     {
-        $lines = explode("\n", $formattedList);
+        $lines    = explode("\n", $formattedList);
         $keywords = explode(' ', $query);
-        
+
         $scoredLines = [];
         foreach ($lines as $line) {
             $lowerLine = strtolower($line);
             $score = 0;
-            
             foreach ($keywords as $keyword) {
                 if (strlen($keyword) > 2 && str_contains($lowerLine, $keyword)) {
                     $score++;
                 }
             }
-            
             if ($score > 0) {
                 $scoredLines[] = ['line' => $line, 'score' => $score];
             }
         }
-        
-        // Sort by relevance score and take top N
+
         usort($scoredLines, fn($a, $b) => $b['score'] <=> $a['score']);
-        
         $topLines = array_slice($scoredLines, 0, self::MAX_GPT_CANDIDATES);
-        
+
         return implode("\n", array_column($topLines, 'line'));
     }
 
     // =========================================================================
-    // GPT PICKER
+    // GPT PICKER (Step 2 — pick best ID from a list)
     // =========================================================================
 
-    /**
-     * Sends a list of titles to GPT for semantic matching.
-     */
     private function gptPick(string $query, string $list, string $type): array
     {
         $typeLabel = $type === 'course' ? 'course' : 'video lesson';
@@ -620,38 +627,35 @@ PROMPT;
                     'temperature' => 0,
                     'messages'    => [
                         ['role' => 'system', 'content' => 'You are a precise search matching system. Reply with only a number.'],
-                        ['role' => 'user', 'content' => $prompt],
+                        ['role' => 'user',   'content' => $prompt],
                     ],
                 ]);
 
             $answer = trim($response->json('choices.0.message.content', '0'));
-            
-            // Clean the answer - extract just the number
             $answer = trim(preg_replace('/[^0-9]/', '', $answer));
-            
+
             if ($answer === '' || $answer === '0') {
                 return ['id' => null, 'raw' => '0 (No match found)'];
             }
-            
+
             $id = (int) $answer;
-            
+
             Log::info('SmartSearch: GPT picked ID', [
-                'query' => $query,
-                'type' => $type,
-                'picked_id' => $id,
+                'query'            => $query,
+                'type'             => $type,
+                'picked_id'        => $id,
                 'candidates_count' => substr_count($list, "\n") + 1,
             ]);
-            
+
             return ['id' => $id, 'raw' => $answer];
 
         } catch (\Throwable $e) {
             Log::error('SmartSearch: GPT pick failed', [
                 'query' => $query,
-                'type' => $type,
+                'type'  => $type,
                 'error' => $e->getMessage(),
             ]);
-            
-            return ['id' => null, 'raw' => "Error: " . $e->getMessage()];
+            return ['id' => null, 'raw' => 'Error: ' . $e->getMessage()];
         }
     }
 
@@ -659,28 +663,17 @@ PROMPT;
     // CACHE MANAGEMENT
     // =========================================================================
 
-    /**
-     * Clear cached search results (useful after content updates).
-     */
     public function clearCache(Request $request)
     {
         $query = $request->input('query');
-        
+
         if ($query) {
             $cacheKey = 'search_result:' . md5(strtolower($query));
             Cache::forget($cacheKey);
-            
-            return response()->json([
-                'success' => true,
-                'message' => "Cache cleared for query: {$query}",
-            ]);
+            return response()->json(['success' => true, 'message' => "Cache cleared for query: {$query}"]);
         }
-        
+
         Cache::flush();
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'All search caches cleared',
-        ]);
+        return response()->json(['success' => true, 'message' => 'All search caches cleared']);
     }
 }

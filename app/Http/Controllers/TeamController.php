@@ -17,6 +17,10 @@ class TeamController extends Controller
     {
         $user = Auth::user();
         
+        if ($user->account_type === 'Free Plan') {
+            return redirect()->route('roadmap')->with('error', 'My Team is a premium feature. Please upgrade to Pro to access team analytics.');
+        }
+
         $range = $request->get('range', 'today');
         $dateFilter = null;
         if ($range === 'today') {

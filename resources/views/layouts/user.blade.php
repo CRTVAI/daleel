@@ -261,8 +261,13 @@
             <a href="{{ route('bookmarks') }}" class="nav-link-neo {{ Route::is('bookmarks') ? 'active' : '' }}">Bookmarks</a>
             <a href="{{ route('roadmap') }}" class="nav-link-neo {{ Request::is('roadmap*') ? 'active' : '' }}">Roadmaps</a>
             <a href="{{ route('extension.install') }}" class="nav-link-neo {{ Route::is('extension.install') ? 'active' : '' }}">AI Extension</a>
-            @if(auth()->user()->can_access_team)
-            <a href="{{ route('team.index') }}" class="nav-link-neo {{ Route::is('team.index') ? 'active' : '' }}">My Team</a>
+            @if(auth()->user()->can_access_team || auth()->user()->account_type === 'Free Plan')
+            <a href="{{ route('team.index') }}" class="nav-link-neo {{ Route::is('team.index') ? 'active' : '' }}">
+                My Team
+                @if(auth()->user()->account_type === 'Free Plan')
+                    <span class="badge bg-danger ms-1" style="font-size: 8px; vertical-align: middle;">PRO</span>
+                @endif
+            </a>
             @endif
         </div>
 
@@ -345,6 +350,16 @@
                     @csrf
                     <button type="submit" class="btn-complete-neo">Resend Activation Email</button>
                 </form>
+            </div>
+        @endif
+
+        @if(auth()->user()->account_type === 'Free Plan' && !Request::is('extension-setup*') && !Request::is('upgrade*'))
+            <div class="warning-bar-neo mb-4" style="background: rgba(79, 70, 229, 0.05); border: 1px solid rgba(79, 70, 229, 0.15); color: #4f46e5; box-shadow: 0 4px 12px rgba(79, 70, 229, 0.05);">
+                <div class="d-flex align-items-center gap-3">
+                    <i class="bi bi-stars fs-5 text-primary"></i>
+                    <span>You are currently learning on the <strong>Free Plan</strong>. Upgrade to access unlimited AI roadmaps!</span>
+                </div>
+                <a href="{{ route('upgrade') }}" class="btn-complete-neo" style="background: #4f46e5;">Upgrade to Pro</a>
             </div>
         @endif
 

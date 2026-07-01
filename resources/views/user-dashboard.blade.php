@@ -4,6 +4,33 @@
 
 @section('content')
 <div class="dashboard-focus-modern pb-5">
+    @if(isset($pendingData) && $pendingData)
+        <div class="alert alert-info border-0 shadow-lg p-4 rounded-4 mb-4" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 5px solid #2563eb !important;">
+            <div class="d-flex align-items-center flex-wrap flex-md-nowrap gap-3">
+                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center p-3" style="width: 50px; height: 50px; flex-shrink: 0;">
+                    <i class="bi bi-stars text-warning fs-4"></i>
+                </div>
+                <div class="flex-grow-1">
+                    <h5 class="fw-800 text-dark mb-1">New Tool Usage Detected!</h5>
+                    <p class="text-secondary mb-0 small text-muted">We noticed you have been active on <strong>{{ $pendingData['tool']->name }}</strong>. We have matching tutorial content and video lessons. Would you like to append it to your Auto-Generated Roadmap?</p>
+                </div>
+                <div class="d-flex gap-2 ms-md-auto mt-3 mt-md-0">
+                    <form action="{{ route('roadmap.auto.add-tool') }}" method="POST" class="d-inline">
+                        @csrf
+                        <input type="hidden" name="roadmap_id" value="{{ $pendingData['roadmap_id'] }}">
+                        <input type="hidden" name="tool_id" value="{{ $pendingData['tool']->id }}">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 py-2 fw-800 btn-sm">Yes, Add to Path</button>
+                    </form>
+                    <form action="{{ route('roadmap.auto.dismiss-tool') }}" method="POST" class="d-inline">
+                        @csrf
+                        <input type="hidden" name="roadmap_id" value="{{ $pendingData['roadmap_id'] }}">
+                        <input type="hidden" name="tool_id" value="{{ $pendingData['tool']->id }}">
+                        <button type="submit" class="btn btn-outline-secondary rounded-pill px-3 py-2 fw-bold btn-sm">Dismiss</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
     <!-- Top Row: Welcome Hero & Stats -->
     <!-- Premium Hero Section (Centered Design) -->
     <!-- Premium Hero Section (Two-Column Layout) -->

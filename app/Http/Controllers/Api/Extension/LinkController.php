@@ -53,6 +53,17 @@ class LinkController extends Controller
             $user = $verificationCode->user;
         }
 
+        // Enforce Free Plan 1 device limit
+        if ($user->account_type === 'Free Plan') {
+            $activeDevicesCount = ExtensionDevice::where('user_id', $user->id)
+                ->whereNull('revoked_at')
+                ->where('device_id', '!=', $request->device_id)
+                ->count();
+            if ($activeDevicesCount >= 1) {
+                return response()->json(['message' => 'Free Plan limit reached: You can only have 1 active device connection.'], 422);
+            }
+        }
+
         // Create or update the device
         $device = ExtensionDevice::updateOrCreate(
             ['user_id' => $user->id, 'device_id' => $request->device_id],
@@ -64,6 +75,12 @@ class LinkController extends Controller
                 'revoked_at' => null,
             ]
         );
+
+        // Clean up any previously associated token (e.g. from a prior link that wasn't revoked via UI)
+        if ($device->token_id) {
+            \Laravel\Sanctum\PersonalAccessToken::where('id', $device->token_id)->delete();
+            $device->token_id = null;
+        }
 
         // Temporary individual verification codes are single-use.
         // Employee connection codes are also rotated after each successful link
@@ -86,6 +103,8 @@ class LinkController extends Controller
             'extension:recommendations.read',
             'extension:feedback.write',
         ]);
+
+        $device->update(['token_id' => $token->accessToken->id]);
 
         return response()->json([
             'data' => [

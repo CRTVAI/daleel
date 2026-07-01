@@ -14,6 +14,30 @@
         </div>
     </div>
 
+    <!-- Filter Navigation Pills -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <ul class="nav nav-pills gap-2" id="user-filter-tabs">
+            <li class="nav-item">
+                <a href="{{ route('admin.users.index') }}" class="nav-link py-2 px-3 rounded-pill fw-bold small {{ !request('account_type') ? 'active bg-dark text-white' : 'text-secondary bg-light' }}">
+                    All Users
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('admin.users.index', ['account_type' => 'Pro']) }}" class="nav-link py-2 px-3 rounded-pill fw-bold small {{ request('account_type') === 'Pro' ? 'active bg-primary text-white' : 'text-secondary bg-light' }}">
+                    <i class="bi bi-stars text-warning me-1"></i> Pro Users
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ route('admin.users.index', ['account_type' => 'Free Plan']) }}" class="nav-link py-2 px-3 rounded-pill fw-bold small {{ request('account_type') === 'Free Plan' ? 'active bg-secondary text-white' : 'text-secondary bg-light' }}">
+                    Free Users
+                </a>
+            </li>
+        </ul>
+        <div class="small text-muted fw-semibold">
+            Total: {{ $users->total() }} Users
+        </div>
+    </div>
+
     <div class="card border-0 shadow-sm overflow-hidden">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -21,6 +45,7 @@
                     <tr>
                         <th class="ps-4 border-0 text-muted small fw-bold py-3">USER NAME</th>
                         <th class="border-0 text-muted small fw-bold py-3">EMAIL ADDRESS</th>
+                        <th class="border-0 text-muted small fw-bold py-3">PLAN / TYPE</th>
                         <th class="border-0 text-muted small fw-bold py-3">JOINED DATE</th>
                         <th class="border-0 text-muted small fw-bold py-3">STATUS</th>
                         <th class="border-0 text-muted small fw-bold py-3 text-center">TEAM ACCESS</th>
@@ -41,8 +66,15 @@
                                     </div>
                                 </div>
                             </td>
-                            <td>
+                             <td>
                                 <span class="text-muted small fw-500">{{ $user->email }}</span>
+                            </td>
+                            <td>
+                                @if($user->account_type === 'Pro' || $user->account_type === 'Pro Plan')
+                                    <span class="badge bg-primary text-white px-3 py-1.5 rounded-pill fw-bold small"><i class="bi bi-stars text-warning me-1"></i> Pro Trial</span>
+                                @else
+                                    <span class="badge bg-secondary text-white px-3 py-1.5 rounded-pill fw-semibold small">Free Plan</span>
+                                @endif
                             </td>
                             <td>
                                 <span class="text-muted small fw-500">{{ $user->created_at->format('M d, Y') }}</span>
@@ -121,7 +153,7 @@
                                                     <label class="form-label small fw-700 text-muted">Account Type</label>
                                                     <select name="account_type" class="form-select rounded-3">
                                                         <option value="Free Plan" {{ $user->account_type == 'Free Plan' ? 'selected' : '' }}>Free Plan</option>
-                                                        <option value="Pro Plan" {{ $user->account_type == 'Pro Plan' ? 'selected' : '' }}>Pro Plan</option>
+                                                        <option value="Pro" {{ $user->account_type == 'Pro' || $user->account_type == 'Pro Plan' ? 'selected' : '' }}>Pro Plan</option>
                                                     </select>
                                                 </div>
                                                 <div class="col-md-6">

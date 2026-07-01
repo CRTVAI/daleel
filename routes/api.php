@@ -25,6 +25,9 @@ Route::get('/external/tools', [\App\Http\Controllers\Api\ExternalToolController:
 Route::post('/external/tools', [\App\Http\Controllers\Api\ExternalToolController::class, 'store']);
 Route::post('/external/content', [\App\Http\Controllers\Api\ExternalContentController::class, 'store']);
 
+// Extension suggestion (no auth — resolves user via device_id header)
+Route::get('/extension/suggest', [\App\Http\Controllers\Api\Extension\SuggestionController::class, 'suggest']);
+
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [ApiAuthController::class, 'user']);

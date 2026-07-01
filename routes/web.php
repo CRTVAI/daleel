@@ -119,6 +119,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/roadmap', [App\Http\Controllers\RoadmapController::class, 'index'])->name('roadmap');
     Route::get('/roadmap/wizard', [App\Http\Controllers\RoadmapController::class, 'wizard'])->name('roadmap.wizard');
     Route::get('/roadmap/{roadmap}', [App\Http\Controllers\RoadmapController::class, 'show'])->name('roadmap.show');
+    Route::delete('/roadmap/{roadmap}', [App\Http\Controllers\RoadmapController::class, 'destroy'])->name('roadmap.destroy');
     Route::post('/roadmap/api/categories', [App\Http\Controllers\RoadmapController::class, 'getFocusCategories'])->name('roadmap.api.categories');
     Route::post('/roadmap/api/generate', [App\Http\Controllers\RoadmapController::class, 'generateRoadmap'])->name('roadmap.api.generate');
 });
@@ -173,6 +174,16 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::get('/activity-history', [App\Http\Controllers\HomeController::class, 'activityHistory'])->middleware(['auth', 'verified'])->name('activity.history');
+
+// Upgrade to Pro Routes
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/upgrade', [App\Http\Controllers\UpgradeController::class, 'show'])->name('upgrade');
+    Route::post('/upgrade/activate', [App\Http\Controllers\UpgradeController::class, 'activate'])->name('upgrade.activate');
+    
+    // Auto-Generated Roadmap Routes
+    Route::post('/roadmap/auto/add-tool', [App\Http\Controllers\RoadmapController::class, 'addAutoTool'])->name('roadmap.auto.add-tool');
+    Route::post('/roadmap/auto/dismiss-tool', [App\Http\Controllers\RoadmapController::class, 'dismissAutoTool'])->name('roadmap.auto.dismiss-tool');
+});
 require __DIR__.'/auth.php';
 
 Route::get('/{page}', function ($page) {

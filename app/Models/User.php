@@ -17,9 +17,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
+        'phone',
         'google_id',
         'is_admin',
         'account_type',
+        'pro_expires_at',
         'learning_goal',
         'experience_level',
         'interests',
@@ -42,15 +44,16 @@ class User extends Authenticatable implements MustVerifyEmail
     protected function casts(): array
     {
         return [
-            'email_verified_at' => 'datetime',
-            'password'          => 'hashed',
-            'interests'         => 'array',
-            'connections'       => 'array',
+            'email_verified_at'          => 'datetime',
+            'password'                   => 'hashed',
+            'interests'                  => 'array',
+            'connections'                => 'array',
             'is_admin'                   => 'boolean',
             'is_employee'                => 'boolean',
             'can_access_team'            => 'boolean',
             'last_activity_at'           => 'datetime',
             'connection_code_issued_at'  => 'datetime',
+            'pro_expires_at'             => 'datetime',
         ];
     }
 

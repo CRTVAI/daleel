@@ -57,7 +57,7 @@ const tools = [
 ];
 
 const helpTopics = [
-  ["Getting Started", "How do recommendations work?", "Dallel AI uses your role, goals, selected tools, completed lessons, saved items, and optional workflow signals to recommend practical lessons."],
+  ["Getting Started", "How do recommendations work?", "Daleel AI uses your role, goals, selected tools, completed lessons, saved items, and optional workflow signals to recommend practical lessons."],
   ["Getting Started", "Can individuals use the platform?", "Yes. Individual learners can use role-based paths, video lessons, saved lessons, and the AI mentor without joining a company workspace."],
   ["Enterprise", "What can managers track?", "Managers can track progress, completed paths, AI readiness, adoption by department, and estimated productivity impact."],
   ["Enterprise", "Can we request custom training?", "Yes. Companies can request training content for internal tools, policies, departments, or workflows."],
@@ -76,9 +76,9 @@ function shellNav(activePage) {
   return `
     <header class="site-nav">
       <div class="container nav-inner">
-        <a class="brand" href="/" aria-label="Dallel AI home">
+        <a class="brand" href="/" aria-label="Daleel AI home">
           <span class="brand-mark">DA</span>
-          <span class="brand-copy"><strong>Dallel AI</strong><small>by Creative AI</small></span>
+          <span class="brand-copy"><strong>Daleel AI</strong><small>by Creative AI</small></span>
         </a>
         <nav class="nav-links" id="siteNavLinks" aria-label="Public pages">${links}</nav>
         <div class="nav-actions">
@@ -99,7 +99,7 @@ function shellFooter() {
       <div class="container">
         <div class="footer-grid">
           <div class="footer-brand">
-            <a class="brand" href="/"><span class="brand-mark">DA</span><span class="brand-copy"><strong>Dallel AI</strong><small>by Creative AI</small></span></a>
+            <a class="brand" href="/"><span class="brand-mark">DA</span><span class="brand-copy"><strong>Daleel AI</strong><small>by Creative AI</small></span></a>
             <p>AI lessons matched to daily tasks, repeated work, and real workplace goals.</p>
             <form class="newsletter" data-demo-form>
               <input aria-label="Email for AI tips" placeholder="Get AI workflow tips">
@@ -132,14 +132,14 @@ function shellFooter() {
             <h3>Company</h3>
             <a href="about">About</a>
             <a href="pricing">Pricing</a>
-            <a href="contact">hello@dallel.ai</a>
+            <a href="contact">hello@Daleel.ai</a>
             <a href="terms">Terms</a>
             <a href="privacy">Privacy Policy</a>
             <a href="cookies">Cookie Policy</a>
           </div>
         </div>
         <div class="footer-bottom">
-          <span>&copy; 2026 Dallel AI by Creative AI. All rights reserved.</span>
+          <span>&copy; 2026 Daleel AI by Creative AI. All rights reserved.</span>
           <div class="footer-socials">
             <a href="#" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
             <a href="#" aria-label="X"><i class="bi bi-twitter-x"></i></a>
@@ -172,8 +172,8 @@ function hero({ eyebrow, title, text, primary = "Start Free", primaryHref = "reg
 
 function dashboardMock() {
   return `
-    <aside class="product-preview" aria-label="Dallel AI product preview">
-      <div class="mock-top">Dallel AI workspace <span class="status">Behavior insight on</span></div>
+    <aside class="product-preview" aria-label="Daleel AI product preview">
+      <div class="mock-top">Daleel AI workspace <span class="status">Behavior insight on</span></div>
       <div class="preview-content" style="padding: 24px;">
         <div class="profile-row" style="display: flex; gap: 12px; margin-bottom: 20px; align-items: center;">
           <span class="avatar" style="width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; font-weight: 800;">MH</span>
@@ -280,7 +280,7 @@ const templates = {
     ${hero({
       eyebrow: "AI learning for real work",
       title: "Learn AI through the work you already do",
-      text: "Dallel AI recommends practical lessons from your role, tools, behavior signals, and repeated tasks so learning turns into daily AI workflows.",
+      text: "Daleel AI recommends practical lessons from your role, tools, behavior signals, and repeated tasks so learning turns into daily AI workflows.",
       primary: "Start Free",
       primaryHref: "register",
       secondary: "Book Demo",
@@ -302,7 +302,7 @@ const templates = {
         <div class="section-header center">
           <p class="eyebrow">Partners & Ecosystem</p>
           <h2>Built for practical AI adoption</h2>
-          <p class="lead">Dallel AI integrates with the world's leading AI technologies to provide practical training in the tools your team uses daily.</p>
+          <p class="lead">Daleel AI integrates with the world's leading AI technologies to provide practical training in the tools your team uses daily.</p>
         </div>
         <div class="grid six ecosystem-grid">
           <div class="eco-card">
@@ -354,7 +354,7 @@ const templates = {
     <section class="section">
       <div class="container">
         <div class="section-header center">
-          <p class="eyebrow">How Dallel AI works</p>
+          <p class="eyebrow">How Daleel AI works</p>
           <h2>Not random courses. Recommendations from actual work behavior.</h2>
         </div>
         <div class="grid four">
@@ -415,7 +415,7 @@ const templates = {
         </div>
         <div class="insight-feed-visual">
           <div class="feed-header">
-            <strong>Dallel Proactive Insights</strong>
+            <strong>Daleel Proactive Insights</strong>
             <span class="pulse-dot"></span>
           </div>
           <div class="feed-items">
@@ -443,7 +443,7 @@ const templates = {
       <div class="container">
         <div class="section-header center">
           <p class="eyebrow">Success stories</p>
-          <h2>Teams use Dallel AI to reduce repeated work</h2>
+          <h2>Teams use Daleel AI to reduce repeated work</h2>
         </div>
         <div class="grid three">
           ${stories.slice(0, 3).map(storyCard).join("")}
@@ -557,8 +557,8 @@ const templates = {
   "how-it-works": () => `
     ${hero({
       eyebrow: "Workflow-aware learning",
-      title: "How Dallel AI recommends the right lesson at the right time",
-      text: "Dallel AI connects learner profiles, tool behavior, repeated tasks, and progress to recommend practical lessons that can be applied immediately.",
+      title: "How Daleel AI recommends the right lesson at the right time",
+      text: "Daleel AI connects learner profiles, tool behavior, repeated tasks, and progress to recommend practical lessons that can be applied immediately.",
       mock: workflowPreviewMock()
     })}
     <section class="section">
@@ -595,7 +595,7 @@ const templates = {
   videos: () => `
     <header class="page-hero search-hero">
       <div class="container text-center">
-        <p class="eyebrow">Dallel AI Playground</p>
+        <p class="eyebrow">Daleel AI Playground</p>
         <h1>Immediate AI workflows for your role</h1>
         <div class="search-bar-luxury">
           <i class="bi bi-search"></i>
@@ -885,7 +885,7 @@ const templates = {
   about: () => `
     ${hero({
       eyebrow: "Company profile",
-      title: "Dallel AI helps people learn AI through the work they already do",
+      title: "Daleel AI helps people learn AI through the work they already do",
       text: "We are building a practical AI learning layer for professionals, teams, and enterprises that need measurable adoption, not random content."
     })}
     <section class="section">
@@ -893,7 +893,7 @@ const templates = {
         <div>
           <p class="eyebrow">Company mission</p>
           <h2>Make AI useful at work for every role</h2>
-          <p class="lead">Dallel AI exists because most AI training is disconnected from the user's actual job. Our platform connects learning to role, tools, workflows, goals, and behavior so users can apply AI immediately.</p>
+          <p class="lead">Daleel AI exists because most AI training is disconnected from the user's actual job. Our platform connects learning to role, tools, workflows, goals, and behavior so users can apply AI immediately.</p>
           <div class="inline-actions"><a class="btn primary" href="contact">Partner With Us</a><a class="btn secondary" href="enterprise">Enterprise Training</a></div>
         </div>
         <div class="profile-card">
@@ -936,7 +936,7 @@ const templates = {
   contact: () => `
     ${hero({
       eyebrow: "Contact",
-      title: "Book a demo or talk to the Dallel AI team",
+      title: "Book a demo or talk to the Daleel AI team",
       text: "Tell us about your company, training goals, and AI adoption needs. This static sample shows the intended lead-capture flow.",
       primary: "Start Free",
       primaryHref: "register",
@@ -971,7 +971,7 @@ const templates = {
     </section>
   `,
 
-  login: () => authPage("Login to Dallel AI", "Welcome back. Continue learning AI based on your work.", "Login", "No account yet?", "register", "Create one"),
+  login: () => authPage("Login to Daleel AI", "Welcome back. Continue learning AI based on your work.", "Login", "No account yet?", "register", "Create one"),
   signup: () => authPage("Create your free account", "Set up your profile in under 2 minutes and get your first recommendations.", "Create Account", "Already have an account?", "login", "Login"),
 
   blog: () => `
@@ -1044,19 +1044,19 @@ const templates = {
   `,
 
   terms: () => legalPage("Terms", "Terms of Service", [
-    "This sample page outlines expected public website terms for Dallel AI. Replace this copy with reviewed legal language before launch.",
+    "This sample page outlines expected public website terms for Daleel AI. Replace this copy with reviewed legal language before launch.",
     "Users are responsible for using lessons, templates, and AI recommendations in accordance with their company policies and applicable laws.",
     "The platform may provide educational guidance, workflow suggestions, analytics, and AI mentor responses, but users remain responsible for final work decisions.",
     "Enterprise features, custom content, and support obligations should be governed by a signed agreement or order form."
   ]),
   privacy: () => legalPage("Privacy", "Privacy Policy", [
-    "Dallel AI should collect only the information needed to personalize learning, operate accounts, support teams, and improve recommendations.",
+    "Daleel AI should collect only the information needed to personalize learning, operate accounts, support teams, and improve recommendations.",
     "Optional workflow analysis should focus on behavior signals such as tools used, repeated tasks, and time allocation, not private content.",
     "Companies should configure employee analytics transparently and explain how progress, adoption, and productivity insights are used.",
     "Users should be able to request access, correction, deletion, or export of personal data according to the final production policy."
   ]),
   cookies: () => legalPage("Cookies", "Cookie Policy", [
-    "This sample page describes how Dallel AI may use cookies or similar technologies for login, preferences, analytics, and product improvement.",
+    "This sample page describes how Daleel AI may use cookies or similar technologies for login, preferences, analytics, and product improvement.",
     "Essential cookies support account access, security, and basic site function.",
     "Analytics cookies should help understand public website usage and improve content performance.",
     "Users should be able to manage cookie preferences once production tracking tools are selected."
@@ -1243,7 +1243,7 @@ function initShell() {
       ${shellFooter()}
     </div>
   `;
-  document.title = `Dallel AI | ${pageTitle(activePage)}`;
+  document.title = `Daleel AI | ${pageTitle(activePage)}`;
 }
 
 function pageTitle(page) {

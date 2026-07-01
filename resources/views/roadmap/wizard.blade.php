@@ -5,21 +5,22 @@
 @section('content')
 <div class="container py-3" id="roadmap-wizard">
     <div class="row justify-content-center">
-        <div class="col-lg-10">
+        <div class="col-lg-8 col-xl-7">
             
             {{-- WIZARD HEADER --}}
-            <div id="wizard-header" class="text-center mb-3">
+            <div id="wizard-header" class="text-center mb-4">
                 <div id="step-count" class="text-uppercase text-primary fw-bold mb-2 ls-1" style="font-size: 0.75rem;">Step 1 of 3</div>
-                <h2 id="wizard-title" class="fw-900 text-dark">Which tools do you want to learn?</h2>
-                <div class="progress mt-4 mx-auto" style="height: 6px; width: 240px; border-radius: 10px; background: #e2e8f0;">
-                    <div id="progress-bar" class="progress-bar transition-all" role="progressbar" style="width: 33%; background: #4f46e5;" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div>
+                <h2 id="wizard-title" class="fw-900 text-dark" style="letter-spacing: -0.03em;">Which tools do you want to learn?</h2>
+                <div class="progress mt-3 mx-auto" style="height: 6px; width: 200px; border-radius: 10px; background: #e2e8f0;">
+                    <div id="progress-bar" class="progress-bar transition-all" role="progressbar" style="width: 33%; background: #6366f1;" aria-valuenow="33" aria-valuemin="0" aria-valuemax="100"></div>
                 </div>
             </div>
-            {{-- STEP 1: TOOL SELECTION --}}
+
+            {{-- STEP 1: TOOL SELECTION (Rows layout) --}}
             <div id="step-1" class="wizard-step">
                 
                 {{-- Tool Search Bar --}}
-                <div class="mb-4 mx-auto" style="max-width: 500px;">
+                <div class="mb-4">
                     <div class="input-group bg-white rounded-pill p-1 border shadow-sm" style="border: 2px solid #e2e8f0 !important;">
                         <span class="input-group-text border-0 bg-transparent ps-3 text-muted">
                             <i class="bi bi-search"></i>
@@ -30,48 +31,48 @@
                             class="form-control border-0 bg-transparent" 
                             placeholder="Search tools (e.g. GPT, Zapier, Excel...)"
                             onkeyup="filterTools()"
-                            style="box-shadow: none !important;"
+                            style="box-shadow: none !important; font-size: 0.9rem;"
                         >
                     </div>
                 </div>
 
-                {{-- Compressed Tool Grid --}}
-                <div class="row g-2 justify-content-center" id="tools-grid">
+                {{-- Vertical list of rows --}}
+                <div class="d-flex flex-column gap-2" id="tools-grid">
                     @foreach($allTools->sortByDesc(fn($t) => in_array($t->id, $selectedIds)) as $index => $tool)
                         @php 
                             $isRecommended = in_array($tool->id, @$selectedIds ?? []);
                             $isVisible = ($index < 12 || $isRecommended);
                         @endphp
-                        <div class="col-6 col-md-3 tool-item {{ $isVisible ? '' : 'd-none' }}" 
+                        <div class="tool-item {{ $isVisible ? '' : 'd-none' }}" 
                              data-name="{{ strtolower($tool->name) }}"
                              data-recommended="{{ $isRecommended ? '1' : '0' }}">
-                            <div class="h-100">
-                                <input type="checkbox" name="tools[]" value="{{ $tool->id }}" 
-                                       id="tool-{{ $tool->id }}" 
-                                       data-name="{{ $tool->name }}" 
-                                       class="tool-checkbox d-none" 
-                                       {{ $isRecommended ? 'checked' : '' }}>
-                                <label for="tool-{{ $tool->id }}" class="card tool-card h-100 border transition-all rounded-4 p-2 border-2 cursor-pointer position-relative shadow-sm d-block">
-                                    <div class="d-flex align-items-center gap-2">
-                                        <div class="flex-shrink-0 bg-light rounded-3 d-flex align-items-center justify-content-center" style="width: 36px; height: 36px;">
-                                            @if($tool->logo)
-                                                <img src="{{ asset($tool->logo) }}" style="width: 24px; height: 24px; object-fit: contain;">
-                                            @else
-                                                <i class="bi bi-tools text-muted small"></i>
-                                            @endif
-                                        </div>
-                                        <div class="text-start overflow-hidden">
-                                            <h6 class="fw-bold mb-0 text-truncate small" style="font-size: 13px;">{{ $tool->name }}</h6>
-                                            @if($isRecommended)
-                                                <div class="text-primary fw-bold" style="font-size: 8px; text-transform: uppercase; letter-spacing: 0.5px;">Suggested</div>
-                                            @endif
-                                        </div>
+                            
+                            <input type="checkbox" name="tools[]" value="{{ $tool->id }}" 
+                                   id="tool-{{ $tool->id }}" 
+                                   data-name="{{ $tool->name }}" 
+                                   class="tool-checkbox d-none" 
+                                   {{ $isRecommended ? 'checked' : '' }}>
+                            
+                            <label for="tool-{{ $tool->id }}" class="card tool-row-card p-3 border-2 cursor-pointer d-flex flex-row align-items-center justify-content-between rounded-4 shadow-sm mb-0">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="flex-shrink-0 bg-light rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; border: 1px solid #e2e8f0;">
+                                        @if($tool->logo)
+                                            <img src="{{ asset($tool->logo) }}" style="width: 26px; height: 26px; object-fit: contain;">
+                                        @else
+                                            <i class="bi bi-tools text-muted"></i>
+                                        @endif
                                     </div>
-                                    <div class="selection-overlay position-absolute top-0 end-0 p-1">
-                                        <i class="bi bi-check-circle-fill text-primary d-none" style="font-size: 14px;"></i>
+                                    <div class="text-start">
+                                        <h6 class="fw-800 mb-1 text-dark" style="font-size: 0.95rem; margin-bottom: 0;">{{ $tool->name }}</h6>
+                                        @if($isRecommended)
+                                            <span class="badge bg-primary bg-opacity-10 text-primary fw-800" style="font-size: 0.65rem; text-transform: uppercase;">Suggested</span>
+                                        @else
+                                            <span class="text-muted small fw-600" style="font-size: 0.72rem;">Include in roadmap</span>
+                                        @endif
                                     </div>
-                                </label>
-                            </div>
+                                </div>
+                                <div class="tool-select-indicator d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid #cbd5e1; color: transparent; font-size: 0.8rem; font-weight: 800; transition: all 0.2s;">✓</div>
+                            </label>
                         </div>
                     @endforeach
                 </div>
@@ -83,49 +84,55 @@
                     </button>
                 </div>
 
-                <div class="text-center mt-3 pt-2">
-                    <button type="button" onclick="goToStep(2)" class="btn btn-dark rounded-pill px-5 py-3 fw-bold shadow">
+                <div class="mt-4 pt-2">
+                    <button type="button" onclick="goToStep(2)" class="btn btn-dark w-100 py-3 fw-bold rounded-4 shadow">
                         Step 2: Focus & Level <i class="bi bi-arrow-right ms-2"></i>
                     </button>
                 </div>
             </div>
->
 
-            {{-- STEP 2: FOCUS SELECTION --}}
+            {{-- STEP 2: FOCUS SELECTION (Rows layout) --}}
             <div id="step-2" class="wizard-step d-none opacity-0 transition-all">
-                <h4 class="text-center mb-4 fw-bold">Select your primary improvement focus:</h4>
-                <div id="focus-container" class="row g-3 justify-content-center">
+                <h5 class="text-muted mb-4 fw-600 text-center" style="font-size: 0.95rem;">Select your primary improvement goal:</h5>
+                
+                <div id="focus-container" class="d-flex flex-column gap-2">
                     {{-- Generated via JS --}}
-                    <div class="col-12 text-center py-5" id="focus-loader">
+                    <div class="text-center py-5" id="focus-loader">
                         <div class="spinner-border text-primary" role="status"></div>
-                        <p class="mt-3 text-muted">AI is generating categories based on your tools...</p>
+                        <p class="mt-3 text-muted fw-600 small">AI is generating goals based on your tools...</p>
                     </div>
                 </div>
-                <div class="text-center mt-3 pt-2 d-flex justify-content-center gap-3">
-                    <button type="button" onclick="goToStep(1)" class="btn btn-outline-secondary px-4 py-3 rounded-pill">Back</button>
-                    <button type="button" id="btn-next-step-3" onclick="goToStep(3)" class="btn btn-primary px-5 py-3 rounded-pill fw-bold d-none">Next Step <i class="bi bi-arrow-right ms-2"></i></button>
+                
+                <div class="mt-4 pt-2 d-flex gap-2">
+                    <button type="button" onclick="goToStep(1)" class="btn btn-outline-secondary py-3 rounded-4 fw-bold" style="flex: 1;">Back</button>
+                    <button type="button" id="btn-next-step-3" onclick="goToStep(3)" class="btn btn-primary py-3 rounded-4 fw-bold d-none" style="flex: 2;">Next Step <i class="bi bi-arrow-right ms-2"></i></button>
                 </div>
             </div>
 
-            {{-- STEP 3: SKILL LEVEL --}}
+            {{-- STEP 3: SKILL LEVEL (Rows layout) --}}
             <div id="step-3" class="wizard-step d-none opacity-0 transition-all text-center">
-                <h4 class="mb-5 fw-bold text-center">What is your current skill level?</h4>
-                <div class="row justify-content-center g-4">
+                <h5 class="text-muted mb-4 fw-600 text-center" style="font-size: 0.95rem;">What is your current skill level?</h5>
+                
+                <div class="d-flex flex-column gap-2 text-start">
                     @foreach(['Beginner' => 'I am new to these tools.', 'Intermediate' => 'I have some basic experience.', 'Advanced' => 'I want to master advanced features.'] as $level => $desc)
-                    <div class="col-md-4">
-                        <label class="w-100 h-100">
+                    <div class="col-12">
+                        <label class="w-100">
                             <input type="radio" name="level" value="{{ strtolower($level) }}" class="level-radio d-none">
-                            <div class="card level-card p-4 transition-all border-2 cursor-pointer shadow-sm">
-                                <h5 class="fw-bold mb-2">{{ $level }}</h5>
-                                <p class="text-muted small mb-0">{{ $desc }}</p>
+                            <div class="card level-row-card p-3 transition-all border-2 cursor-pointer d-flex flex-row align-items-center gap-3 rounded-4 shadow-sm" style="border: 2px solid #e2e8f0; background: #fff;">
+                                <div class="level-circle-select d-flex align-items-center justify-content-center flex-shrink-0" style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid #cbd5e1; transition: all 0.2s;"></div>
+                                <div>
+                                    <h6 class="fw-800 mb-1 text-dark" style="font-size: 0.95rem; margin-bottom: 0;">{{ $level }}</h6>
+                                    <p class="text-muted small mb-0 fw-600" style="font-size: 0.78rem;">{{ $desc }}</p>
+                                </div>
                             </div>
                         </label>
                     </div>
                     @endforeach
                 </div>
-                <div class="text-center mt-3 pt-2 d-flex justify-content-center gap-3">
-                    <button type="button" onclick="goToStep(2)" class="btn btn-outline-secondary px-4 py-3 rounded-pill">Back</button>
-                    <button type="button" id="btn-generate" onclick="generateRoadmap()" class="btn btn-success px-5 py-3 rounded-pill fw-bold shadow-lg d-none">
+                
+                <div class="mt-4 pt-2 d-flex gap-2">
+                    <button type="button" onclick="goToStep(2)" class="btn btn-outline-secondary py-3 rounded-4 fw-bold" style="flex: 1;">Back</button>
+                    <button type="button" id="btn-generate" onclick="generateRoadmap()" class="btn btn-success py-3 rounded-4 fw-bold shadow d-none" style="flex: 2;">
                         Generate My Roadmap <i class="bi bi-magic ms-2"></i>
                     </button>
                 </div>
@@ -143,16 +150,57 @@
 </div>
 
 <style>
-    .transition-all { transition: all 0.4s ease; }
+    .transition-all { transition: all 0.25s ease; }
     .ls-1 { letter-spacing: 1.5px; }
-    .tool-card, .level-card { border: 2px solid #f1f5f9; position: relative; border-radius: 20px; }
-    .tool-card:hover, .level-card:hover { transform: translateY(-3px); border-color: #4f46e5; }
-    .tool-checkbox:checked + .tool-card, .level-radio:checked + .level-card { border-color: #4f46e5 !important; background: #f5f3ff !important; box-shadow: 0 10px 20px rgba(79, 70, 229, 0.1) !important; }
-    .tool-checkbox:checked + .tool-card .bi-check-circle-fill { display: block !important; }
+
+    /* Custom Row Cards Stylings */
+    .tool-row-card, .focus-row-card, .level-row-card {
+        border: 2px solid #e2e8f0;
+        border-radius: 16px;
+        transition: all 0.2s ease;
+    }
+    .tool-row-card:hover, .focus-row-card:hover, .level-row-card:hover {
+        transform: translateY(-2px);
+        border-color: #6366f1;
+        box-shadow: 0 6px 18px rgba(99,102,241,0.06);
+    }
+    
+    /* Checked tool checkbox styling */
+    .tool-checkbox:checked + .tool-row-card {
+        border-color: #6366f1 !important;
+        background: #f5f3ff !important;
+    }
+    .tool-checkbox:checked + .tool-row-card .tool-select-indicator {
+        border-color: #6366f1 !important;
+        background: #6366f1 !important;
+        color: #fff !important;
+    }
+
+    /* Checked focus radio styling */
+    .focus-radio:checked + .focus-row-card {
+        border-color: #6366f1 !important;
+        background: #f5f3ff !important;
+    }
+    .focus-radio:checked + .focus-row-card .focus-bullet-circle {
+        border-color: #6366f1 !important;
+        background: #6366f1 !important;
+        color: #fff !important;
+    }
+
+    /* Checked level radio styling */
+    .level-radio:checked + .level-row-card {
+        border-color: #6366f1 !important;
+        background: #f5f3ff !important;
+    }
+    .level-radio:checked + .level-row-card .level-circle-select {
+        border-color: #6366f1 !important;
+        background: #6366f1 !important;
+        box-shadow: inset 0 0 0 4px #f5f3ff;
+    }
+
     .cursor-pointer { cursor: pointer; }
-    .cursor-pointer { cursor: pointer; }
-    .btn-primary { background: #4f46e5 !important; border: none !important; color: #fff !important; }
-    .btn-primary:hover { background: #3730a3 !important; }
+    .btn-primary { background: #6366f1 !important; border: none !important; color: #fff !important; }
+    .btn-primary:hover { background: #4f46e5 !important; }
     .btn-success { background: #10b981 !important; border: none !important; color: #fff !important; }
     .btn-success:hover { background: #059669 !important; }
     .btn-dark { background: #0f172a !important; border: none !important; color: #fff !important; }
@@ -185,7 +233,7 @@
         
         const titles = { 
             1: "Which tools do you want to learn?", 
-            2: "What is your main focus?", 
+            2: "What is your main goal?", 
             3: "What is your skill level?" 
         };
         document.getElementById('wizard-title').innerText = titles[step];
@@ -209,13 +257,10 @@
             showMoreBtn.classList.remove('d-none');
             tools.forEach((el, index) => {
                 const isRec = el.getAttribute('data-recommended') === '1';
-                // Find visible items based on initial logic (index < 12 or recommended)
-                // Note: Sorting happens in PHP, so we just check recommended status
                 if (isRec) {
                     el.classList.remove('d-none');
                 } else {
-                    // This is simplified; showAllTools handles full restoration
-                    // We'll keep them hidden by default if not recommended
+                    el.classList.add('d-none');
                 }
             });
         }
@@ -225,6 +270,22 @@
         document.querySelectorAll('.tool-item').forEach(el => el.classList.remove('d-none'));
         document.getElementById('show-more-tools-wrapper').classList.add('d-none');
         document.getElementById('tool-search').placeholder = "Search across all tools...";
+    }
+
+    function handleFocusSelection(radio) {
+        const textarea = document.getElementById('custom-focus');
+        if (textarea) textarea.value = '';
+        document.getElementById('btn-next-step-3').classList.remove('d-none');
+    }
+
+    function handleCustomFocusInput(textarea) {
+        document.querySelectorAll('.focus-radio').forEach(r => r.checked = false);
+        const nextBtn = document.getElementById('btn-next-step-3');
+        if (textarea.value.trim().length > 0) {
+            nextBtn.classList.remove('d-none');
+        } else {
+            nextBtn.classList.add('d-none');
+        }
     }
 
     async function loadFocusCategories() {
@@ -243,15 +304,36 @@
             let html = '';
             categories.forEach(cat => {
                 html += `
-                    <div class="col-md-6">
+                    <div class="col-12 mb-2">
                         <label class="w-100">
-                            <input type="radio" name="focus" value="${cat}" class="focus-radio d-none" onchange="document.getElementById('btn-next-step-3').classList.remove('d-none')">
-                            <div class="card p-3 border-2 transition-all cursor-pointer text-center">
-                                <h6 class="mb-0 fw-semibold">${cat}</h6>
+                            <input type="radio" name="focus" value="${cat}" class="focus-radio d-none" onchange="handleFocusSelection(this)">
+                            <div class="card focus-row-card p-3 border-2 transition-all cursor-pointer d-flex flex-row align-items-center justify-content-between rounded-4 shadow-sm mb-0">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="focus-bullet-circle d-flex align-items-center justify-content-center" style="width: 24px; height: 24px; border-radius: 50%; border: 2px solid #cbd5e1; color: transparent; font-size: 0.8rem; font-weight: 800; transition: all 0.2s;">✓</div>
+                                    <h6 class="mb-0 fw-bold text-dark" style="font-size: 0.95rem;">${cat}</h6>
+                                </div>
+                                <i class="bi bi-chevron-right text-muted"></i>
                             </div>
                         </label>
                     </div>`;
             });
+            
+            // Append custom focus text field
+            html += `
+                <div class="col-12 mt-4 text-start">
+                    <div class="card p-3 border border-dashed rounded-4">
+                        <h6 class="fw-bold mb-2 small text-muted">Or write a custom learning goal:</h6>
+                        <textarea 
+                            id="custom-focus" 
+                            class="form-control border shadow-none" 
+                            rows="2" 
+                            placeholder="Describe what specific skills you want to learn... (e.g., 'I want to master financial modeling')" 
+                            onkeyup="handleCustomFocusInput(this)"
+                            style="font-size: 0.9rem;"
+                        ></textarea>
+                    </div>
+                </div>`;
+                
             container.innerHTML = html;
             document.getElementById('focus-loader').classList.add('d-none');
         } catch(e) { console.error(e); }
@@ -266,12 +348,36 @@
 
     async function generateRoadmap() {
         const tools = Array.from(document.querySelectorAll('.tool-checkbox:checked')).map(el => el.value);
-        const focus = document.querySelector('input[name="focus"]:checked').value;
+        
+        let focus = '';
+        const customText = document.getElementById('custom-focus') ? document.getElementById('custom-focus').value.trim() : '';
+        const checkedRadio = document.querySelector('input[name="focus"]:checked');
+        
+        if (customText.length > 0) {
+            focus = customText;
+        } else if (checkedRadio) {
+            focus = checkedRadio.value;
+        }
+        
+        if (!focus) {
+            alert('Please select a focus or type a custom one.');
+            return;
+        }
+        
         const level = document.querySelector('input[name="level"]:checked').value;
         
         goToStep(4);
         const resultContainer = document.getElementById('roadmap-result');
-        resultContainer.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-3">Building your personal curriculum...</p></div>';
+        resultContainer.innerHTML = `
+            <div class="card border-0 shadow-lg rounded-4 overflow-hidden p-5 text-center bg-white">
+                <div class="py-4">
+                    <div class="spinner-grow text-primary mb-4" style="width: 3.5rem; height: 3.5rem;" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <h3 class="fw-bold text-dark mb-2">Building Your Personal Curriculum</h3>
+                    <p class="text-muted fs-6 mb-0">Our AI is structuring the path patterns and setting up your journey...</p>
+                </div>
+            </div>`;
 
         try {
             const resp = await fetch("{{ route('roadmap.api.generate') }}", {
@@ -283,12 +389,17 @@
             
             if (data.redirect_url) {
                 resultContainer.innerHTML = `
-                    <div class="text-center py-5">
-                        <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" style="width: 80px; height: 80px;">
-                            <i class="bi bi-check-lg fs-1"></i>
+                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden p-5 text-center bg-white">
+                        <div class="py-4">
+                            <div class="bg-success bg-opacity-10 text-success rounded-circle d-flex align-items-center justify-content-center mx-auto mb-4" style="width: 80px; height: 80px; display: inline-flex !important;">
+                                <i class="bi bi-check-lg" style="font-size: 2.2rem;"></i>
+                            </div>
+                            <h3 class="fw-bold text-dark mb-2">Roadmap Created!</h3>
+                            <p class="text-muted fs-6 mb-4">Taking you to your new journey...</p>
+                            <div class="progress mx-auto" style="height: 4px; width: 120px; border-radius: 10px; background-color: #e9ecef;">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 100%;"></div>
+                            </div>
                         </div>
-                        <h3 class="fw-bold">Roadmap Created!</h3>
-                        <p class="text-muted">Taking you to your new journey...</p>
                     </div>`;
                 
                 setTimeout(() => {
@@ -331,6 +442,6 @@
 </script>
 
 <style>
-    .focus-radio:checked + .card { border-color: #7c6fff; background: #7c6fff10; }
+    .focus-radio:checked + .focus-row-card { border-color: #6366f1; background: #f5f3ff; }
 </style>
 @endsection

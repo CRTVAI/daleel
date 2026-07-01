@@ -66,6 +66,9 @@ class HomeController extends Controller
     {
         $user = Auth::user();
 
+        // Dynamically track and detect key tools usage for the Auto-Generated Roadmap
+        $pendingData = (new \App\Http\Controllers\RoadmapController())->detectAndTrackPendingTools($user);
+
         // Featured content for hero
         $featured = \App\Models\Content::where('is_featured', true)->latest()->first();
 
@@ -462,7 +465,8 @@ class HomeController extends Controller
             'aiUsage',
             'totalInteractions',
             'lastLesson',
-            'currentRoadmap'
+            'currentRoadmap',
+            'pendingData'
         ))->with([
             'learningGoals' => \App\Models\LearningGoal::orderBy('title')->get(),
             'experienceLevels' => \App\Models\ExperienceLevel::orderBy('title')->get(),
@@ -474,6 +478,9 @@ class HomeController extends Controller
     public function activityHistory(Request $request)
     {
         $user = Auth::user();
+        $isFreePlan = $user->account_type === 'Free Plan';
+        $historyLimitDays = 7;
+
         $query = BrowsingHistory::query()->with('user');
 
         // Enforcement: Non-admins only see their own data
@@ -484,6 +491,11 @@ class HomeController extends Controller
             if ($request->filled('user_id')) {
                 $query->where('user_id', $request->user_id);
             }
+        }
+
+        // Free Plan: restrict to last 7 days
+        if ($isFreePlan && !$user->is_admin) {
+            $query->where('timestamp', '>=', now()->subDays($historyLimitDays));
         }
 
         // Common filters
@@ -512,7 +524,7 @@ class HomeController extends Controller
         $domains = BrowsingHistory::when(!$user->is_admin, fn($q) => $q->where('user_id', $user->id))
             ->distinct()->pluck('domain')->sort();
 
-        return view('activity-history', compact('history', 'filtered_count', 'users', 'domains'));
+        return view('activity-history', compact('history', 'filtered_count', 'users', 'domains', 'isFreePlan', 'historyLimitDays'));
     }
 
     /**
@@ -521,39 +533,51 @@ class HomeController extends Controller
     public function extensionSetup(Request $request)
     {
         $user = Auth::user();
+        $isFreePlan = $user->account_type === 'Free Plan';
+        $historyLimitDays = 7;
+        $freeCutoff = now()->subDays($historyLimitDays);
+
         $devices = \App\Models\ExtensionDevice::where('user_id', $user->id)
             ->whereNull('revoked_at')
             ->orderBy('last_active_at', 'desc')
             ->get();
 
-        // Data Viewer data (embedded in setup page)
-        $sessions = \App\Models\ExtensionSession::where('user_id', $user->id)
-            ->with('device')
-            ->orderBy('started_at', 'desc')->get();
-            
-        $snapshots = \App\Models\ExtensionMetricsSnapshot::where('user_id', $user->id)
-            ->with('device')
-            ->orderBy('captured_at', 'desc')->get();
-            
-        $rollups = \App\Models\ExtensionDailyRollup::where('user_id', $user->id)
-            ->with('device') // In case of older records
-            ->orderBy('date', 'desc')->get();
-            
-        $recommendations = \App\Models\ExtensionRecommendation::where('user_id', $user->id)
-            ->with(['events' => fn($q) => $q->orderBy('occurred_at', 'desc')])
-            ->orderBy('created_at', 'desc')->get();
+        // Data Viewer data — Free Plan users see only last 7 days
+        $sessionsQuery = \App\Models\ExtensionSession::where('user_id', $user->id)->with('device');
+        if ($isFreePlan) {
+            $sessionsQuery->where('started_at', '>=', $freeCutoff);
+        }
+        $sessions = $sessionsQuery->orderBy('started_at', 'desc')->get();
 
+        $snapshotsQuery = \App\Models\ExtensionMetricsSnapshot::where('user_id', $user->id)->with('device');
+        if ($isFreePlan) {
+            $snapshotsQuery->where('captured_at', '>=', $freeCutoff);
+        }
+        $snapshots = $snapshotsQuery->orderBy('captured_at', 'desc')->get();
+
+        $rollupsQuery = \App\Models\ExtensionDailyRollup::where('user_id', $user->id)->with('device');
+        if ($isFreePlan) {
+            $rollupsQuery->where('date', '>=', $freeCutoff->toDateString());
+        }
+        $rollups = $rollupsQuery->orderBy('date', 'desc')->get();
+
+        $recommendationsQuery = \App\Models\ExtensionRecommendation::where('user_id', $user->id)
+            ->with(['events' => fn($q) => $q->orderBy('occurred_at', 'desc')]);
+        if ($isFreePlan) {
+            $recommendationsQuery->where('created_at', '>=', $freeCutoff);
+        }
+        $recommendations = $recommendationsQuery->orderBy('created_at', 'desc')->get();
 
         $helpRequestsQuery = \App\Models\ExtensionHelpRequest::query();
-        
         if (!$user->is_admin) {
             $helpRequestsQuery->where('user_id', $user->id);
         }
-        
+        if ($isFreePlan) {
+            $helpRequestsQuery->where('created_at', '>=', $freeCutoff);
+        }
         $helpRequests = $helpRequestsQuery->with('user')->orderBy('created_at', 'desc')->get();
 
-        // Calculate Today's Active Time using actual Active MS from sessions
-        // We filter for sessions that were active at some point today
+        // Today's Active Time
         $todayActiveMs = \App\Models\ExtensionSession::where('user_id', $user->id)
             ->where(function($q) {
                 $q->whereDate('started_at', today())
@@ -576,7 +600,8 @@ class HomeController extends Controller
 
         return view('extension-setup', compact(
             'devices', 'sessions', 'snapshots', 'rollups', 'recommendations',
-            'helpRequests', 'todayActiveMs', 'domainGroups', 'uniqueRecommendedCount'
+            'helpRequests', 'todayActiveMs', 'domainGroups', 'uniqueRecommendedCount',
+            'isFreePlan', 'historyLimitDays'
         ));
     }
 
@@ -665,7 +690,13 @@ class HomeController extends Controller
         if ($device->user_id !== auth()->id()) {
             abort(403);
         }
-        $device->update(['revoked_at' => now()]);
+
+        // Delete the associated API token so the extension can no longer authenticate
+        if ($device->token_id) {
+            \Laravel\Sanctum\PersonalAccessToken::where('id', $device->token_id)->delete();
+        }
+
+        $device->update(['revoked_at' => now(), 'token_id' => null]);
         return response()->json(['data' => ['unlinked' => true]]);
     }
 }

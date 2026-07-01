@@ -49,20 +49,52 @@ class ExternalContentController extends Controller
         $data['is_featured'] = $request->boolean('is_featured');
         $data['language'] = $request->filled('video_url_ar') ? 'both' : 'en';
 
+        // --- Parse Connected Tools early ---
+        $incomingTools = [];
+        if ($request->filled('connected_tools')) {
+            if (is_string($request->connected_tools)) {
+                $incomingTools = array_map('trim', explode(',', $request->connected_tools));
+            } else {
+                $incomingTools = (array)$request->connected_tools;
+            }
+        }
+        $data['connected_tools'] = $incomingTools;
+
         // --- Handle Course Association ---
         $isIndividual = $request->boolean('is_individual', true); // Default to individual if not specified
 
-        if (!$isIndividual && $request->filled('course_name')) {
-            $courseName = trim($request->course_name);
-            $course = \App\Models\Course::firstOrCreate(
-                ['title' => $courseName],
-                [
-                    'category_id' => $request->category_id ?? null,
-                    'thumbnail' => $request->course_thumbnail ?? null,
-                    'status' => 'active'
-                ]
-            );
-            $data['course_id'] = $course->id;
+        if (!$isIndividual) {
+            if ($request->filled('course_name')) {
+                $courseName = trim($request->course_name);
+                $course = \App\Models\Course::firstOrCreate(
+                    ['title' => $courseName],
+                    [
+                        'category_id' => $request->category_id ?? null,
+                        'thumbnail' => $request->course_thumbnail ?? null,
+                        'status' => 'active',
+                        'connected_tools' => $incomingTools
+                    ]
+                );
+
+                // Merge tools if the course already existed to keep a cumulative list of tools
+                if (!$course->wasRecentlyCreated && !empty($incomingTools)) {
+                    $existingTools = is_array($course->connected_tools) ? $course->connected_tools : [];
+                    $mergedTools = array_values(array_unique(array_merge($existingTools, $incomingTools)));
+                    $course->update(['connected_tools' => $mergedTools]);
+                }
+
+                $data['course_id'] = $course->id;
+            } elseif ($request->filled('course_id')) {
+                $course = \App\Models\Course::find($request->course_id);
+                if ($course) {
+                    if (!empty($incomingTools)) {
+                        $existingTools = is_array($course->connected_tools) ? $course->connected_tools : [];
+                        $mergedTools = array_values(array_unique(array_merge($existingTools, $incomingTools)));
+                        $course->update(['connected_tools' => $mergedTools]);
+                    }
+                    $data['course_id'] = $course->id;
+                }
+            }
         } else {
             // Ensure no course is linked if marked as individual
             $data['course_id'] = null;
@@ -89,14 +121,8 @@ class ExternalContentController extends Controller
             }
         }
 
-        // 4. Tools Mapping
-        if ($request->filled('connected_tools')) {
-            if (is_string($request->connected_tools)) {
-                $data['connected_tools'] = array_map('trim', explode(',', $request->connected_tools));
-            } else {
-                $data['connected_tools'] = (array)$request->connected_tools;
-            }
-        } else {
+        // 4. Tools Mapping - already handled above, ensure array defaults if empty
+        if (!isset($data['connected_tools'])) {
             $data['connected_tools'] = [];
         }
 

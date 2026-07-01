@@ -207,6 +207,15 @@
 
 @section('content')
 <div class="container-fluid p-0">
+    @if($devices->isEmpty())
+        <div class="alert d-flex align-items-center gap-3 mb-4 rounded-4 shadow-sm border-0" style="background: rgba(220, 38, 38, 0.05); border: 1px solid rgba(220, 38, 38, 0.15) !important; color: #b91c1c; padding: 1.25rem 1.75rem;">
+            <i class="bi bi-exclamation-triangle-fill fs-4 text-danger"></i>
+            <div>
+                <strong class="fw-800" style="font-size: 1.1rem; display: block; margin-bottom: 0.2rem;">Extension Connection Required</strong>
+                <span class="fw-600">Please connect your extension first before continuing. Follow the setup instructions below to generate a connection key and link your device.</span>
+            </div>
+        </div>
+    @endif
     <!-- Hero Section -->
     <div class="setup-hero animate-slide-up">
         <div class="row align-items-center">
@@ -277,6 +286,18 @@
                 </button>
             </form>
         </div>
+
+        {{-- Free Plan limitation notice --}}
+        @if($isFreePlan ?? false)
+        <div class="alert d-flex align-items-center gap-3 mb-4" style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 16px; padding: 1rem 1.5rem;">
+            <span style="font-size: 1.4rem;">⚠️</span>
+            <div>
+                <strong style="color: #92400e;">Free Plan — Showing last {{ $historyLimitDays ?? 7 }} days only.</strong>
+                <span style="color: #78350f; font-size: 0.88rem; margin-left: 0.3rem;">Upgrade to Pro to unlock your full history.</span>
+            </div>
+            <a href="/pricing" class="btn btn-sm ms-auto fw-700 rounded-pill px-3" style="background:#f59e0b;color:#fff;white-space:nowrap;">Upgrade →</a>
+        </div>
+        @endif
 
         {{-- Tab Nav --}}
         <div class="ev-tabs mb-0">
@@ -574,8 +595,20 @@
     <div class="card border-0 shadow-sm rounded-5 p-5 animate-slide-up delay-2 mb-5" style="background: #f8fafc; border: 1px solid #e2e8f0 !important;">
         <div class="row align-items-center">
             <div class="col-lg-6">
+                <!-- <p class="text-muted small fw-600 mb-4 mb-lg-0">This key is required to authenticate your extension with your Daleel AI account. Keep it secure.</p> -->
                 <h4 class="fw-800 text-dark mb-2">Your Unique Connection Key</h4>
-                <p class="text-muted small fw-600 mb-4 mb-lg-0">This key is required to authenticate your extension with your Daleel AI account. Keep it secure.</p>
+                @if(auth()->user()->account_type === 'Free Plan')
+                <div class="d-flex align-items-center gap-2 mt-2">
+                    <span class="badge bg-warning text-dark fw-700 rounded-pill px-3 py-2" style="font-size: 11px;">
+                        <i class="bi bi-shield-exclamation me-1"></i> Free Plan — 1 device limit
+                    </span>
+                    @if($devices->count() >= 1)
+                    <span class="badge bg-danger text-white fw-700 rounded-pill px-3 py-2" style="font-size: 11px;">
+                        Limit Reached
+                    </span>
+                    @endif
+                </div>
+                @endif
             </div>
             <div class="col-lg-6 text-lg-end">
                 <div id="code-display-area" style="display: none;">
@@ -588,9 +621,21 @@
                     </div>
                 </div>
                 <div id="generate-area">
-                    <button class="btn-generate" id="btn-generate-code" onclick="generateCode()">
-                        <i class="bi bi-shield-lock-fill me-2"></i> Generate Connection Key
-                    </button>
+                    @if(auth()->user()->account_type === 'Free Plan' && $devices->count() >= 1)
+                        {{-- Free plan limit reached: show upgrade prompt --}}
+                        <div class="text-end">
+                            <p class="text-danger fw-700 mb-2" style="font-size: 13px;">
+                                <i class="bi bi-lock-fill me-1"></i> You already have an active device connected.
+                            </p>
+                            <a href="/pricing" class="btn btn-sm btn-outline-primary rounded-pill fw-700 px-4">
+                                <i class="bi bi-arrow-up-circle me-1"></i> Upgrade for Unlimited Devices
+                            </a>
+                        </div>
+                    @else
+                        <button class="btn-generate" id="btn-generate-code" onclick="generateCode()">
+                            <i class="bi bi-shield-lock-fill me-2"></i> Generate Connection Key
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -659,7 +704,14 @@
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
             }
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(json => {
+                    throw new Error(json.message || 'Failed to generate code');
+                });
+            }
+            return response.json();
+        })
         .then(data => {
             const result = data.data;
             document.getElementById('key-text').innerText = result.verification_code;
@@ -672,7 +724,7 @@
         })
         .catch(error => {
             console.error('Error:', error);
-            showToast('Failed to generate code', 'danger');
+            showToast(error.message || 'Failed to generate code', 'danger');
             btn.disabled = false;
             btn.innerHTML = '<i class="bi bi-shield-lock-fill me-2"></i> Generate Connection Key';
         });
@@ -760,12 +812,6 @@
             btn.innerText = 'COPY KEY';
             btn.classList.remove('bg-success', 'text-white', 'border-success');
         }, 2000);
-    }
-
-    function showToast(message, type = 'success') {
-        // Assuming there's a global toast function or simple alert
-        console.log(message);
-        // You can implement a nice bootstrap toast here if needed
     }
 
     // Data Viewer tab switching

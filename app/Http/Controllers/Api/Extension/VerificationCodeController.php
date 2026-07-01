@@ -17,6 +17,18 @@ class VerificationCodeController extends Controller
     {
         $user = $request->user();
 
+        // Enforce Free Plan 1 device limit
+        if ($user->account_type === 'Free Plan') {
+            $activeDevicesCount = \App\Models\ExtensionDevice::where('user_id', $user->id)
+                ->whereNull('revoked_at')
+                ->count();
+            if ($activeDevicesCount >= 1) {
+                return response()->json([
+                    'message' => 'Free Plan limit reached! You can only connect 1 device. Please revoke your existing device connection before generating a new key.'
+                ], 422);
+            }
+        }
+
         // Invalidate older unused codes for the same user
         ExtensionVerificationCode::where('user_id', $user->id)
             ->where('expires_at', '>', now())

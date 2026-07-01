@@ -19,9 +19,15 @@ class AdminController extends Controller
     }
 
     // User Management
-    public function usersIndex()
+    public function usersIndex(Request $request)
     {
-        $users = User::where('is_admin', false)->orderBy('created_at', 'desc')->paginate(20);
+        $query = User::where('is_admin', false);
+
+        if ($request->filled('account_type')) {
+            $query->where('account_type', $request->account_type);
+        }
+
+        $users = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
         $learningGoals = \App\Models\LearningGoal::orderBy('title')->get();
         $experienceLevels = \App\Models\ExperienceLevel::orderBy('title')->get();
         return view('admin.users.index', compact('users', 'learningGoals', 'experienceLevels'));
@@ -355,7 +361,8 @@ class AdminController extends Controller
     public function coursesIndex()
     {
         $courses = Course::withCount('contents')->orderBy('created_at', 'desc')->paginate(10);
-        return view('admin.courses.index', compact('courses'));
+        $tools   = \App\Models\Tool::where('status', 'active')->orderBy('name')->get();
+        return view('admin.courses.index', compact('courses', 'tools'));
     }
 
     public function courseStore(Request $request)
@@ -365,6 +372,7 @@ class AdminController extends Controller
             'category' => 'nullable|string|max:255',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:active,draft',
+            'connected_tools' => 'nullable|string',
         ]);
 
         $data = $request->except('thumbnail');
@@ -372,6 +380,12 @@ class AdminController extends Controller
         if ($request->hasFile('thumbnail')) {
             $path = $request->file('thumbnail')->store('thumbnails', 'public');
             $data['thumbnail'] = '/storage/' . $path;
+        }
+
+        if ($request->filled('connected_tools')) {
+            $data['connected_tools'] = array_map('trim', explode(',', $request->connected_tools));
+        } else {
+            $data['connected_tools'] = [];
         }
 
         Course::create($data);
@@ -386,6 +400,7 @@ class AdminController extends Controller
             'category' => 'nullable|string|max:255',
             'thumbnail' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'status' => 'required|in:active,draft',
+            'connected_tools' => 'nullable|string',
         ]);
 
         $data = $request->except('thumbnail');
@@ -393,6 +408,12 @@ class AdminController extends Controller
         if ($request->hasFile('thumbnail')) {
             $path = $request->file('thumbnail')->store('thumbnails', 'public');
             $data['thumbnail'] = '/storage/' . $path;
+        }
+
+        if ($request->filled('connected_tools')) {
+            $data['connected_tools'] = array_map('trim', explode(',', $request->connected_tools));
+        } else {
+            $data['connected_tools'] = [];
         }
 
         $course->update($data);

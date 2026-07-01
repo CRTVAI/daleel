@@ -14,6 +14,11 @@ class Course extends Model
         'category',
         'category_id',
         'status',
+        'connected_tools',
+    ];
+
+    protected $casts = [
+        'connected_tools' => 'array',
     ];
 
     /**

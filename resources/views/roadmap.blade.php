@@ -685,11 +685,6 @@
                                     <i class="bi bi-play-fill"></i> Continue Watching
                                 </a>
                                 @endif
-
-                                <a href="{{ route('roadmap.wizard') }}" class="btn btn-lg rounded-pill fw-bold px-4 d-flex align-items-center gap-2 text-white" style="background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); border: none; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);">
-                                    <i class="bi bi-magic"></i> New AI Curriculum
-                                </a>
-
                                 <a href="{{ route('ai.mentor') }}" class="btn btn-outline-light btn-lg rounded-pill px-4" style="opacity:.85;">
                                     <i class="bi bi-stars me-1"></i> Ask AI Mentor
                                 </a>

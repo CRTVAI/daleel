@@ -10,13 +10,19 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class RoadmapController extends Controller
 {
     public function index()
     {
+        $user = Auth::user();
+        
+        // Auto-detect tools and either initialize roadmap or check for pending tools
+        $pendingData = $this->detectAndTrackPendingTools($user);
+
         $roadmaps = UserRoadmap::where('user_id', Auth::id())->latest()->get();
-        return view('roadmap.index', compact('roadmaps'));
+        return view('roadmap.index', compact('roadmaps', 'pendingData'));
     }
 
     public function show(UserRoadmap $roadmap)
@@ -72,13 +78,27 @@ class RoadmapController extends Controller
         $totalDurationSeconds  = Content::whereIn('id', $allVideoIds)->sum('duration_seconds');
         $remainingSeconds      = max(0, $totalDurationSeconds - $totalWatchedSeconds);
 
-        // 5. Current (last-watched) lesson in this roadmap
-        $currentProgressRecord = $progressMap->sortByDesc(fn($p) => $p->last_watched_at)->first();
-        $currentLesson         = $currentProgressRecord?->content;
+        // 5. Current active lesson: Find the first incomplete video in the roadmap sequence
+        $currentLesson = null;
+        $currentProgressRecord = null;
 
+        foreach ($roadmapData as $phase) {
+            foreach ($phase['contents'] as $content) {
+                if (!$content->is_completed) {
+                    $currentLesson = $content;
+                    $currentProgressRecord = $progressMap->get($content->id);
+                    break 2;
+                }
+            }
+        }
+
+        // Fallback: If all lessons are completed, default to the very first lesson
         if (!$currentLesson) {
-            $firstPhase    = $roadmapData->first();
+            $firstPhase = $roadmapData->first();
             $currentLesson = $firstPhase ? $firstPhase['contents']->first() : null;
+            if ($currentLesson) {
+                $currentProgressRecord = $progressMap->get($currentLesson->id);
+            }
         }
 
         $currentTool = null;
@@ -103,6 +123,15 @@ class RoadmapController extends Controller
         
         if (!$goal) return redirect()->route('learn.explore');
 
+        // Check roadmap creation limit for Free users (limit: 2)
+        $user = auth()->user();
+        if ($user->account_type === 'Free Plan') {
+            $existing = \App\Models\UserRoadmap::where('user_id', $user->id)->where('is_auto_generated', false)->count();
+            if ($existing >= 2) {
+                return redirect()->route('roadmap')->with('error', 'You have reached the limit of 2 roadmaps on the Free Plan. Please upgrade to Pro to create more.');
+            }
+        }
+
         // 1. Get all tools and AI matches (Initial state for Step 1)
         $allTools = Tool::active()->get(['id', 'name', 'description', 'logo']);
         $selectedIds = $this->askGptToMatchTools($goal, $allTools);
@@ -122,10 +151,10 @@ class RoadmapController extends Controller
         $goal = $request->input('goal');
         $toolNames = $request->input('tool_names', []);
 
-        // We can use GPT to generate 7 specific categories based on tools
+        // We can use GPT to generate 3 specific categories based on tools
         $prompt = "Goal: {$goal}. Tools: " . implode(', ', $toolNames) . ". 
-                   Generate 7 short improvement categories for a learning roadmap. 
-                   Return ONLY a JSON array of 7 strings.";
+                   Generate exactly 3 short improvement categories for a learning roadmap. 
+                   Return ONLY a JSON array of 3 strings.";
 
         try {
             $response = Http::withToken(config('services.openai.key'))
@@ -136,12 +165,13 @@ class RoadmapController extends Controller
                 ]);
 
             $categories = json_decode($response->json('choices.0.message.content'), true);
-            if (!is_array($categories) || count($categories) < 7) throw new \Exception("Invalid GPT format");
+            if (!is_array($categories) || count($categories) < 3) throw new \Exception("Invalid GPT format");
         } catch (\Throwable $e) {
             // Fallback
             $categories = [
-                'Productivity & Speed', 'Advanced Office Skills', 'Data Analysis', 
-                'Professional Documents', 'Presentation Skills', 'Communication & Email', 'Others'
+                'Core Productivity & Performance', 
+                'Advanced Features & Tools Usage', 
+                'Data Management & Analysis'
             ];
         }
 
@@ -153,6 +183,19 @@ class RoadmapController extends Controller
      */
     public function generateRoadmap(Request $request)
     {
+        // Check roadmap creation limit for Free users
+        $user = auth()->user();
+        if ($user->account_type === 'Free Plan') {
+            $existing = \App\Models\UserRoadmap::where('user_id', $user->id)->where('is_auto_generated', false)->count();
+            if ($existing >= 2) {
+                return response()->json([
+                    'error' => 'limit_reached',
+                    'message' => 'Free Plan limit reached! You can only create up to 2 roadmaps.',
+                    'redirect_url' => url('/pricing')
+                ], 403);
+            }
+        }
+
         $goal = $request->input('goal');
         $tools = $request->input('tools', []);
         $focus = $request->input('focus');
@@ -182,6 +225,7 @@ class RoadmapController extends Controller
             'phases' => $roadmapData['phases'],
             'focus' => $focus,
             'level' => $level,
+            'redirect_url' => route('roadmap.show', $userRoadmap->id),
         ]);
     }
 
@@ -215,7 +259,7 @@ class RoadmapController extends Controller
         $cacheKey = 'roadmap_tools:' . md5($goal);
 
         return Cache::remember($cacheKey, 3600, function() use ($goal, $toolList) {
-            $prompt = "GOAL: {$goal}\nTOOLS:\n{$toolList}\nSelect necessary tools. Reply ONLY with comma-separated IDs.";
+            $prompt = "GOAL: {$goal}\nTOOLS:\n{$toolList}\nSelect only the tools that are directly mentioned or absolutely essential to achieving the goal. Avoid selecting tangentially related tools (e.g. do not select Python for an Excel goal unless Python is explicitly mentioned or requested). Reply ONLY with the comma-separated IDs.";
             try {
                 $response = Http::withToken(config('services.openai.key'))
                     ->post('https://api.openai.com/v1/chat/completions', [
@@ -226,6 +270,54 @@ class RoadmapController extends Controller
                 return array_map('intval', $ids);
             } catch (\Throwable $e) { return []; }
         });
+    }
+
+    private function filterVideosByFocusAndLevel($videos, string $focus, string $toolName, string $level)
+    {
+        if ($videos->count() <= 6) {
+            return $videos; // No need to filter if there are already few videos
+        }
+
+        // Format a list of candidates: ID and Title
+        $candidateList = $videos->map(fn($v) => "ID:{$v->id} | {$v->title}")->implode("\n");
+
+        $prompt = <<<PROMPT
+We are building a learning roadmap phase for the tool "{$toolName}" at "{$level}" level.
+The user's primary focus/learning goal is: "{$focus}".
+
+Here is the list of available lessons:
+{$candidateList}
+
+TASK:
+1. Select the top 5 to 7 most relevant lessons from the list above that align best with the user's focus and level.
+2. Order them from easiest to hardest to form a progressive curriculum.
+3. If they are equally relevant, pick the best tutorials.
+
+Return ONLY a comma-separated list of the selected IDs in order (e.g. 102,45,67). No text, no markdown.
+PROMPT;
+
+        try {
+            $response = Http::withToken(config('services.openai.key'))
+                ->timeout(20)
+                ->post('https://api.openai.com/v1/chat/completions', [
+                    'model' => 'gpt-4o-mini',
+                    'messages' => [['role' => 'user', 'content' => $prompt]],
+                    'temperature' => 0.2,
+                ]);
+
+            $content = trim($response->json('choices.0.message.content'), '" ');
+            $ids = array_map('intval', array_filter(explode(',', preg_replace('/[^0-9,]/', '', $content))));
+
+            if (empty($ids)) {
+                return $videos->take(6); // Fallback
+            }
+
+            // Return the selected videos in the order specified by GPT
+            return collect($ids)->map(fn($id) => $videos->firstWhere('id', $id))->filter()->values();
+        } catch (\Throwable $e) {
+            Log::error("Roadmap Video Focus Filtering failed for {$toolName}: " . $e->getMessage());
+            return $videos->take(6); // Fallback
+        }
     }
 
     private function buildFinalCurriculum($title, $toolIds, $focus, $level)
@@ -241,8 +333,11 @@ class RoadmapController extends Controller
                 ->get();
             
             if ($videos->count() > 0) {
+                // Filter the list of videos to match the user's specific focus
+                $filteredVideos = $this->filterVideosByFocusAndLevel($videos, $focus, $tool->name, $level);
+
                 // Map to ensure we have the thumbnail_url accessor value for the frontend
-                $videoData = $videos->map(function($v) {
+                $videoData = $filteredVideos->map(function($v) {
                     return [
                         'id' => $v->id,
                         'title' => $v->title,
@@ -286,5 +381,211 @@ class RoadmapController extends Controller
             'level' => $level,
             'phases' => $phases
         ];
+    }
+
+    /**
+     * Delete the specified roadmap.
+     */
+    public function destroy(UserRoadmap $roadmap)
+    {
+        if ($roadmap->user_id !== Auth::id()) {
+            abort(403);
+        }
+
+        $roadmap->delete();
+
+        return redirect()->route('roadmap')->with('success', 'Roadmap deleted successfully.');
+    }
+
+    public function addAutoTool(Request $request)
+    {
+        $request->validate([
+            'roadmap_id' => 'required|exists:user_roadmaps,id',
+            'tool_id' => 'required|exists:tools,id',
+        ]);
+
+        $roadmap = UserRoadmap::findOrFail($request->roadmap_id);
+        if ($roadmap->user_id !== Auth::id()) abort(403);
+
+        $tool = Tool::findOrFail($request->tool_id);
+        $toolIds = is_array($roadmap->tools) ? $roadmap->tools : [];
+
+        if (!in_array($tool->id, $toolIds)) {
+            $toolIds[] = $tool->id;
+
+            // Re-generate curriculum for all aggregated tools
+            $level = $roadmap->level ?: 'Beginner';
+            $focus = $roadmap->focus ?: 'General Productivity';
+            $curriculumData = $this->buildFinalCurriculum($roadmap->title, $toolIds, $focus, $level);
+
+            $roadmap->update([
+                'tools' => $toolIds,
+                'curriculum' => $curriculumData['phases']
+            ]);
+        }
+
+        return redirect()->back()->with('success', "🎉 Added {$tool->name} to your Auto-Generated Roadmap!");
+    }
+
+    public function dismissAutoTool(Request $request)
+    {
+        $request->validate([
+            'roadmap_id' => 'required|exists:user_roadmaps,id',
+            'tool_id' => 'required|exists:tools,id',
+        ]);
+
+        $roadmap = UserRoadmap::findOrFail($request->roadmap_id);
+        if ($roadmap->user_id !== Auth::id()) abort(403);
+
+        $meta = $roadmap->metadata ?: [];
+        $dismissed = isset($meta['dismissed_tools']) ? (array) $meta['dismissed_tools'] : [];
+
+        if (!in_array($request->tool_id, $dismissed)) {
+            $dismissed[] = (int) $request->tool_id;
+            $meta['dismissed_tools'] = $dismissed;
+            $roadmap->update(['metadata' => $meta]);
+        }
+
+        return redirect()->back()->with('info', 'Tool recommendation dismissed.');
+    }
+
+    public function detectAndTrackPendingTools($user)
+    {
+        if (!$user) return null;
+
+        $toolSeconds = [];
+
+        // 1. Process Browsing History URLs
+        $histories = \App\Models\BrowsingHistory::where('user_id', $user->id)
+            ->whereNotNull('url')
+            ->get(['url', 'duration']);
+
+        foreach ($histories as $history) {
+            $detected = \App\Services\ToolDetector::detect($history->url);
+            $toolName = $detected['tool_name'];
+            if ($toolName && $toolName !== 'Unknown') {
+                if (!isset($toolSeconds[$toolName])) {
+                    $toolSeconds[$toolName] = 0;
+                }
+                $toolSeconds[$toolName] += $history->duration;
+            }
+        }
+
+        // 2. Process Extension Sessions domains and nested pages URLs
+        $sessions = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->get(['platform_domain', 'active_ms', 'pages']);
+
+        foreach ($sessions as $session) {
+            $hasAggregatedFromPages = false;
+            if ($session->pages && is_array($session->pages)) {
+                foreach ($session->pages as $page) {
+                    $url = $page['url'] ?? null;
+                    $pageMs = $page['active_ms'] ?? 0;
+                    if ($url && $pageMs > 0) {
+                        $detected = \App\Services\ToolDetector::detect($url);
+                        $toolName = $detected['tool_name'];
+                        if ($toolName && $toolName !== 'Unknown') {
+                            if (!isset($toolSeconds[$toolName])) {
+                                $toolSeconds[$toolName] = 0;
+                            }
+                            $toolSeconds[$toolName] += ($pageMs / 1000);
+                            $hasAggregatedFromPages = true;
+                        }
+                    }
+                }
+            }
+
+            // Fallback to platform_domain if pages didn't yield anything
+            if (!$hasAggregatedFromPages && $session->platform_domain) {
+                // Construct a URL for the detector
+                $url = 'https://' . $session->platform_domain;
+                $detected = \App\Services\ToolDetector::detect($url);
+                $toolName = $detected['tool_name'];
+                if ($toolName && $toolName !== 'Unknown') {
+                    if (!isset($toolSeconds[$toolName])) {
+                        $toolSeconds[$toolName] = 0;
+                    }
+                    $toolSeconds[$toolName] += ($session->active_ms / 1000);
+                }
+            }
+        }
+
+        // 3. Match detected tool names against database active tools
+        $activeTools = Tool::active()->get();
+        $detectedTools = collect();
+
+        foreach ($toolSeconds as $toolName => $seconds) {
+            if ($seconds < 3600) continue; // Minimum active duration threshold of 1 hour (3600 seconds)
+
+            $matchedTool = $activeTools->first(function($dbTool) use ($toolName) {
+                $dbNameLower = strtolower($dbTool->name);
+                $detectedLower = strtolower($toolName);
+                
+                return $dbNameLower === $detectedLower 
+                    || str_contains($detectedLower, $dbNameLower)
+                    || str_contains($dbNameLower, $detectedLower);
+            });
+
+            if ($matchedTool) {
+                $existing = $detectedTools->firstWhere('id', $matchedTool->id);
+                if ($existing) {
+                    $existing->usage_seconds += $seconds;
+                } else {
+                    $matchedTool->usage_seconds = $seconds;
+                    $detectedTools->push($matchedTool);
+                }
+            }
+        }
+
+        if ($detectedTools->isEmpty()) return null;
+
+        // Sort by usage time descending, so most used tools are prioritized
+        $detectedTools = $detectedTools->sortByDesc('usage_seconds')->values();
+
+        // Check if an auto-generated roadmap exists
+        $autoRoadmap = UserRoadmap::where('user_id', $user->id)
+            ->where('is_auto_generated', true)
+            ->first();
+
+        if (!$autoRoadmap) {
+            // Auto-create initial roadmap using detected tools
+            $toolIds = $detectedTools->pluck('id')->toArray();
+            $level = $user->experience_level ?: 'Beginner';
+            $focus = $user->learning_goal ?: 'General Productivity';
+
+            $curriculumData = $this->buildFinalCurriculum("Auto-Generated Career path", $toolIds, $focus, $level);
+
+            UserRoadmap::create([
+                'user_id' => $user->id,
+                'title' => 'Auto-Generated Learning Path',
+                'goal' => 'Auto-Generated based on extension history',
+                'tools' => $toolIds,
+                'focus' => $focus,
+                'level' => $level,
+                'curriculum' => $curriculumData['phases'],
+                'progress' => 0,
+                'is_auto_generated' => true,
+                'metadata' => ['dismissed_tools' => []]
+            ]);
+
+            return null; // Initialized!
+        }
+
+        // Auto roadmap exists, check for pending tools (tools the user has used but aren't in this roadmap yet, nor dismissed)
+        $existingToolIds = is_array($autoRoadmap->tools) ? $autoRoadmap->tools : [];
+        $meta = $autoRoadmap->metadata ?: [];
+        $dismissedToolIds = isset($meta['dismissed_tools']) ? (array) $meta['dismissed_tools'] : [];
+
+        foreach ($detectedTools as $tool) {
+            if (!in_array($tool->id, $existingToolIds) && !in_array($tool->id, $dismissedToolIds)) {
+                // We found a pending tool! Let's return this first one to ask the user.
+                return [
+                    'roadmap_id' => $autoRoadmap->id,
+                    'tool' => $tool
+                ];
+            }
+        }
+
+        return null;
     }
 }
