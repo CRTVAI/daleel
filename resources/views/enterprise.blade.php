@@ -474,6 +474,12 @@
                                     Please check the form and try again.
                                 </div>
                             @endif
+
+                            @if (session('enterprise_contact_error'))
+                                <div class="alert-error-custom mb-4">
+                                    {{ session('enterprise_contact_error') }}
+                                </div>
+                            @endif
                             
                             <div class="row g-3">
                                 <div class="col-md-6">

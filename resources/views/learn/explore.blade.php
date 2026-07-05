@@ -3,7 +3,6 @@
 @section('title', 'Library — Explore — Daleel AI')
 
 @section('styles')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <style>
     :root {
         --crtv-primary: #6366f1;
@@ -426,7 +425,7 @@
             <p class="opacity-75 fs-6 fw-600">Access our premium catalog of video tutorials and complete masterclasses.</p>
         </div>
 
-        <form method="GET" action="{{ route('search.advanced') }}" class="search-container-premium">
+        <form method="GET" action="{{ route('learn.explore') }}" class="search-container-premium">
             <input type="hidden" name="type" value="{{ $type }}">
             <input type="hidden" name="category_id" value="{{ request('category_id') }}">
             
@@ -496,66 +495,7 @@
         @endforeach
     </div>
 
-    {{-- SECTION 1: Personal Path Recommendations --}}
-    @if($recommendedItems->isNotEmpty() && !request('search') && !request('category'))
-    <div class="mb-5 animate-slide-up delay-2">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h4 class="fw-800 text-dark mb-0 d-flex align-items-center gap-2">
-                <i class="bi bi-stars text-primary"></i> Recommended for Your Learning Path
-            </h4>
-            <div class="d-flex gap-2">
-                <button class="swiper-prev-explore-recom btn btn-light rounded-circle shadow-sm p-0" style="width: 32px; height: 32px; border: 1px solid #eee;">
-                    <i class="bi bi-chevron-left" style="font-size: 12px;"></i>
-                </button>
-                <button class="swiper-next-explore-recom btn btn-light rounded-circle shadow-sm p-0" style="width: 32px; height: 32px; border: 1px solid #eee;">
-                    <i class="bi bi-chevron-right" style="font-size: 12px;"></i>
-                </button>
-            </div>
-        </div>
-        
-        <div class="swiper exploreRecomSwiper" style="overflow: hidden; padding: 10px 4px;">
-            <div class="swiper-wrapper">
-                @foreach($recommendedItems as $item)
-                <div class="swiper-slide h-auto">
-                    <div class="premium-card h-100 d-flex flex-column">
-                        <button class="premium-bookmark-btn {{ Auth::user()->bookmarkedContents()->where('content_id', $item->id)->exists() ? 'active' : '' }}" 
-                                onclick="event.preventDefault(); toggleBookmark({{ $item->id }}, this)" 
-                                title="Bookmark">
-                            <i class="bi {{ Auth::user()->bookmarkedContents()->where('content_id', $item->id)->exists() ? 'bi-bookmark-fill' : 'bi-bookmark' }}"></i>
-                        </button>
-                        <a href="{{ route('learn.watch', $item) }}" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;height:100%">
-                            <div class="premium-thumb">
-                                <img src="{{ $item->thumbnail_url }}" alt="{{ $item->title }}">
-                                <div class="premium-card-overlay">
-                                    <span class="premium-badge">{{ $item->category_rel->name ?? $item->category }}</span>
-                                    @if($item->connected_tools && is_array($item->connected_tools))
-                                        @foreach($item->connected_tools as $tool)
-                                            <span class="tool-connection-badge"><i class="bi bi-cpu"></i> {{ ucfirst($tool) }}</span>
-                                        @endforeach
-                                    @endif
-                                </div>
-                            </div>
-                            <div class="premium-body bg-white flex-grow-1 d-flex flex-column justify-content-between">
-                                <div>
-                                    <h6 class="premium-title">{{ $item->title }}</h6>
-                                    <p class="premium-desc">{{ $item->description }}</p>
-                                </div>
-                                <div class="premium-footer mt-auto pt-3 border-top border-light">
-                                    <span><i class="bi bi-clock me-1"></i> {{ $item->duration_label ?: '15m' }}</span>
-                                    <span class="watch-cta-btn">WATCH LESSON <i class="bi bi-arrow-right"></i></span>
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-    <hr class="my-5 opacity-10">
-    @endif
-
-    {{-- SECTION 2: Catalog --}}
+    {{-- SECTION: Catalog --}}
     <div class="mb-4 animate-slide-up delay-2">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h4 class="fw-800 text-dark mb-0">
@@ -649,26 +589,7 @@
 @endsection
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        if (document.querySelector('.exploreRecomSwiper')) {
-            new Swiper('.exploreRecomSwiper', {
-                slidesPerView: 1,
-                spaceBetween: 24,
-                navigation: {
-                    nextEl: '.swiper-next-explore-recom',
-                    prevEl: '.swiper-prev-explore-recom',
-                },
-                breakpoints: {
-                    640: { slidesPerView: 2, spaceBetween: 20 },
-                    1024: { slidesPerView: 3, spaceBetween: 24 },
-                    1200: { slidesPerView: 4, spaceBetween: 24 }
-                }
-            });
-        }
-    });
-
     function toggleBookmark(contentId, btn) {
         const icon = btn.querySelector('i');
         const url = `/bookmarks/${contentId}/toggle`;

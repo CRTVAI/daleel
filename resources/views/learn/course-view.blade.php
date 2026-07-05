@@ -162,7 +162,7 @@
         <div class="flex-shrink-0 d-none d-xl-block">
             @php $firstLesson = $course->contents->sortBy('sort_order')->first(); @endphp
             @if($firstLesson)
-                <a href="{{ route('learn.watch', $firstLesson) }}" class="btn btn-primary rounded-pill px-4 py-2 fw-800 small">CONTINUE LEARNING <i class="bi bi-arrow-right ms-2"></i></a>
+                <a href="{{ route('learn.watch', [$firstLesson, 'course_id' => $course->id]) }}" class="btn btn-primary rounded-pill px-4 py-2 fw-800 small">CONTINUE LEARNING <i class="bi bi-arrow-right ms-2"></i></a>
             @endif
         </div>
     </div>
@@ -192,7 +192,7 @@
                 </div>
                 @foreach($lessons as $lesson)
                     <div class="d-flex align-items-center gap-2 pe-3">
-                        <a href="{{ route('learn.watch', $lesson) }}" class="neo-lesson-item flex-grow-1">
+                        <a href="{{ route('learn.watch', [$lesson, 'course_id' => $course->id]) }}" class="neo-lesson-item flex-grow-1">
                             <div class="neo-num-badge">{{ $globalIndex++ }}</div>
                             <div class="flex-grow-1">
                                 <div class="fw-800 text-dark mb-0 small">{{ $lesson->title }}</div>

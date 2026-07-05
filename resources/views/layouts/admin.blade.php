@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daleel AI Admin | Management Portal</title>
+    <link rel="icon" type="image/png" href="{{ asset('images/dashboard/fav.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -276,8 +277,7 @@
     <div class="admin-wrapper">
         <aside class="admin-sidebar">
             <div class="sidebar-brand">
-                <div class="brand-logo"><i class="bi bi-rocket-takeoff-fill"></i></div>
-                <span class="brand-text">Daleel AI ADMIN</span>
+                <x-application-logo style="height: 32px; width: auto;" />
             </div>
 
             <div class="menu-label">Main Menu</div>

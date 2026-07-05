@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
 
 class EnterpriseContactController extends Controller
 {
@@ -29,17 +30,29 @@ class EnterpriseContactController extends Controller
             '',
             'Name: ' . $data['name'],
             'Work email: ' . $data['email'],
-            'Subject: ' . $subject,~
+            'Subject: ' . $subject,
             '',
             'Message:',
             $data['message'],
         ]);
 
-        Mail::raw($body, function ($message) use ($data, $subject) {
-            $message->to('anas@crtvai.com')
-                ->replyTo($data['email'], $data['name'])
-                ->subject('Daleel contact: ' . $subject);
-        }); 
+        try {
+            Mail::raw($body, function ($message) use ($data, $subject) {
+                $message->to(config('mail.contact_to', env('CONTACT_TO_ADDRESS', 'anas@crtvai.com')))
+                    ->replyTo($data['email'], $data['name'])
+                    ->subject('Daleel contact: ' . $subject);
+            });
+        } catch (\Throwable $e) {
+            Log::error('Enterprise contact email failed', [
+                'error' => $e->getMessage(),
+                'from' => $data['email'],
+                'subject' => $subject,
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('enterprise_contact_error', 'We could not send your message right now. Please try again in a moment.');
+        }
 
         return back()->with('enterprise_contact_success', true);
     }

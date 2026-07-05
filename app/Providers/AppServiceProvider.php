@@ -26,7 +26,7 @@ class AppServiceProvider extends ServiceProvider
                 'interestsList' => \App\Models\Content::distinct()->pluck('category')->filter()->values(),
                 'learningGoals' => \Illuminate\Support\Facades\DB::table('learning_goals')->get(),
                 'experienceLevels' => \Illuminate\Support\Facades\DB::table('experience_levels')->get(),
-                'tools' => \App\Models\Tool::where('status', 'active')->get(),
+                'tools' => \App\Models\Tool::where('status', 'active')->orderBy('name')->get(),
             ]);
         });
     }

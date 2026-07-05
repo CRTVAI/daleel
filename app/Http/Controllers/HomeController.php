@@ -467,12 +467,7 @@ class HomeController extends Controller
             'lastLesson',
             'currentRoadmap',
             'pendingData'
-        ))->with([
-            'learningGoals' => \App\Models\LearningGoal::orderBy('title')->get(),
-            'experienceLevels' => \App\Models\ExperienceLevel::orderBy('title')->get(),
-            'tools' => \App\Models\Tool::where('status', 'active')->orderBy('name')->get(),
-            'interestsList' => \App\Models\Content::distinct()->whereNotNull('category')->pluck('category')->toArray(),
-        ]);
+        ));
     }
 
     public function activityHistory(Request $request)
@@ -542,40 +537,47 @@ class HomeController extends Controller
             ->orderBy('last_active_at', 'desc')
             ->get();
 
-        // Data Viewer data — Free Plan users see only last 7 days
-        $sessionsQuery = \App\Models\ExtensionSession::where('user_id', $user->id)->with('device');
+        // Data Viewer data — Free Plan users see all data, but older than 7 days is blurred
+        $sessions = \App\Models\ExtensionSession::where('user_id', $user->id)
+            ->with('device')
+            ->orderBy('started_at', 'desc')
+            ->get();
         if ($isFreePlan) {
-            $sessionsQuery->where('started_at', '>=', $freeCutoff);
+            $sessions->each(fn($s) => $s->started_at < $freeCutoff ? $s->isBlurred = true : null);
         }
-        $sessions = $sessionsQuery->orderBy('started_at', 'desc')->get();
 
-        $snapshotsQuery = \App\Models\ExtensionMetricsSnapshot::where('user_id', $user->id)->with('device');
+        $snapshots = \App\Models\ExtensionMetricsSnapshot::where('user_id', $user->id)
+            ->with('device')
+            ->orderBy('captured_at', 'desc')
+            ->get();
         if ($isFreePlan) {
-            $snapshotsQuery->where('captured_at', '>=', $freeCutoff);
+            $snapshots->each(fn($s) => $s->captured_at < $freeCutoff ? $s->isBlurred = true : null);
         }
-        $snapshots = $snapshotsQuery->orderBy('captured_at', 'desc')->get();
 
-        $rollupsQuery = \App\Models\ExtensionDailyRollup::where('user_id', $user->id)->with('device');
+        $rollups = \App\Models\ExtensionDailyRollup::where('user_id', $user->id)
+            ->with('device')
+            ->orderBy('date', 'desc')
+            ->get();
         if ($isFreePlan) {
-            $rollupsQuery->where('date', '>=', $freeCutoff->toDateString());
+            $rollups->each(fn($r) => $r->date < $freeCutoff ? $r->isBlurred = true : null);
         }
-        $rollups = $rollupsQuery->orderBy('date', 'desc')->get();
 
-        $recommendationsQuery = \App\Models\ExtensionRecommendation::where('user_id', $user->id)
-            ->with(['events' => fn($q) => $q->orderBy('occurred_at', 'desc')]);
+        $recommendations = \App\Models\ExtensionRecommendation::where('user_id', $user->id)
+            ->with(['events' => fn($q) => $q->orderBy('occurred_at', 'desc')])
+            ->orderBy('created_at', 'desc')
+            ->get();
         if ($isFreePlan) {
-            $recommendationsQuery->where('created_at', '>=', $freeCutoff);
+            $recommendations->each(fn($r) => $r->created_at < $freeCutoff ? $r->isBlurred = true : null);
         }
-        $recommendations = $recommendationsQuery->orderBy('created_at', 'desc')->get();
 
-        $helpRequestsQuery = \App\Models\ExtensionHelpRequest::query();
-        if (!$user->is_admin) {
-            $helpRequestsQuery->where('user_id', $user->id);
-        }
+        $helpRequests = \App\Models\ExtensionHelpRequest::query()
+            ->when(!$user->is_admin, fn($q) => $q->where('user_id', $user->id))
+            ->with('user')
+            ->orderBy('created_at', 'desc')
+            ->get();
         if ($isFreePlan) {
-            $helpRequestsQuery->where('created_at', '>=', $freeCutoff);
+            $helpRequests->each(fn($h) => $h->created_at < $freeCutoff ? $h->isBlurred = true : null);
         }
-        $helpRequests = $helpRequestsQuery->with('user')->orderBy('created_at', 'desc')->get();
 
         // Today's Active Time
         $todayActiveMs = \App\Models\ExtensionSession::where('user_id', $user->id)
@@ -593,7 +595,8 @@ class HomeController extends Controller
                 'active_ms' => $g->sum('active_ms'),
                 'ai'        => (bool) $g->where('is_ai_tool', true)->count(),
                 'category'  => $g->first()->platform_category ?? null,
-                'sessions'  => $g->sortByDesc('started_at')->values(),
+                'sessions'  => $g->sortByDesc('started_at')->values()
+                    ->each(fn($s) => $s->makeVisible('isBlurred')),
             ])->sortByDesc('count')->values();
 
         $uniqueRecommendedCount = $recommendations->unique('content_id')->count();
@@ -601,7 +604,7 @@ class HomeController extends Controller
         return view('extension-setup', compact(
             'devices', 'sessions', 'snapshots', 'rollups', 'recommendations',
             'helpRequests', 'todayActiveMs', 'domainGroups', 'uniqueRecommendedCount',
-            'isFreePlan', 'historyLimitDays'
+            'isFreePlan', 'historyLimitDays', 'freeCutoff'
         ));
     }
 

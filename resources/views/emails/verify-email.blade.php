@@ -9,10 +9,7 @@
         .wrapper { width: 100%; table-layout: fixed; background-color: #f4f7fa; padding: 40px 0; }
         .main { background-color: #ffffff; margin: 0 auto; max-width: 560px; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05); }
         .header { padding: 48px 40px 32px; text-align: center; }
-        .logo-container { display: inline-flex; align-items: center; gap: 12px; }
-        .logo-icon { width: 44px; height: 44px; background: #1e1b4b; border-radius: 12px; display: inline-block; vertical-align: middle; }
-        .logo-text { font-size: 26px; font-weight: 800; color: #1e1b4b; letter-spacing: -0.04em; margin-left: 10px; display: inline-block; vertical-align: middle; }
-        .logo-text span { color: #4338ca; }
+        .logo-img { max-width: 180px; height: auto; display: inline-block; }
         .content { padding: 0 48px 48px; text-align: left; color: #475569; line-height: 1.7; }
         .content h1 { color: #0f172a; font-size: 28px; font-weight: 800; margin-bottom: 24px; letter-spacing: -0.02em; text-align: center; }
         .content p { font-size: 16px; margin-bottom: 24px; }
@@ -28,10 +25,7 @@
     <div class="wrapper">
         <div class="main">
             <div class="header">
-                <div class="logo-container">
-                    <div class="logo-icon" style="background: linear-gradient(135deg, #1e1b4b 0%, #4338ca 100%);"></div>
-                    <div class="logo-text">Daleel <span>AI</span></div>
-                </div>
+                <img src="{{ url(asset('images/dashboard/logo.png')) }}" class="logo-img" alt="Daleel AI">
             </div>
             <div class="content">
                 <h1>Email Verification</h1>

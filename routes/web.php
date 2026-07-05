@@ -37,12 +37,17 @@ Route::get('/dashboard', function () {
     if ($user->is_admin) {
         return redirect()->route('admin.dashboard');
     }
-    
+
+    if (!$user->hasVerifiedEmail() && method_exists($user, 'shouldBypassEmailVerification') && $user->shouldBypassEmailVerification()) {
+        $user->markEmailAsVerified();
+        $user->refresh();
+    }
+
     if (!$user->hasVerifiedEmail()) {
         auth()->guard('web')->logout();
         return redirect()->route('login')->with('status', 'verification-required');
     }
-    
+
     return redirect()->route('user.dashboard');
 })->middleware(['auth'])->name('dashboard');
 
@@ -92,7 +97,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/learn/progress/save', [App\Http\Controllers\LearningController::class, 'saveProgress'])->name('learn.progress.save');
     Route::post('/extension/verification-codes', [\App\Http\Controllers\Api\Extension\VerificationCodeController::class, 'store'])->name('extension.verify-code');
     Route::post('/extension/device/{device}/revoke', [App\Http\Controllers\HomeController::class, 'revokeDevice'])->name('extension.device.revoke');
-    
+
     // Team Management
     Route::get('/team', [App\Http\Controllers\TeamController::class, 'index'])->name('team.index');
     Route::post('/team/departments', [App\Http\Controllers\TeamController::class, 'storeDepartment'])->name('team.departments.store');
@@ -104,7 +109,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/team/departments/{department}/top-sites', [App\Http\Controllers\TeamController::class, 'departmentTopSites'])->name('team.departments.top-sites');
     Route::get('/team/overall-top-sites', [App\Http\Controllers\TeamController::class, 'overallTopSites'])->name('team.overall-top-sites');
     Route::get('/team/employees/{employee}/help-requests', [App\Http\Controllers\TeamController::class, 'employeeHelpRequests'])->name('team.employees.help-requests');
-    
+
     // Onboarding
     Route::post('/onboarding/store', [App\Http\Controllers\OnboardingController::class, 'store'])->name('onboarding.store');
 });
@@ -179,11 +184,15 @@ Route::get('/activity-history', [App\Http\Controllers\HomeController::class, 'ac
 Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/upgrade', [App\Http\Controllers\UpgradeController::class, 'show'])->name('upgrade');
     Route::post('/upgrade/activate', [App\Http\Controllers\UpgradeController::class, 'activate'])->name('upgrade.activate');
-    
+
     // Auto-Generated Roadmap Routes
     Route::post('/roadmap/auto/add-tool', [App\Http\Controllers\RoadmapController::class, 'addAutoTool'])->name('roadmap.auto.add-tool');
     Route::post('/roadmap/auto/dismiss-tool', [App\Http\Controllers\RoadmapController::class, 'dismissAutoTool'])->name('roadmap.auto.dismiss-tool');
 });
+
+// Subtitle Converter Route (Converts SRT to WebVTT on the fly)
+Route::get('/subtitles/convert', [App\Http\Controllers\SubtitlesController::class, 'convert'])->name('subtitles.convert');
+
 require __DIR__.'/auth.php';
 
 Route::get('/{page}', function ($page) {
@@ -193,10 +202,10 @@ Route::get('/{page}', function ($page) {
         'terms', 'privacy', 'cookies', 'learning-paths', 'chrome-extension',
         'lesson'
     ];
-    
+
     if (in_array($page, $validPages)) {
         return view($page);
     }
-    
+
     abort(404);
 })->where('page', '^(?!admin|user|dashboard|login|register|roadmap|logout|forgot-password|reset-password|verify-email|profile|integrations|bookmarks|progress|activity-history|ai-mentor|learn|clear-cache|team|extension-setup|extension-data|api|videos).*$');

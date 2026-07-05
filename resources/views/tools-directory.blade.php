@@ -32,14 +32,23 @@
 @section('scripts')
 <script>
 const tools = [
-  { name: "ChatGPT", category: "Writing", use: "Draft, summarize, ideate, and analyze work content.", lesson: "Daily Work Starter" },
-  { name: "Claude", category: "Writing", use: "Long-form document review and structured reasoning.", lesson: "Policy and SOP Review" },
-  { name: "Microsoft Copilot", category: "Productivity", use: "Use AI across documents, spreadsheets, email, and meetings.", lesson: "Office Workflow Basics" },
-  { name: "Google Gemini", category: "Productivity", use: "Research, writing, and workspace assistance.", lesson: "Workspace Research Flow" },
-  { name: "ElevenLabs", category: "Media", use: "Voice generation for training, explainers, and localization.", lesson: "Audio Lessons at Scale" },
+  { name: "ChatGPT", category: "AI Tools", use: "Draft, summarize, ideate, and analyze work content.", lesson: "Daily Work Starter" },
+  { name: "Claude", category: "AI Tools", use: "Long-form document review and structured reasoning.", lesson: "Policy and SOP Review" },
+  { name: "Google Gemini", category: "AI Tools", use: "Research, writing, and workspace assistance.", lesson: "Workspace Research Flow" },
+  { name: "Gmail", category: "Google Workspace", use: "Write, summarize, and prioritize email workflows.", lesson: "Inbox Productivity Flow" },
+  { name: "Google Sheets", category: "Google Workspace", use: "Clean, analyze, and explain spreadsheet data.", lesson: "Spreadsheet Analysis Basics" },
+  { name: "Microsoft Copilot", category: "Microsoft Office", use: "Use AI across documents, spreadsheets, email, and meetings.", lesson: "Office Workflow Basics" },
+  { name: "Excel", category: "Microsoft Office", use: "Analyze data, create formulas, and summarize reports.", lesson: "Excel AI Assistant" },
+  { name: "Notion", category: "Productivity", use: "Summarize notes, organize docs, and build team wikis.", lesson: "Knowledge Base Cleanup" },
+  { name: "Asana", category: "Productivity", use: "Plan projects and turn work updates into clear task lists.", lesson: "Project Planning with AI" },
+  { name: "Slack", category: "Communication", use: "Summarize channels, draft updates, and capture decisions.", lesson: "Team Communication Flow" },
+  { name: "Zoom", category: "Communication", use: "Turn meeting transcripts into notes, tasks, and follow-ups.", lesson: "Meeting Summary Workflow" },
+  { name: "Figma", category: "Design", use: "Generate design briefs, critique layouts, and organize feedback.", lesson: "Design Review Assistant" },
+  { name: "Canva", category: "Design", use: "Create visual content for training, social, and internal updates.", lesson: "Fast Visual Content" },
   { name: "Zapier AI", category: "Automation", use: "Connect tools and automate repeated work steps.", lesson: "No-Code AI Automation" },
-  { name: "Notion AI", category: "Knowledge", use: "Summarize notes, organize docs, and build team wikis.", lesson: "Knowledge Base Cleanup" },
-  { name: "Perplexity", category: "Research", use: "Research topics with cited source trails.", lesson: "Fast Market Research" }
+  { name: "Make", category: "Automation", use: "Build multi-step automations across teams and apps.", lesson: "Workflow Automation Builder" },
+  { name: "GitHub", category: "Development", use: "Review code, summarize issues, and prepare releases.", lesson: "Developer AI Workflow" },
+  { name: "VS Code", category: "Development", use: "Use AI assistance while coding, debugging, and documenting.", lesson: "Coding Assistant Basics" }
 ];
 
 function initTools() {

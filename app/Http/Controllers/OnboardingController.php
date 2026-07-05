@@ -23,13 +23,21 @@ class OnboardingController extends Controller
         ]);
 
         $user = Auth::user();
-        
+
         $user->update([
             'interests' => $request->interests,
             'learning_goal' => $request->goal,
             'experience_level' => $request->level,
             'connections' => $request->connections,
         ]);
+
+        // Generate automatic roadmap immediately using the onboarding answers
+        try {
+            $roadmapController = new \App\Http\Controllers\RoadmapController();
+            $roadmapController->generateAutoOnboardingRoadmap($user);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Auto Onboarding Roadmap Generation Failed: ' . $e->getMessage());
+        }
 
         return response()->json([
             'success' => true,

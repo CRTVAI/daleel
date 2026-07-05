@@ -17,12 +17,13 @@ class RoadmapController extends Controller
     public function index()
     {
         $user = Auth::user();
-        
+
         // Auto-detect tools and either initialize roadmap or check for pending tools
         $pendingData = $this->detectAndTrackPendingTools($user);
 
         $roadmaps = UserRoadmap::where('user_id', Auth::id())->latest()->get();
-        return view('roadmap.index', compact('roadmaps', 'pendingData'));
+        $manualRoadmapsCount = $roadmaps->where('is_auto_generated', false)->count();
+        return view('roadmap.index', compact('roadmaps', 'pendingData', 'manualRoadmapsCount'));
     }
 
     public function show(UserRoadmap $roadmap)
@@ -120,7 +121,7 @@ class RoadmapController extends Controller
     public function wizard(Request $request)
     {
         $goal = $request->input('query', $request->input('goal'));
-        
+
         if (!$goal) return redirect()->route('learn.explore');
 
         // Check roadmap creation limit for Free users (limit: 2)
@@ -152,8 +153,8 @@ class RoadmapController extends Controller
         $toolNames = $request->input('tool_names', []);
 
         // We can use GPT to generate 3 specific categories based on tools
-        $prompt = "Goal: {$goal}. Tools: " . implode(', ', $toolNames) . ". 
-                   Generate exactly 3 short improvement categories for a learning roadmap. 
+        $prompt = "Goal: {$goal}. Tools: " . implode(', ', $toolNames) . ".
+                   Generate exactly 3 short improvement categories for a learning roadmap.
                    Return ONLY a JSON array of 3 strings.";
 
         try {
@@ -169,8 +170,8 @@ class RoadmapController extends Controller
         } catch (\Throwable $e) {
             // Fallback
             $categories = [
-                'Core Productivity & Performance', 
-                'Advanced Features & Tools Usage', 
+                'Core Productivity & Performance',
+                'Advanced Features & Tools Usage',
                 'Data Management & Analysis'
             ];
         }
@@ -207,7 +208,19 @@ class RoadmapController extends Controller
         // 2. Build the curriculum
         $roadmapData = $this->buildFinalCurriculum($title, $tools, $focus, $level);
 
-        // 3. Save to Database
+        // 3. Check if any phases with videos were generated
+        $phasesWithVideos = array_values(array_filter($roadmapData['phases'], function($phase) {
+            return !empty($phase['videos']) && count($phase['videos']) > 0;
+        }));
+
+        if (empty($phasesWithVideos)) {
+            return response()->json([
+                'error' => 'no_videos',
+                'message' => 'No learning videos found for the selected tools and skill level. Please try different tools or adjust your skill level.',
+            ], 422);
+        }
+
+        // 4. Save to Database
         $userRoadmap = UserRoadmap::create([
             'user_id' => Auth::id(),
             'title' => $title,
@@ -215,14 +228,14 @@ class RoadmapController extends Controller
             'tools' => $tools,
             'focus' => $focus,
             'level' => $level,
-            'curriculum' => $roadmapData['phases'],
+            'curriculum' => $phasesWithVideos,
             'progress' => 0,
         ]);
 
         return response()->json([
             'id' => $userRoadmap->id,
             'title' => $title,
-            'phases' => $roadmapData['phases'],
+            'phases' => $phasesWithVideos,
             'focus' => $focus,
             'level' => $level,
             'redirect_url' => route('roadmap.show', $userRoadmap->id),
@@ -231,9 +244,9 @@ class RoadmapController extends Controller
 
     private function cleanTitleWithAi($goal)
     {
-        $prompt = "Correct any spelling or grammar errors and turn this search query into a professional learning roadmap title: '{$goal}'. 
+        $prompt = "Correct any spelling or grammar errors and turn this search query into a professional learning roadmap title: '{$goal}'.
                    Reply ONLY with the new title.";
-        
+
         try {
             $response = Http::withToken(config('services.openai.key'))
                 ->timeout(30) // Explicit 30s timeout for title cleaning
@@ -325,32 +338,51 @@ PROMPT;
         $phases = [];
         $tools = Tool::whereIn('id', $toolIds)->get();
 
+        // Fallback skill level order: try selected level first, then others
+        $fallbackLevels = array_filter(['beginner', 'intermediate', 'advanced'], fn($l) => $l !== strtolower($level));
+        $levelOrder = array_merge([strtolower($level)], $fallbackLevels);
+
         foreach ($tools as $tool) {
-            // Find videos that have this tool name AND match the selected skill level
-            $videos = Content::whereJsonContains('connected_tools', $tool->name)
-                ->where('skill_level', $level) // Apply skill level filter
-                ->active()
-                ->get();
-            
-            if ($videos->count() > 0) {
-                // Filter the list of videos to match the user's specific focus
-                $filteredVideos = $this->filterVideosByFocusAndLevel($videos, $focus, $tool->name, $level);
+            $videos = collect();
+            $matchedLevel = $level;
 
-                // Map to ensure we have the thumbnail_url accessor value for the frontend
-                $videoData = $filteredVideos->map(function($v) {
-                    return [
-                        'id' => $v->id,
-                        'title' => $v->title,
-                        'thumbnail_url' => $v->thumbnail_url, // Uses Model Accessor
-                    ];
-                });
+            // Try each skill level until we find videos
+            foreach ($levelOrder as $tryLevel) {
+                $found = Content::whereJsonContains('connected_tools', $tool->name)
+                    ->where('skill_level', $tryLevel)
+                    ->active()
+                    ->get();
 
-                $phases[] = [
-                    'name' => "Mastering {$tool->name}",
-                    'tool_name' => $tool->name,
-                    'videos' => $videoData
-                ];
+                if ($found->count() > 0) {
+                    $videos = $found;
+                    $matchedLevel = $tryLevel;
+                    break;
+                }
             }
+
+            // Skip this tool entirely if no videos found at any level
+            if ($videos->count() === 0) {
+                continue;
+            }
+
+            // Filter the list of videos to match the user's specific focus
+            $filteredVideos = $this->filterVideosByFocusAndLevel($videos, $focus, $tool->name, $matchedLevel);
+
+            // Map to ensure we have the thumbnail_url accessor value for the frontend
+            $videoData = $filteredVideos->map(function($v) {
+                return [
+                    'id' => $v->id,
+                    'title' => $v->title,
+                    'thumbnail_url' => $v->thumbnail_url,
+                ];
+            });
+
+            $phases[] = [
+                'name' => "Mastering {$tool->name}",
+                'tool_name' => $tool->name,
+                'videos' => $videoData,
+                'skill_level_used' => $matchedLevel,
+            ];
         }
 
         // Fallback for broad goal videos - look at titles
@@ -520,8 +552,8 @@ PROMPT;
             $matchedTool = $activeTools->first(function($dbTool) use ($toolName) {
                 $dbNameLower = strtolower($dbTool->name);
                 $detectedLower = strtolower($toolName);
-                
-                return $dbNameLower === $detectedLower 
+
+                return $dbNameLower === $detectedLower
                     || str_contains($detectedLower, $dbNameLower)
                     || str_contains($dbNameLower, $detectedLower);
             });
@@ -587,5 +619,46 @@ PROMPT;
         }
 
         return null;
+    }
+
+    /**
+     * Generate an initial auto-generated roadmap for a user immediately after onboarding.
+     */
+    public function generateAutoOnboardingRoadmap($user)
+    {
+        // Check if an auto-generated roadmap already exists to prevent duplicate creation
+        $existing = UserRoadmap::where('user_id', $user->id)
+            ->where('is_auto_generated', true)
+            ->exists();
+
+        if ($existing) {
+            return;
+        }
+
+        // Get matching tool IDs from user's connections
+        $connections = is_array($user->connections) ? $user->connections : [];
+        $selectedTools = Tool::whereIn('name', $connections)
+            ->where('status', 'active')
+            ->get();
+
+        $toolIds = $selectedTools->pluck('id')->toArray();
+        $level = $user->experience_level ?: 'Beginner';
+        $focus = $user->learning_goal ?: 'General Productivity';
+
+        // Build final curriculum
+        $curriculumData = $this->buildFinalCurriculum("Auto-Generated Career path", $toolIds, $focus, $level);
+
+        UserRoadmap::create([
+            'user_id' => $user->id,
+            'title' => 'Auto-Generated Learning Path',
+            'goal' => 'Auto-Generated based on onboarding profile',
+            'tools' => $toolIds,
+            'focus' => $focus,
+            'level' => $level,
+            'curriculum' => $curriculumData['phases'],
+            'progress' => 0,
+            'is_auto_generated' => true,
+            'metadata' => ['dismissed_tools' => []]
+        ]);
     }
 }

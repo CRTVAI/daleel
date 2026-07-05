@@ -356,7 +356,11 @@ input:checked + .slider:before {
                     <span class="amount">0</span>
                     <span class="period">/month</span>
                 </div>
-                <a href="{{ route('register') }}" class="pricing-btn btn-outline-pricing">Get Started Free</a>
+                @auth
+                    <a href="{{ route('dashboard') }}" class="pricing-btn btn-outline-pricing">Go to Dashboard</a>
+                @else
+                    <a href="{{ route('register') }}" class="pricing-btn btn-outline-pricing">Get Started Free</a>
+                @endauth
                 <ul class="features-list">
                     <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>2</strong> AI-generated Roadmaps</li>
                     <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>10</strong> AI Mentor messages / day</li>
@@ -379,7 +383,11 @@ input:checked + .slider:before {
                     <span class="amount" data-monthly="19" data-yearly="15">19</span>
                     <span class="period">/month</span>
                 </div>
-                <a href="{{ route('register') }}" class="pricing-btn btn-primary-pricing">Start Accelerating</a>
+                @auth
+                    <a href="{{ route('upgrade') }}" class="pricing-btn btn-primary-pricing">Start Accelerating</a>
+                @else
+                    <a href="{{ route('register') }}" class="pricing-btn btn-primary-pricing">Start Accelerating</a>
+                @endauth
                 <ul class="features-list">
                     <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Unlimited</strong> AI Roadmaps</li>
                     <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> <strong>Unlimited</strong> AI Mentor (fair use)</li>

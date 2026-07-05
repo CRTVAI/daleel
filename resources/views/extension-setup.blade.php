@@ -202,6 +202,18 @@
     
     .ev-empty { text-align:center;padding:4rem 2rem;color:#94a3b8; } .ev-empty i { font-size:3.5rem;color:#cbd5e1;display:block;margin-bottom:1rem; }
     .ev-empty p { font-size:1rem;font-weight:600;margin:0; }
+
+    /* Blur overlay for free plan history items */
+    .ev-blur-wrap { position: relative; overflow: hidden; }
+    .ev-blur-wrap .ev-blur-content { filter: blur(6px); user-select: none; pointer-events: none; transition: filter 0.3s ease; }
+    .ev-blur-overlay { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(255,255,255,0.15); backdrop-filter: blur(2px); z-index: 5; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; border-radius: inherit; }
+    .ev-blur-wrap:hover .ev-blur-overlay { opacity: 1; }
+    .ev-blur-overlay i { font-size: 1.4rem; color: #6366f1; margin-bottom: 0.25rem; background: rgba(255,255,255,0.9); width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    .ev-blur-overlay span { font-size: 0.7rem; font-weight: 700; color: #4f46e5; background: rgba(255,255,255,0.9); padding: 0.2rem 0.7rem; border-radius: 6px; }
+    .roll-blur .roll-grid { filter: blur(5px); user-select: none; pointer-events: none; position: relative; }
+    .roll-blur { position: relative; }
+    .roll-blur::after { content: '🔒 Upgrade to Pro'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: #4f46e5; background: rgba(255,255,255,0.6); backdrop-filter: blur(2px); z-index: 5; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; border-radius: 0; }
+    .roll-blur:hover::after { opacity: 1; }
 </style>
 @endsection
 
@@ -232,7 +244,7 @@
                     <a href="#" class="install-btn-large">
                         <i class="bi bi-download"></i> Download Extension Bundle
                     </a>
-                    <a href="https://chrome.google.com/webstore" target="_blank" class="btn btn-outline-light border-2 rounded-4 px-4 fw-800 d-flex align-items-center" style="border-radius: 18px !important;">
+                    <a href="https://chromewebstore.google.com/detail/daleel-mentor/bpkbkfdbanbdlfmkmgcdkhlobfdifhpi" target="_blank" class="btn btn-outline-light border-2 rounded-4 px-4 fw-800 d-flex align-items-center" style="border-radius: 18px !important;">
                         View on Web Store
                     </a>
                 </div>
@@ -289,13 +301,15 @@
 
         {{-- Free Plan limitation notice --}}
         @if($isFreePlan ?? false)
-        <div class="alert d-flex align-items-center gap-3 mb-4" style="background: #fffbeb; border: 1px solid #fcd34d; border-radius: 16px; padding: 1rem 1.5rem;">
-            <span style="font-size: 1.4rem;">⚠️</span>
-            <div>
-                <strong style="color: #92400e;">Free Plan — Showing last {{ $historyLimitDays ?? 7 }} days only.</strong>
-                <span style="color: #78350f; font-size: 0.88rem; margin-left: 0.3rem;">Upgrade to Pro to unlock your full history.</span>
+        <div class="alert d-flex align-items-center gap-3 mb-4" style="background: linear-gradient(135deg, #fffbeb, #fef3c7); border: 1px solid #fcd34d; border-radius: 16px; padding: 1rem 1.5rem;">
+            <div style="width: 40px; height: 40px; background: #fef3c7; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 1.2rem;">
+                <i class="bi bi-unlock" style="color: #d97706;"></i>
             </div>
-            <a href="/pricing" class="btn btn-sm ms-auto fw-700 rounded-pill px-3" style="background:#f59e0b;color:#fff;white-space:nowrap;">Upgrade →</a>
+            <div>
+                <strong style="color: #92400e; display: block; font-size: 0.95rem;">Free Plan — Data older than {{ $historyLimitDays ?? 7 }} days is blurred.</strong>
+                <span style="color: #78350f; font-size: 0.82rem;">Hover over any blurred item to unlock a preview, or upgrade to Pro for full access.</span>
+            </div>
+            <a href="/pricing" class="btn btn-sm ms-auto fw-700 rounded-pill px-3" style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;white-space:nowrap;border:none;">Upgrade →</a>
         </div>
         @endif
 
@@ -401,7 +415,9 @@
                     <div class="rec-grid">
                         @foreach($recommendations as $rec)
                         @if($rec->content)
-                        <div class="rec-card">
+                        @php $isBlurred = ($rec->isBlurred ?? false) && ($isFreePlan ?? false); @endphp
+                        <div class="rec-card {{ $isBlurred ? 'ev-blur-wrap' : '' }}">
+                            @if($isBlurred)<div class="ev-blur-content">@endif
                             <div style="position:relative">
                                 <img class="rec-img" src="{{ $rec->content->thumbnail ?: 'https://img.youtube.com/vi/'.$rec->content->youtube_id.'/hqdefault.jpg' }}" alt="">
                                 <div style="position:absolute;top:.4rem;left:.4rem"><span class="pill pill-blue" style="font-size:.65rem">🌐 {{ $rec->current_context['domain'] ?? '—' }}</span></div>
@@ -416,6 +432,7 @@
                                 </div>
                                 <a href="{{ route('learn.watch', $rec->content) }}" class="rec-link">▶ Watch Video</a>
                             </div>
+                            @if($isBlurred)</div><div class="ev-blur-overlay"><i class="bi bi-lock-fill"></i><span>Pro Feature</span></div>@endif
                         </div>
                         @endif
                         @endforeach
@@ -434,7 +451,9 @@
                         <div class="ev-empty"><i class="bi bi-chat-dots"></i><p>No help requests yet. Right-click any page and select "Ask help to mentor" to start.</p></div>
                     @else
                         @foreach($helpRequests as $req)
-                        <div class="snap-row" style="{{ auth()->id() !== $req->user_id ? 'border-left: 4px solid #7c3aed;' : '' }}">
+                        @php $isBlurred = ($req->isBlurred ?? false) && ($isFreePlan ?? false); @endphp
+                        <div class="snap-row ev-blur-wrap" style="{{ auth()->id() !== $req->user_id ? 'border-left: 4px solid #7c3aed;' : '' }}">
+                            @if($isBlurred)<div class="ev-blur-content">@endif
                             <div class="snap-time">
                                 <i class="bi bi-question-circle me-2 text-primary"></i> 
                                 <strong>{{ $req->user->name }}:</strong> "{{ $req->query }}"
@@ -452,6 +471,7 @@
                                 <span class="pill pill-purple" style="font-size: 10px; padding: 2px 8px;">TEAM MEMBER</span>
                                 @endif
                             </div>
+                            @if($isBlurred)</div><div class="ev-blur-overlay"><i class="bi bi-lock-fill"></i><span>Pro Feature</span></div>@endif
                         </div>
                         @endforeach
                     @endif
@@ -499,6 +519,8 @@
                 @else
                 <div class="roll-hdr" style="display:grid;grid-template-columns:100px 1fr 80px 1fr;gap:.75rem"><div>Date</div><div>Active Time</div><div>Sessions</div><div>Scores</div></div>
                 @foreach($rollups->take(20) as $r)
+                @php $isBlurred = ($r->isBlurred ?? false) && ($isFreePlan ?? false); @endphp
+                <div class="{{ $isBlurred ? 'roll-blur' : '' }}">
                 <div class="roll-grid">
                     <div><div style="font-weight:800;font-size:.88rem;color:#111">{{ $r->date->format('M d') }}</div><div style="font-size:.72rem;color:#6b7280">{{ $r->date->format('l') }}</div></div>
                     <div>
@@ -514,6 +536,7 @@
                         @if($r->ai_adoption_score!==null)<span class="snap-pill" style="background:#f5f3ff;color:#7c3aed">🤖 {{ $r->ai_adoption_score }}</span>@endif
                     </div>
                 </div>
+                </div>
                 @endforeach
                 @endif
             </div>
@@ -524,7 +547,9 @@
             <div class="ev-box">
                 <div class="ev-box-head"><div><h3>📷 Metrics Snapshots</h3><p>Captured every 30 minutes while you browse.</p></div><span class="pill pill-green">{{ $snapshots->count() }} snapshots</span></div>
                 @forelse($snapshots->take(30) as $snap)
-                <div class="snap-row">
+                @php $isBlurred = ($snap->isBlurred ?? false) && ($isFreePlan ?? false); @endphp
+                <div class="snap-row ev-blur-wrap">
+                    @if($isBlurred)<div class="ev-blur-content">@endif
                     <div class="snap-time">
                         <i class="bi bi-camera me-2 text-muted"></i> 
                         {{ $snap->captured_at?->format('M d, Y · H:i') ?? '—' }} &nbsp;
@@ -537,6 +562,7 @@
                         @if($snap->ai_adoption_score!==null)<span class="snap-pill" style="background:#f5f3ff;color:#7c3aed">🤖 AI Adoption: {{ $snap->ai_adoption_score }}/100</span>@endif
                         @if($snap->context_switch_count!==null)<span class="snap-pill" style="background:#fff7ed;color:#c2410c">🔀 {{ $snap->context_switch_count }} tab switches{{ $snap->tab_switches_per_hour ? ' ('.$snap->tab_switches_per_hour.'/hr)' : '' }}</span>@endif
                     </div>
+                    @if($isBlurred)</div><div class="ev-blur-overlay"><i class="bi bi-lock-fill"></i><span>Pro Feature</span></div>@endif
                 </div>
                 @empty
                 <div class="ev-empty"><i class="bi bi-camera"></i><p>No snapshots yet.</p></div>
@@ -828,10 +854,14 @@
     function openEVModal(domain) {
         const dg = evDomainData.find(d => d.domain === domain);
         if (!dg) return;
+        const isFree = @json($isFreePlan ?? false);
         document.getElementById('evModalTitle').textContent = (dg.ai ? '🤖 ' : '🌐 ') + dg.domain;
         document.getElementById('evModalSub').textContent = dg.count + ' sessions · ' + evMs(dg.active_ms) + ' active time';
-        document.getElementById('evModalBody').innerHTML = dg.sessions.map(s => `
-            <div style="padding:.85rem 1.5rem;border-bottom:1px solid #f3f4f6">
+        document.getElementById('evModalBody').innerHTML = dg.sessions.map(s => {
+            const blurred = isFree && s.isBlurred;
+            return `
+            <div class="${blurred ? 'ev-blur-wrap' : ''}" style="${blurred ? '' : 'padding:.85rem 1.5rem;border-bottom:1px solid #f3f4f6'}">
+                ${blurred ? '<div class="ev-blur-content" style="padding:.85rem 1.5rem;border-bottom:1px solid #f3f4f6">' : ''}
                 <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;flex-wrap:wrap">
                     <div>
                         <div style="font-weight:700;font-size:.88rem;color:#111">${s.started_at ? new Date(s.started_at).toLocaleString('en-GB',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—'}</div>
@@ -846,8 +876,9 @@
                         <span style="font-size:.8rem;color:#374151">${s.click_count||0} clicks</span>
                     </div>
                 </div>
+                ${blurred ? '</div><div class="ev-blur-overlay"><i class="bi bi-lock-fill"></i><span>Pro Feature</span></div>' : ''}
             </div>
-        `).join('');
+        `}).join('');
         document.getElementById('evDomainModal').style.display = 'block';
         document.body.style.overflow = 'hidden';
     }

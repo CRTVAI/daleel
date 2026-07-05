@@ -1,0 +1,11 @@
+1
+00:00:01,000 --> 00:00:05,000
+Welcome to this training session on AI automation.
+
+2
+00:00:05,100 --> 00:00:10,000
+Today we are going to cover how to auto-generate customized tools.
+
+3
+00:00:10,100 --> 00:00:15,000
+We will look at how tracking dashboards can optimize professional workflow productivity.

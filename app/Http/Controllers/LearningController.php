@@ -25,78 +25,141 @@ class LearningController extends Controller
         $progress = null;
 
         if ($user) {
-            // Get or create progress record
             $progress = UserVideoProgress::firstOrCreate(
                 ['user_id' => $user->id, 'content_id' => $content->id],
                 ['watched_seconds' => 0, 'duration_seconds' => $content->duration_seconds ?? 0, 'completion_percent' => 0]
             );
         }
 
-        // If part of a course, get course context
-        $course = null;
-        if ($content->course_id) {
-            $course = $content->course()->with('contents')->first();
+        // ── Context 1: Coming from a Roadmap ──────────────────────────────
+        $roadmapContext  = null;
+        $roadmapData     = collect();
+        $roadmapContents = collect();
+        $roadmapId       = $request->input('roadmap_id', $request->input('roadmap'));
+
+        if ($roadmapId && $user) {
+            $roadmapContext = \App\Models\UserRoadmap::where('id', $roadmapId)
+                ->where('user_id', $user->id)
+                ->first();
+
+            if ($roadmapContext) {
+                $phases = $roadmapContext->curriculum['phases'] ?? $roadmapContext->curriculum ?? [];
+                $allVideoIds = collect($phases)
+                    ->filter(fn($p) => is_array($p))
+                    ->flatMap(fn($p) => collect($p['videos'] ?? [])->pluck('id'))
+                    ->unique()
+                    ->values();
+
+                $progressMap = $user->videoProgress()
+                    ->whereIn('content_id', $allVideoIds)
+                    ->get()
+                    ->keyBy('content_id');
+
+                $roadmapData = collect($phases)->map(function($phase) use ($progressMap) {
+                    if (!is_array($phase)) return null;
+                    $tool = \App\Models\Tool::where('name', $phase['tool_name'] ?? null)->first();
+                    $videoIds = collect($phase['videos'])->pluck('id')->filter()->values();
+                    $contents = Content::whereIn('id', $videoIds)->get()
+                        ->sortBy(fn($content) => $videoIds->search($content->id))
+                        ->values()
+                        ->map(function($content) use ($progressMap) {
+                            $p = $progressMap->get($content->id);
+                            $content->progress_record = $p;
+                            $content->watched_seconds = $p?->watched_seconds ?? 0;
+                            $content->completion_pct  = $p ? round($p->completion_percent) : 0;
+                            $content->is_completed    = $p?->completed ?? false;
+                            $content->last_watched_at = $p?->last_watched_at;
+                            return $content;
+                        });
+
+                    $totalCount     = $contents->count();
+                    if ($totalCount === 0) return null;
+                    $completedCount = $contents->where('is_completed', true)->count();
+
+                    return [
+                        'tool'      => $tool,
+                        'contents'  => $contents,
+                        'total'     => $totalCount,
+                        'completed' => $completedCount,
+                        'percent'   => round(($completedCount / $totalCount) * 100),
+                        'name'      => $phase['name'] ?? null
+                    ];
+                })->filter()->values();
+
+                $roadmapContents = $roadmapData
+                    ->flatMap(fn($phase) => $phase['contents'])
+                    ->unique('id')
+                    ->values();
+            }
         }
 
-        // Recommended videos
+        // ── Context 2: Coming from a Course ──────────────────────────────
+        $course = null;
+        if (!$roadmapContext && $request->filled('course_id')) {
+            $course = Course::where('id', $request->course_id)
+                ->whereHas('contents', fn($q) => $q->where('contents.id', $content->id))
+                ->with(['contents' => fn($q) => $q->orderBy('sort_order')->orderBy('id')])
+                ->first();
+        }
+
+        // ── Context 3: Standalone – build recommended list ────────────────
         $recommended = collect();
 
-        // If coming from AI Mentor with a query, search for related videos
-        if ($query) {
-            $keywords = array_filter(explode(' ', strtolower($query)), function($k) {
-                return strlen($k) > 2;
-            });
+        if (!$roadmapContext && !$course) {
+            if ($query) {
+                $keywords = array_filter(explode(' ', strtolower($query)), fn($k) => strlen($k) > 2);
 
-            $recommended = Content::active()
-                ->where('id', '!=', $content->id)
-                ->where(function ($q) use ($query, $keywords) {
-                    $q->where('title', 'like', "%{$query}%")
-                      ->orWhere('tags', 'like', "%{$query}%");
-                    
-                    foreach ($keywords as $word) {
-                        $q->orWhere('title', 'like', "%{$word}%")
-                          ->orWhere('tags', 'like', "%{$word}%");
-                    }
-                })
-                ->limit(10)
-                ->get();
-        }
-
-        // Fallback recommendations
-        if ($recommended->isEmpty()) {
-            if ($user) {
-                $watchedIds = $user->videoProgress()->pluck('content_id');
                 $recommended = Content::active()
-                    ->where('category_id', $content->category_id)
                     ->where('id', '!=', $content->id)
-                    ->whereNotIn('id', $watchedIds)
-                    ->limit(5)
-                    ->get();
-            }
-
-            if ($recommended->isEmpty()) {
-                $recommended = Content::active()
-                    ->where(function($q) use ($content) {
-                        $q->where('category_id', $content->category_id);
-                        if ($content->tags) $q->orWhere('tags', 'like', "%{$content->tags}%");
+                    ->where(function ($q) use ($query, $keywords) {
+                        $q->where('title', 'like', "%{$query}%")
+                          ->orWhere('tags', 'like', "%{$query}%");
+                        foreach ($keywords as $word) {
+                            $q->orWhere('title', 'like', "%{$word}%")
+                              ->orWhere('tags', 'like', "%{$word}%");
+                        }
                     })
-                    ->where('id', '!=', $content->id)
-                    ->inRandomOrder()
-                    ->limit(5)
+                    ->limit(10)
                     ->get();
             }
 
-            // Final safety fallback: just get any active videos if still empty
             if ($recommended->isEmpty()) {
-                $recommended = Content::active()
-                    ->where('id', '!=', $content->id)
-                    ->inRandomOrder()
-                    ->limit(5)
-                    ->get();
+                if ($user) {
+                    $watchedIds = $user->videoProgress()->pluck('content_id');
+                    $recommended = Content::active()
+                        ->where('category_id', $content->category_id)
+                        ->where('id', '!=', $content->id)
+                        ->whereNotIn('id', $watchedIds)
+                        ->limit(5)
+                        ->get();
+                }
+
+                if ($recommended->isEmpty()) {
+                    $recommended = Content::active()
+                        ->where(function($q) use ($content) {
+                            $q->where('category_id', $content->category_id);
+                            if ($content->tags) $q->orWhere('tags', 'like', "%{$content->tags}%");
+                        })
+                        ->where('id', '!=', $content->id)
+                        ->inRandomOrder()
+                        ->limit(5)
+                        ->get();
+                }
+
+                if ($recommended->isEmpty()) {
+                    $recommended = Content::active()
+                        ->where('id', '!=', $content->id)
+                        ->inRandomOrder()
+                        ->limit(5)
+                        ->get();
+                }
             }
         }
 
-        return view('learn.watch', compact('content', 'progress', 'recommended', 'course'));
+        return view('learn.watch', compact(
+            'content', 'progress', 'recommended', 'course',
+            'roadmapContext', 'roadmapData', 'roadmapContents'
+        ));
     }
 
     /**
@@ -143,11 +206,6 @@ class LearningController extends Controller
 
     public function explore(Request $request)
     {
-        // --- SMART REDIRECT: Catch old search requests and upgrade to AI Search ---
-        if ($request->filled('search')) {
-            return redirect()->route('search.advanced', ['search' => $request->search]);
-        }
-
         $user = Auth::user();
         $type = $request->get('type', 'video'); // default to videos
         
@@ -211,67 +269,7 @@ class LearningController extends Controller
             ->pluck('content_id')
             ->toArray();
 
-        $recommendedItems = collect();
-
-        if ($user && !empty($usedToolNames)) {
-            // Find active videos connected to the user's top used tools that they haven't watched yet
-            $matchedContents = Content::active()
-                ->where('type', 'video')
-                ->where(function($q) use ($usedToolNames) {
-                    foreach ($usedToolNames as $toolName) {
-                        $q->orWhere('tags', 'like', "%{$toolName}%")
-                          ->orWhere('connected_tools', 'like', "%{$toolName}%");
-                    }
-                })
-                ->whereNotIn('id', $user->videoProgress()->pluck('content_id'))
-                ->get();
-
-            // Sort matched videos by global popularity (most watched globally first)
-            $recommendedItems = $matchedContents->sortBy(function($content) use ($popularContentIds) {
-                $pos = array_search($content->id, $popularContentIds);
-                return $pos === false ? 999999 : $pos;
-            })->values()->take(20);
-        }
-
-        // Fallback/Padded items to guarantee 20 recommendations: match declared onboarding interests sorted by popularity
-        if ($recommendedItems->count() < 20) {
-            $interests = $user ? (array) ($user->interests ?? []) : [];
-            $fallbackQuery = Content::active()
-                ->where('type', 'video');
-            
-            if ($user) {
-                $fallbackQuery->whereNotIn('id', $user->videoProgress()->pluck('content_id'));
-            }
-
-            if (!empty($interests)) {
-                $fallbackQuery->where(function($q) use ($interests) {
-                    foreach ($interests as $interest) {
-                        $q->orWhere('category', 'like', "%{$interest}%")
-                          ->orWhere('tags', 'like', "%{$interest}%");
-                    }
-                });
-            }
-
-            $fallbackItems = $fallbackQuery->get()->sortBy(function($content) use ($popularContentIds) {
-                $pos = array_search($content->id, $popularContentIds);
-                return $pos === false ? 999999 : $pos;
-            })->values();
-
-            $recommendedItems = $recommendedItems->merge($fallbackItems)->unique('id')->take(20)->values();
-        }
-
-        // Absolute fallback if still under 20 items: most popular videos overall
-        if ($recommendedItems->count() < 20) {
-            $allActiveVideos = Content::active()->where('type', 'video')->get();
-            $absoluteFallback = $allActiveVideos->sortBy(function($content) use ($popularContentIds) {
-                $pos = array_search($content->id, $popularContentIds);
-                return $pos === false ? 999999 : $pos;
-            })->values();
-
-            $recommendedItems = $recommendedItems->merge($absoluteFallback)->unique('id')->take(20)->values();
-        }
-
-        // 2. All Items (Filtered, Ranked, and Paginated)
+        // All Items (Filtered, Ranked, and Paginated)
         $query = ($type === 'course') ? Course::where('status', 'active') : Content::active();
 
         if ($request->filled('category_id')) {
@@ -352,10 +350,10 @@ class LearningController extends Controller
         $connectedTools = \App\Models\Tool::where('status', 'active')->orderBy('name')->get();
 
         if (\Illuminate\Support\Facades\Route::currentRouteName() === 'videos.public') {
-            return view('videos', compact('items', 'categories', 'type', 'recommendedItems', 'connectedTools'));
+            return view('videos', compact('items', 'categories', 'type', 'connectedTools'));
         }
 
-        return view('learn.explore', compact('items', 'categories', 'type', 'recommendedItems', 'connectedTools'));
+        return view('learn.explore', compact('items', 'categories', 'type', 'connectedTools'));
     }
 
     /**

@@ -19,10 +19,21 @@ class ExternalContentController extends Controller
             return response()->json(['error' => 'Unauthorized content request.'], 401);
         }
 
+        // Log the incoming request structure for debugging
+        Log::info('External Content API Request received', [
+            'title' => $request->get('title'),
+            'has_srt_file_en' => $request->hasFile('srt_file_en'),
+            'has_srt_file_ar' => $request->hasFile('srt_file_ar'),
+            'srt_file_en_filled' => $request->filled('srt_file_en'),
+            'srt_file_ar_filled' => $request->filled('srt_file_ar'),
+            'all_input_keys' => array_keys($request->all()),
+            'all_file_keys' => array_keys($request->allFiles()),
+        ]);
+
         // 2. Validation
         $validated = $request->validate([
             'title' => 'required|string|max:255',
-            'video_url' => 'required|string', 
+            'video_url' => 'required|string',
             'video_url_ar' => 'nullable|url',
             'category' => 'nullable|string',
             'category_id' => 'nullable|exists:categories,id',
@@ -32,7 +43,7 @@ class ExternalContentController extends Controller
             'course_thumbnail' => 'nullable|string',
             'section_part_label' => 'nullable|string|max:255',
             'sort_order' => 'nullable|integer',
-            'connected_tools' => 'nullable', 
+            'connected_tools' => 'nullable',
             'description' => 'nullable|string',
             'tags' => 'nullable|string',
             'duration_seconds' => 'nullable|integer',
@@ -43,6 +54,8 @@ class ExternalContentController extends Controller
             'is_individual' => 'nullable|boolean',
             'reference_url' => 'nullable|string',
             'video_duration' => 'nullable|string',
+            'srt_file_en' => 'nullable',
+            'srt_file_ar' => 'nullable',
         ]);
 
         $data = $validated;
@@ -121,6 +134,72 @@ class ExternalContentController extends Controller
             }
         }
 
+        // Handle English SRT (File upload, URL, or raw/base64 string)
+        if ($request->hasFile('srt_file_en')) {
+            try {
+                $file = $request->file('srt_file_en');
+                $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+                $path = $file->store('subtitles/' . date('Y-m-d'), $disk);
+                $data['srt_file_en'] = Storage::disk($disk)->url($path);
+            } catch (\Exception $e) {
+                Log::error('External SRT English File Upload Failed: ' . $e->getMessage());
+            }
+        } elseif ($request->filled('srt_file_en')) {
+            $srtInput = $request->srt_file_en;
+            if (filter_var($srtInput, FILTER_VALIDATE_URL)) {
+                $data['srt_file_en'] = $srtInput;
+            } else {
+                try {
+                    $srtContent = $srtInput;
+                    if (str_starts_with($srtInput, 'data:') || preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $srtInput)) {
+                        $decoded = base64_decode(preg_replace('#^data:.*?/.*?;base64,#', '', $srtInput), true);
+                        if ($decoded !== false) {
+                            $srtContent = $decoded;
+                        }
+                    }
+                    $fileName = 'subtitles/' . Str::slug($data['title']) . '-' . time() . '_en.srt';
+                    $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+                    Storage::disk($disk)->put($fileName, $srtContent, 'public');
+                    $data['srt_file_en'] = Storage::disk($disk)->url($fileName);
+                } catch (\Exception $e) {
+                    Log::error('External SRT English Text/Base64 Upload Failed: ' . $e->getMessage());
+                }
+            }
+        }
+
+        // Handle Arabic SRT (File upload, URL, or raw/base64 string)
+        if ($request->hasFile('srt_file_ar')) {
+            try {
+                $file = $request->file('srt_file_ar');
+                $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+                $path = $file->store('subtitles/' . date('Y-m-d'), $disk);
+                $data['srt_file_ar'] = Storage::disk($disk)->url($path);
+            } catch (\Exception $e) {
+                Log::error('External SRT Arabic File Upload Failed: ' . $e->getMessage());
+            }
+        } elseif ($request->filled('srt_file_ar')) {
+            $srtInput = $request->srt_file_ar;
+            if (filter_var($srtInput, FILTER_VALIDATE_URL)) {
+                $data['srt_file_ar'] = $srtInput;
+            } else {
+                try {
+                    $srtContent = $srtInput;
+                    if (str_starts_with($srtInput, 'data:') || preg_match('/^[a-zA-Z0-9\/\r\n+]*={0,2}$/', $srtInput)) {
+                        $decoded = base64_decode(preg_replace('#^data:.*?/.*?;base64,#', '', $srtInput), true);
+                        if ($decoded !== false) {
+                            $srtContent = $decoded;
+                        }
+                    }
+                    $fileName = 'subtitles/' . Str::slug($data['title']) . '-' . time() . '_ar.srt';
+                    $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+                    Storage::disk($disk)->put($fileName, $srtContent, 'public');
+                    $data['srt_file_ar'] = Storage::disk($disk)->url($fileName);
+                } catch (\Exception $e) {
+                    Log::error('External SRT Arabic Text/Base64 Upload Failed: ' . $e->getMessage());
+                }
+            }
+        }
+
         // 4. Tools Mapping - already handled above, ensure array defaults if empty
         if (!isset($data['connected_tools'])) {
             $data['connected_tools'] = [];
@@ -135,6 +214,13 @@ class ExternalContentController extends Controller
         unset($data['course_name']); // Not a DB column
 
         $content = Content::create($data);
+
+        Log::info('External Content created successfully in Database', [
+            'content_id' => $content->id,
+            'title' => $content->title,
+            'srt_file_en' => $content->srt_file_en,
+            'srt_file_ar' => $content->srt_file_ar,
+        ]);
 
         return response()->json([
             'success' => true,

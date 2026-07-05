@@ -21,6 +21,14 @@
                                     <p class="mb-0 small">Success! We've sent a verification link to your email address. Please check your inbox and click the link to activate your account.</p>
                                 </div>
                             </div>
+                        @elseif (session('status') === 'registration-success')
+                            <div class="alert-neo success">
+                                <i class="bi bi-patch-check-fill me-3"></i>
+                                <div>
+                                    <strong>Account Created</strong>
+                                    <p class="mb-0 small">Your Gmail address is verified automatically. You can sign in now.</p>
+                                </div>
+                            </div>
                         @elseif (session('status') === 'verified-success')
                             <div class="alert-neo success">
                                 <i class="bi bi-patch-check-fill me-3"></i>

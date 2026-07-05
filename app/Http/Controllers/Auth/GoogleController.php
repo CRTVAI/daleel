@@ -41,6 +41,10 @@ class GoogleController extends Controller
                 if (!$user->google_id) {
                     $user->update(['google_id' => $googleUser->id]);
                 }
+
+                if (!$user->hasVerifiedEmail()) {
+                    $user->markEmailAsVerified();
+                }
                 
                 Auth::login($user);
                 return redirect()->intended(route('dashboard'))

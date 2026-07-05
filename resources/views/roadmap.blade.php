@@ -681,7 +681,7 @@
                             <p class="text-white mb-4" style="opacity:.65;">{{ $roadmap->title }}</p>
                             <div class="d-flex flex-wrap gap-3 mt-4">
                                 @if($currentLesson)
-                                <a href="{{ route('learn.watch', $currentLesson) }}" class="btn btn-primary btn-lg rounded-pill fw-bold px-4 d-flex align-items-center gap-2 shadow-sm">
+                                <a href="{{ route('learn.watch', [$currentLesson, 'roadmap_id' => $roadmap->id]) }}" class="btn btn-primary btn-lg rounded-pill fw-bold px-4 d-flex align-items-center gap-2 shadow-sm">
                                     <i class="bi bi-play-fill"></i> Continue Watching
                                 </a>
                                 @endif
@@ -800,7 +800,7 @@
                                             $hidden         = $loopIndex >= 5;
                                         @endphp
 
-                                        <a href="{{ route('learn.watch', $content) }}"
+                                        <a href="{{ route('learn.watch', [$content, 'roadmap_id' => $roadmap->id]) }}"
                                            class="lesson-link {{ $isActiveLesson ? 'active' : '' }} {{ $isDone ? 'done' : '' }} {{ $hidden ? 'd-none extra-lesson' : '' }}"
                                            data-lesson-id="{{ $content->id }}">
 
@@ -944,7 +944,7 @@
                         </div>
 
                         {{-- CTA --}}
-                        <a href="{{ route('learn.watch', $currentLesson) }}" class="btn-roadmap btn-roadmap-primary">
+                        <a href="{{ route('learn.watch', [$currentLesson, 'roadmap_id' => $roadmap->id]) }}" class="btn-roadmap btn-roadmap-primary">
                             <i class="bi bi-play-fill"></i> {{ $lessonPct > 0 ? 'Continue Lesson' : 'Start Lesson' }}
                         </a>
 

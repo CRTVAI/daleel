@@ -138,10 +138,7 @@
 <header class="mentor-header">
     <div class="d-flex align-items-center">
         <a href="/" class="brand text-decoration-none">
-            <span class="brand-mark">DA</span>
-            <div class="d-flex flex-column">
-                <span class="brand-name">Daleel AI</span>
-            </div>
+            <x-application-logo style="height: 34px; width: auto;" />
         </a>
         <span class="brand-status">AI Mentor 2.0</span>
     </div>

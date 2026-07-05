@@ -17,6 +17,12 @@ class EmailVerificationNotificationController extends Controller
             return redirect()->intended(route('dashboard', absolute: false));
         }
 
+        if (method_exists($request->user(), 'shouldBypassEmailVerification') && $request->user()->shouldBypassEmailVerification()) {
+            $request->user()->markEmailAsVerified();
+
+            return back()->with('status', 'already-verified');
+        }
+
         $request->user()->sendEmailVerificationNotification();
 
         return back()->with('status', 'verification-link-sent');
@@ -34,6 +40,12 @@ class EmailVerificationNotificationController extends Controller
         $user = \App\Models\User::where('email', $request->email)->first();
 
         if ($user->hasVerifiedEmail()) {
+            return redirect()->route('login')->with('status', 'already-verified');
+        }
+
+        if (method_exists($user, 'shouldBypassEmailVerification') && $user->shouldBypassEmailVerification()) {
+            $user->markEmailAsVerified();
+
             return redirect()->route('login')->with('status', 'already-verified');
         }
 

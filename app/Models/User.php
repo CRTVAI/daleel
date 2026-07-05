@@ -16,6 +16,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $fillable = [
         'name',
         'email',
+        'email_verified_at',
         'password',
         'phone',
         'google_id',
@@ -156,6 +157,17 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return empty($this->learning_goal) || empty($this->experience_level) || empty($this->interests);
     }
+
+    public function hasGmailAddress(): bool
+    {
+        return in_array(strtolower(strrchr($this->email, '@') ?: ''), ['@gmail.com', '@googlemail.com'], true);
+    }
+
+    public function shouldBypassEmailVerification(): bool
+    {
+        return !empty($this->google_id);
+    }
+
     /**
      * Send the email verification notification.
      *
@@ -163,6 +175,14 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function sendEmailVerificationNotification()
     {
+        if ($this->shouldBypassEmailVerification()) {
+            if (!$this->hasVerifiedEmail()) {
+                $this->markEmailAsVerified();
+            }
+
+            return;
+        }
+
         $this->notify(new \App\Notifications\VerifyEmailCustom);
     }
 }

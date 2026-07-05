@@ -37,6 +37,11 @@ class AuthenticatedSessionController extends Controller
         $user = Auth::user();
         if ($user) {
             $user->refresh();
+
+            if (!$user->is_admin && !$user->hasVerifiedEmail() && method_exists($user, 'shouldBypassEmailVerification') && $user->shouldBypassEmailVerification()) {
+                $user->markEmailAsVerified();
+                $user->refresh();
+            }
         }
 
         // Strict verification check

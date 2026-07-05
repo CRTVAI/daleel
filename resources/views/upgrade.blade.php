@@ -1,955 +1,929 @@
 @extends('layouts.user')
 
-@section('title', 'Upgrade to Pro — Daleel AI')
+@section('title', 'Checkout — Daleel AI')
 
 @section('styles')
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
 <style>
     :root {
-        --ink: #0b1220;
-        --ink-soft: #55607a;
-        --paper: #ffffff;
-        --mist: #f5f7fb;
-        --page-bg: #eef1f7;
-        --line: #e3e7f0;
-        --line-strong: #cbd3e3;
-        --brand: #2a2f8f;
-        --brand-2: #4147c9;
-        --gold: #b8863b;
-        --gold-soft: #f6ecd9;
-        --success: #0e9f6e;
-        --success-soft: #eafbf3;
-        --danger: #dc2626;
-        --shadow-card: 0 24px 60px -20px rgba(11, 18, 32, 0.16), 0 2px 8px rgba(11, 18, 32, 0.04);
-        --shadow-soft: 0 10px 24px -12px rgba(11, 18, 32, 0.12);
-        --font-display: 'Space Grotesk', 'Inter', sans-serif;
-        --font-body: 'Inter', sans-serif;
-        --font-mono: 'IBM Plex Mono', monospace;
+        --checkout-bg: #f8f9fb;
+        --checkout-white: #ffffff;
+        --checkout-border: #e2e8f0;
+        --checkout-text: #0f172a;
+        --checkout-text-secondary: #475569;
+        --checkout-primary: #4f46e5;
+        --checkout-primary-hover: #4338ca;
+        --checkout-accent: #6366f1;
+        --checkout-accent-light: #eef2ff;
+        --checkout-success: #10b981;
+        --checkout-success-light: #ecfdf5;
+        --checkout-warning: #f59e0b;
+        --checkout-warning-light: #fffbeb;
+        --checkout-radius: 12px;
+        --checkout-shadow: 0 4px 6px -1px rgba(99, 102, 241, 0.05), 0 2px 4px -1px rgba(99, 102, 241, 0.03);
+        --checkout-shadow-lg: 0 10px 15px -3px rgba(99, 102, 241, 0.04), 0 4px 6px -2px rgba(99, 102, 241, 0.02);
     }
 
-    body { background: var(--page-bg); }
-
-    * { -webkit-font-smoothing: antialiased; }
-
-    .checkout-shell {
-        max-width: 1160px;
-        margin: 2.5rem auto 4.5rem;
-        padding: 0 1rem;
-        font-family: var(--font-body);
-        color: var(--ink);
-    }
-
-    .checkout-header {
-        margin-bottom: 2.2rem;
-        text-align: center;
-    }
-
-    .style-label {
-        font-size: 0.72rem;
-        font-family: var(--font-mono);
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
-        color: var(--brand-2);
-        background: rgba(65, 71, 201, 0.06);
-        border: 1px solid rgba(65, 71, 201, 0.12);
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        padding: 0.35rem 0.85rem;
-        border-radius: 999px;
-        margin-bottom: 0.8rem;
-    }
-
-    .checkout-header h2 {
-        font-family: var(--font-display);
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--ink);
-        letter-spacing: -0.02em;
-        margin: 0 0 0.5rem;
-    }
-
-    .checkout-header p {
-        color: var(--ink-soft);
-        font-size: 0.92rem;
-        max-width: 580px;
-        margin: 0 auto;
-        line-height: 1.65;
-    }
-
-    .checkout-top {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.5rem;
-        margin-bottom: 1.5rem;
-        color: var(--ink-soft);
-        font-size: 0.82rem;
-        font-weight: 600;
-    }
-
-    .checkout-top i { color: var(--success); }
-
-    .checkout-card {
-        display: grid;
-        grid-template-columns: 1fr 1.35fr;
-        gap: 1.5rem;
-        align-items: start;
-    }
-
-    /* ---------- TICKET (order summary) ---------- */
-
-    .ticket-wrap { position: sticky; top: 1.75rem; }
-
-    .ticket {
-        background: var(--paper);
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        box-shadow: var(--shadow-card);
-        overflow: hidden;
-    }
-
-    .ticket-top {
-        padding: 2.1rem 2.1rem 1.6rem;
-    }
-
-    .pro-chip {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.4rem;
-        font-family: var(--font-mono);
-        font-size: 0.68rem;
-        font-weight: 600;
-        letter-spacing: 0.09em;
-        text-transform: uppercase;
-        color: var(--gold);
-        background: var(--gold-soft);
-        border: 1px solid #ecdcbb;
-        border-radius: 999px;
-        padding: 0.32rem 0.7rem 0.32rem 0.55rem;
-        margin-bottom: 1.1rem;
-    }
-
-    .pro-chip i { font-size: 0.75rem; }
-
-    .ticket-title {
-        font-family: var(--font-display);
-        font-size: 1.62rem;
-        font-weight: 700;
-        letter-spacing: -0.02em;
-        line-height: 1.2;
+    * {
         margin: 0;
+        padding: 0;
+        box-sizing: border-box;
     }
 
-    .ticket-subtitle {
-        margin-top: 0.6rem;
-        color: var(--ink-soft);
-        font-size: 0.92rem;
-        line-height: 1.6;
+    body {
+        background-color: var(--checkout-bg);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
-    .ticket-subtitle strong { color: var(--ink); }
-
-    .price-row {
-        display: flex;
-        align-items: baseline;
-        gap: 0.55rem;
-        margin-top: 1.5rem;
+    .checkout-container {
+        max-width: 1040px;
+        margin: 48px auto;
+        padding: 0 24px;
     }
 
-    .price-main {
-        font-family: var(--font-mono);
-        font-size: 2.5rem;
-        font-weight: 600;
-        letter-spacing: -0.02em;
+    .checkout-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 0;
+        background: var(--checkout-white);
+        border-radius: 16px;
+        box-shadow: var(--checkout-shadow-lg);
+        overflow: hidden;
+        border: 1px solid var(--checkout-border);
     }
 
-    .price-note {
-        color: var(--ink-soft);
-        font-weight: 600;
-        font-size: 0.86rem;
+    @media (max-width: 900px) {
+        .checkout-wrapper {
+            grid-template-columns: 1fr;
+        }
+        .checkout-container {
+            margin: 24px auto;
+            padding: 0 16px;
+        }
     }
 
-    /* perforated seam */
-    .ticket-seam {
-        position: relative;
-        height: 1px;
-        margin: 0 0;
-        background: repeating-linear-gradient(90deg, var(--line-strong) 0 8px, transparent 8px 16px);
+    /* Left Section */
+    .checkout-left {
+        padding: 48px 48px 40px;
     }
 
-    .ticket-seam::before,
-    .ticket-seam::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        width: 24px;
-        height: 24px;
-        border-radius: 50%;
-        background: var(--page-bg);
-        transform: translateY(-50%);
+    @media (max-width: 900px) {
+        .checkout-left {
+            padding: 32px 24px 28px;
+        }
     }
 
-    .ticket-seam::before { left: -12px; }
-    .ticket-seam::after { right: -12px; }
-
-    .ticket-body {
-        padding: 1.5rem 2.1rem;
-    }
-
-    .summary-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 1rem;
-        padding: 0.6rem 0;
-        font-size: 0.88rem;
-        border-bottom: 1px dashed var(--line);
-    }
-
-    .summary-row:last-child { border-bottom: 0; padding-bottom: 0; }
-    .summary-row:first-child { padding-top: 0; }
-
-    .summary-key { color: var(--ink-soft); font-weight: 500; }
-
-    .summary-val {
-        font-weight: 700;
-        text-align: right;
-        font-family: var(--font-mono);
-        font-size: 0.86rem;
-    }
-
-    .summary-val.discount { color: var(--success); }
-
-    .summary-total {
-        display: flex;
-        justify-content: space-between;
-        align-items: baseline;
-        margin-top: 0.9rem;
-        padding-top: 0.9rem;
-        border-top: 1px solid var(--line);
-    }
-
-    .summary-total .label { font-weight: 700; font-size: 0.9rem; }
-    .summary-total .value {
-        font-family: var(--font-mono);
-        font-weight: 700;
-        font-size: 1.15rem;
-        color: var(--success);
-    }
-
-    .ticket-ref {
-        padding: 0 2.1rem 1.9rem;
-    }
-
-    .barcode {
-        height: 30px;
-        border-radius: 3px;
-        background: repeating-linear-gradient(
-            90deg,
-            var(--ink) 0px, var(--ink) 2px,
-            transparent 2px, transparent 4px,
-            var(--ink) 4px, var(--ink) 5px,
-            transparent 5px, transparent 9px,
-            var(--ink) 9px, var(--ink) 12px,
-            transparent 12px, transparent 14px
-        );
-        opacity: 0.85;
-    }
-
-    .barcode-caption {
-        margin-top: 0.5rem;
-        font-family: var(--font-mono);
-        font-size: 0.7rem;
-        letter-spacing: 0.06em;
-        color: var(--ink-soft);
-        display: flex;
-        justify-content: space-between;
-    }
-
-    /* benefits + trust live below the ticket, outside the card */
-    .benefits-card {
-        background: var(--paper);
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        box-shadow: var(--shadow-card);
-        padding: 1.6rem;
-        margin-top: 1.25rem;
-        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
-    }
-
-    .benefits-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 28px 64px -22px rgba(11, 18, 32, 0.18);
-    }
-
-    .benefits-header {
-        font-family: var(--font-display);
-        font-size: 0.8rem;
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--ink-soft);
-        margin-bottom: 1.1rem;
+    .checkout-breadcrumb {
         display: flex;
         align-items: center;
-        gap: 0.45rem;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--checkout-text-secondary);
+        margin-bottom: 32px;
+        font-weight: 500;
     }
 
-    .benefits-header i {
-        color: var(--brand-2);
-        font-size: 0.92rem;
+    .checkout-breadcrumb span {
+        color: var(--checkout-primary);
+        font-weight: 600;
     }
 
-    .benefit-list {
-        display: flex;
-        flex-direction: column;
-        gap: 0.75rem;
+    .checkout-breadcrumb svg {
+        width: 14px;
+        height: 14px;
     }
 
-    .benefit-item {
+    .section {
+        margin-bottom: 36px;
+    }
+
+    .section:last-child {
+        margin-bottom: 0;
+    }
+
+    .section-header {
+        margin-bottom: 16px;
+    }
+
+    .section-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--checkout-text-secondary);
+        margin-bottom: 6px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: var(--checkout-text);
+        letter-spacing: -0.01em;
+    }
+
+    /* Country Selector */
+    .form-group {
+        position: relative;
+    }
+
+    .form-select {
+        width: 100%;
+        height: 48px;
+        padding: 0 44px 0 16px;
+        font-size: 14px;
+        font-weight: 500;
+        color: var(--checkout-text);
+        background-color: var(--checkout-white);
+        border: 1.5px solid var(--checkout-border);
+        border-radius: 10px;
+        appearance: none;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        font-family: inherit;
+    }
+
+    .form-select:hover {
+        border-color: #d1d5db;
+    }
+
+    .form-select:focus {
+        outline: none;
+        border-color: var(--checkout-primary);
+        box-shadow: 0 0 0 3px rgba(17, 24, 39, 0.06);
+    }
+
+    .form-select-icon {
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        pointer-events: none;
+        color: var(--checkout-text-secondary);
+        width: 16px;
+        height: 16px;
+    }
+
+    .form-hint {
+        margin-top: 8px;
+        font-size: 13px;
+        color: var(--checkout-text-secondary);
+        line-height: 1.5;
         display: flex;
         align-items: flex-start;
-        gap: 0.65rem;
-        color: #334155;
-        font-size: 0.88rem;
-        line-height: 1.45;
+        gap: 6px;
     }
 
-    .benefit-item strong {
-        color: var(--ink);
-        font-weight: 700;
+    .form-hint svg {
+        width: 14px;
+        height: 14px;
+        flex-shrink: 0;
+        margin-top: 2px;
     }
 
-    .benefit-item .tick {
+    /* Payment Methods */
+    .payment-options {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .payment-option {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border: 1.5px solid var(--checkout-border);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        background: var(--checkout-white);
+    }
+
+    .payment-option:hover {
+        border-color: #cbd5e1;
+        background: #f8fafc;
+    }
+
+    .payment-option.selected {
+        border-color: var(--checkout-primary);
+        background: var(--checkout-accent-light);
+    }
+
+    .payment-option-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .payment-radio {
         width: 18px;
         height: 18px;
         border-radius: 50%;
-        background: var(--success-soft);
-        color: var(--success);
-        display: inline-flex;
+        border: 2px solid #d1d5db;
+        position: relative;
+        flex-shrink: 0;
+        transition: all 0.15s ease;
+    }
+
+    .payment-option.selected .payment-radio {
+        border-color: var(--checkout-primary);
+    }
+
+    .payment-radio::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) scale(0);
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--checkout-primary);
+        transition: transform 0.15s ease;
+    }
+
+    .payment-option.selected .payment-radio::after {
+        transform: translate(-50%, -50%) scale(1);
+    }
+
+    .payment-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--checkout-text);
+    }
+
+    .payment-badges {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .payment-badge {
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
+        color: var(--checkout-text-secondary);
+        padding: 3px 8px;
+        border: 1px solid var(--checkout-border);
+        border-radius: 4px;
+        background: var(--checkout-white);
+    }
+
+    .payment-option.selected .payment-badge {
+        background: #f5f5f5;
+    }
+
+    /* Order Items */
+    .order-items {
+        border: 1.5px solid var(--checkout-border);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .order-item {
+        display: flex;
+        align-items: center;
+        padding: 20px;
+        gap: 16px;
+        border-bottom: 1px solid var(--checkout-border);
+    }
+
+    .order-item:last-child {
+        border-bottom: none;
+    }
+
+    .order-item-thumb {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #818cf8, #4f46e5);
+        border-radius: 8px;
+        display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        margin-top: 0.12rem;
-        font-size: 0.68rem;
+        font-size: 18px;
+        color: #ffffff;
     }
 
-    .benefits-divider {
-        height: 1px;
-        background: var(--line);
-        margin: 1.25rem 0;
+    .order-item-info {
+        flex: 1;
+        min-width: 0;
     }
 
-    .trust-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 0.5rem;
-    }
-
-    .trust-item {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        gap: 0.35rem;
-        padding: 0.6rem 0.25rem;
-        border-radius: 12px;
-        background: var(--mist);
-        border: 1px solid transparent;
-        transition: all 0.2s ease;
-    }
-
-    .trust-item:hover {
-        background: var(--paper);
-        border-color: var(--line-strong);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(11, 18, 32, 0.04);
-    }
-
-    .trust-item i {
-        font-size: 1.15rem;
-        color: var(--brand);
-    }
-
-    .trust-item span {
-        font-size: 0.72rem;
-        font-weight: 700;
-        color: var(--ink);
-        line-height: 1.1;
-    }
-
-    /* ---------- FORM PANEL ---------- */
-
-    .form-panel {
-        background: var(--paper);
-        border: 1px solid var(--line);
-        border-radius: 20px;
-        box-shadow: var(--shadow-card);
-        padding: 2.2rem 2.3rem 2.4rem;
-    }
-
-    /* stepper */
-    .stepper { margin-bottom: 2.1rem; }
-
-    .stepper-track {
-        position: relative;
-        height: 2px;
-        background: var(--line);
-        border-radius: 2px;
-        margin: 17px 17px 0;
-    }
-
-    .stepper-progress {
-        position: absolute;
-        top: 0; left: 0;
-        height: 2px;
-        width: 0%;
-        background: linear-gradient(90deg, var(--brand), var(--brand-2));
-        border-radius: 2px;
-        transition: width 0.35s ease;
-    }
-
-    .stepper-nodes {
-        display: flex;
-        justify-content: space-between;
-        margin-top: -17px;
-    }
-
-    .stepper-node {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        width: 33.33%;
-    }
-
-    .node-dot {
-        width: 34px;
-        height: 34px;
-        border-radius: 50%;
-        background: var(--paper);
-        border: 2px solid var(--line-strong);
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        font-family: var(--font-mono);
-        font-size: 0.8rem;
+    .order-item-name {
+        font-size: 14px;
         font-weight: 600;
-        color: var(--ink-soft);
-        transition: all 0.25s ease;
+        color: var(--checkout-text);
+        margin-bottom: 4px;
     }
 
-    .node-check { display: none; font-size: 0.95rem; }
-
-    .stepper-node.active .node-dot {
-        border-color: var(--brand);
-        color: var(--brand);
-        box-shadow: 0 0 0 4px rgba(42, 47, 143, 0.1);
+    .order-item-meta {
+        font-size: 12px;
+        color: var(--checkout-text-secondary);
     }
 
-    .stepper-node.completed .node-dot {
-        background: var(--brand);
-        border-color: var(--brand);
-        color: #fff;
+    .order-item-price {
+        text-align: right;
+        flex-shrink: 0;
     }
 
-    .stepper-node.completed .node-num { display: none; }
-    .stepper-node.completed .node-check { display: inline; }
-
-    .node-label {
-        font-size: 0.72rem;
+    .order-item-price-current {
+        font-size: 16px;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: var(--ink-soft);
+        color: var(--checkout-text);
     }
 
-    .stepper-node.active .node-label { color: var(--brand); }
-    .stepper-node.completed .node-label { color: var(--ink); }
-
-    .pane { display: none; }
-    .pane.active { display: block; animation: paneIn 0.28s ease; }
-
-    @keyframes paneIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
+    .order-item-price-original {
+        font-size: 13px;
+        color: #9ca3af;
+        text-decoration: line-through;
     }
 
-    .pane-title {
-        font-family: var(--font-display);
-        font-size: 1.3rem;
-        font-weight: 700;
-        letter-spacing: -0.01em;
-        margin-bottom: 0.35rem;
+    .feature-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 24px;
+        padding: 16px 20px;
+        background: #fafafa;
+        list-style: none;
     }
 
-    .pane-subtitle {
-        color: var(--ink-soft);
-        font-size: 0.89rem;
-        line-height: 1.6;
-        margin-bottom: 1.5rem;
-    }
-
-    .review-card {
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        background: var(--mist);
-        padding: 1.15rem 1.3rem;
-        margin-bottom: 1.4rem;
+    .feature-list li {
+        font-size: 12px;
+        color: var(--checkout-text-secondary);
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        gap: 1rem;
-    }
-
-    .review-card strong { display: block; font-size: 0.96rem; margin-bottom: 0.2rem; }
-    .review-card span { color: var(--ink-soft); font-size: 0.84rem; }
-    .review-card .review-badge {
-        font-family: var(--font-mono);
-        font-size: 0.78rem;
-        font-weight: 700;
-        color: var(--success);
-        background: var(--success-soft);
-        padding: 0.3rem 0.6rem;
-        border-radius: 8px;
+        gap: 6px;
         white-space: nowrap;
+        position: relative;
+        padding-left: 18px;
     }
 
-    .field { margin-bottom: 1.1rem; }
+    .feature-list li::before {
+        display: none;
+    }
 
-    .field-label {
-        display: block;
-        margin-bottom: 0.42rem;
-        font-size: 0.74rem;
+    .feature-list li::after {
+        content: '✓';
+        position: absolute;
+        left: 0;
+        color: var(--checkout-success);
+        font-weight: 800;
+        font-size: 13px;
+    }
+
+    /* Right Section */
+    .checkout-right {
+        background: #fafafa;
+        border-left: 1px solid var(--checkout-border);
+        padding: 40px 32px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    @media (max-width: 900px) {
+        .checkout-right {
+            border-left: none;
+            border-top: 1px solid var(--checkout-border);
+            padding: 32px 24px;
+        }
+    }
+
+    .summary-header {
+        font-size: 16px;
         font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
-        color: #475569;
+        color: var(--checkout-text);
+        margin-bottom: 20px;
+        letter-spacing: -0.01em;
     }
 
-    .field-label .req { color: var(--danger); }
-
-    .field-input {
+    .summary-table {
         width: 100%;
-        padding: 0.85rem 1rem;
-        border: 1.5px solid var(--line-strong);
-        border-radius: 12px;
-        background: var(--paper);
-        color: var(--ink);
-        font-size: 0.94rem;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+    .summary-table tr {
+        border-bottom: 1px solid #f3f4f6;
+    }
+
+    .summary-table tr:last-child {
+        border-bottom: none;
+    }
+
+    .summary-table td {
+        padding: 10px 0;
+        font-size: 14px;
+        color: var(--checkout-text-secondary);
+    }
+
+    .summary-table td:last-child {
+        text-align: right;
+        font-weight: 500;
+        color: var(--checkout-text);
+    }
+
+    .summary-table .summary-total td {
+        font-size: 17px;
+        font-weight: 700;
+        color: var(--checkout-text);
+        padding-top: 16px;
+        border-top: 2px solid var(--checkout-border);
+    }
+
+    .savings-tag {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        color: #047857;
+        background: #d1fae5;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        margin-left: 8px;
+        border: 1px solid #a7f3d0;
+    }
+
+    .secure-notice {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 10px;
+        font-size: 12px;
+        color: var(--checkout-text-secondary);
+        font-weight: 500;
+        margin-bottom: 16px;
+    }
+
+    .secure-notice svg {
+        width: 14px;
+        height: 14px;
+    }
+
+    .terms {
+        font-size: 12px;
+        color: var(--checkout-text-secondary);
+        text-align: center;
+        line-height: 1.6;
+        margin-bottom: 20px;
+    }
+
+    .terms a {
+        color: var(--checkout-text);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        font-weight: 500;
+    }
+
+    .terms a:hover {
+        color: #000;
+    }
+
+    .btn-pay {
+        width: 100%;
+        height: 52px;
+        background: var(--checkout-primary);
+        color: #ffffff;
+        font-size: 15px;
         font-weight: 600;
-        font-family: var(--font-body);
-        outline: none;
-        transition: border-color 0.18s ease, box-shadow 0.18s ease;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.15s ease;
+        letter-spacing: -0.01em;
+        margin-bottom: 24px;
+        font-family: inherit;
     }
 
-    .field-input:focus {
-        border-color: var(--brand);
-        box-shadow: 0 0 0 3px rgba(42, 47, 143, 0.12);
+    .btn-pay:hover {
+        background: var(--checkout-primary-hover);
     }
 
-    .field-input[readonly] {
-        background: var(--mist);
-        color: var(--ink-soft);
+    .btn-pay:disabled {
+        background: #9ca3af;
         cursor: not-allowed;
     }
 
-    .field-input.invalid { border-color: var(--danger); }
-    .field-input.invalid:focus { box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.12); }
+    .guarantee-box {
+        margin-top: auto;
+        padding-top: 24px;
+        border-top: 1px solid var(--checkout-border);
+        text-align: center;
+    }
 
-    .phone-error {
+    .guarantee-icon {
+        width: 36px;
+        height: 36px;
+        margin: 0 auto 10px;
+        color: var(--checkout-text-secondary);
+    }
+
+    .guarantee-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--checkout-text);
+        margin-bottom: 4px;
+    }
+
+    .guarantee-text {
+        font-size: 12px;
+        color: var(--checkout-text-secondary);
+        line-height: 1.5;
+    }
+
+    /* Loading */
+    .spinner {
+        width: 18px;
+        height: 18px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top-color: #ffffff;
+        border-radius: 50%;
+        animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .checkout-success-message {
         display: none;
-        margin-top: 0.45rem;
-        color: var(--danger);
-        font-size: 0.78rem;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        border-radius: var(--checkout-radius);
+        background: var(--checkout-success-light);
+        border: 1px solid rgba(16, 185, 129, 0.22);
+        color: #065f46;
+        font-size: 13px;
         font-weight: 700;
-        align-items: center;
-        gap: 0.35rem;
+        line-height: 1.45;
     }
 
-    .phone-error.show { display: flex; }
-
-    @keyframes shake {
-        10%, 90% { transform: translateX(-1px); }
-        20%, 80% { transform: translateX(2px); }
-        30%, 50%, 70% { transform: translateX(-4px); }
-        40%, 60% { transform: translateX(4px); }
-    }
-
-    .shake { animation: shake 0.5s; }
-
-    .action-row {
-        display: grid;
-        grid-template-columns: 1fr 1.3fr;
-        gap: 0.75rem;
-        margin-top: 1.5rem;
-    }
-
-    .btn-checkout {
-        width: 100%;
-        border: 0;
-        border-radius: 12px;
-        padding: 0.92rem 1rem;
-        font-size: 0.92rem;
-        font-weight: 700;
-        font-family: var(--font-body);
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.55rem;
-        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-    }
-
-    .btn-primary-checkout {
-        background: linear-gradient(180deg, var(--brand-2), var(--brand));
-        color: #fff;
-        box-shadow: var(--shadow-soft);
-    }
-
-    .btn-primary-checkout:hover { transform: translateY(-1px); }
-    .btn-primary-checkout:disabled { opacity: 0.75; cursor: default; transform: none; }
-
-    .btn-secondary-checkout {
-        background: var(--paper);
-        color: #334155;
-        border: 1.5px solid var(--line-strong);
-    }
-
-    .btn-secondary-checkout:hover { background: var(--mist); }
-
-    /* confirm pane */
-    .confirm-hero {
-        border: 1px solid var(--line);
-        border-radius: 14px;
-        background: linear-gradient(135deg, #f8f9ff 0%, var(--mist) 100%);
-        padding: 1.3rem 1.4rem;
-        margin-bottom: 1.3rem;
-    }
-
-    .confirm-hero strong {
-        display: block;
-        font-family: var(--font-display);
-        font-size: 1.05rem;
-        margin-bottom: 0.3rem;
-    }
-
-    .confirm-hero span { color: var(--ink-soft); font-size: 0.86rem; }
-
-    .confirm-list { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
-
-    .confirm-list .summary-row {
-        padding: 0.85rem 1.2rem;
-        border-bottom: 1px solid var(--line);
-        font-size: 0.87rem;
-    }
-
-    .confirm-list .summary-row:last-child { border-bottom: 0; }
-
-    .fine-print {
-        margin-top: 1.2rem;
-        font-size: 0.78rem;
-        color: var(--ink-soft);
-        line-height: 1.6;
+    .checkout-success-message.show {
         display: flex;
-        gap: 0.5rem;
     }
 
-    .fine-print i { flex-shrink: 0; margin-top: 0.15rem; }
-
-    @media (max-width: 992px) {
-        .checkout-card { grid-template-columns: 1fr; }
-        .ticket-wrap { position: static; }
-    }
-
-    @media (max-width: 576px) {
-        .checkout-shell { margin: 1.25rem auto 2.5rem; padding: 0 0.65rem; }
-        .ticket-top, .ticket-body, .ticket-ref { padding-left: 1.4rem; padding-right: 1.4rem; }
-        .form-panel { padding: 1.5rem 1.4rem 1.8rem; }
-        .action-row { grid-template-columns: 1fr; }
-        .node-label { font-size: 0.64rem; }
-        .review-card { flex-direction: column; align-items: flex-start; gap: 0.5rem; }
-        .benefits-card { padding: 1.25rem; }
-        .trust-grid { grid-template-columns: 1fr; gap: 0.4rem; }
-        .trust-item { flex-direction: row; justify-content: flex-start; padding: 0.6rem 1rem; gap: 0.6rem; }
+    .checkout-success-message svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+        color: var(--checkout-success);
     }
 </style>
 @endsection
 
 @section('content')
-<div class="checkout-shell">
+<div class="checkout-container">
+    <div class="checkout-wrapper">
+        
+        <!-- Left Column -->
+        <div class="checkout-left">
+            <div class="checkout-breadcrumb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path></svg>
+                <span>/</span> Plans <span>/</span> <span>Checkout</span>
+            </div>
 
-    <div class="checkout-header">
-        <span class="style-label">
-            <i class="bi bi-stars"></i> Exclusive Pro Offer
-        </span>
-        <h2>Claim Your 3-Month Pro Trial</h2>
-        <p>Unlock absolute learning freedom. Generate unlimited AI roadmaps, access complete logs, and activate your personal student metrics tool dashboard instantly.</p>
-    </div>
-
-    <div class="checkout-top">
-        <i class="bi bi-shield-lock-fill"></i> Encrypted, secure activation
-    </div>
-
-    <div class="checkout-card">
-
-        <div class="ticket-wrap">
-            <div class="ticket">
-                <div class="ticket-top">
-                    <span class="pro-chip"><i class="bi bi-stars"></i> Pro trial</span>
-
-                    <h1 class="ticket-title">Complete your Pro upgrade</h1>
-                    <p class="ticket-subtitle">
-                        You're currently on the <strong>Free Plan</strong>. Activate 3 months of Pro — nothing due today.
-                    </p>
-
-                    <div class="price-row">
-                        <div class="price-main">$0.00</div>
-                        <div class="price-note">USD · first 3 months</div>
-                    </div>
+            <!-- Billing Address -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-label">Billing Address</div>
+                    <div class="section-title">Select your country</div>
                 </div>
-
-                <div class="ticket-seam"></div>
-
-                <div class="ticket-body">
-                    <div class="summary-row">
-                        <span class="summary-key">Plan</span>
-                        <span class="summary-val">3-Month Pro Trial</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="summary-key">Discount</span>
-                        <span class="summary-val discount">−100%</span>
-                    </div>
-                    <div class="summary-total">
-                        <span class="label">Total due today</span>
-                        <span class="value">$0.00</span>
-                    </div>
+                <div class="form-group">
+                    <select name="billing_country" class="form-select">
+                        <option value="">Select a country</option>
+                        <option value="AF">Afghanistan</option>
+                        <option value="AL">Albania</option>
+                        <option value="DZ">Algeria</option>
+                        <option value="AR">Argentina</option>
+                        <option value="AM">Armenia</option>
+                        <option value="AU">Australia</option>
+                        <option value="AT">Austria</option>
+                        <option value="AZ">Azerbaijan</option>
+                        <option value="BH">Bahrain</option>
+                        <option value="BD">Bangladesh</option>
+                        <option value="BY">Belarus</option>
+                        <option value="BE">Belgium</option>
+                        <option value="BT">Bhutan</option>
+                        <option value="BO">Bolivia</option>
+                        <option value="BA">Bosnia and Herzegovina</option>
+                        <option value="BR">Brazil</option>
+                        <option value="BN">Brunei</option>
+                        <option value="BG">Bulgaria</option>
+                        <option value="KH">Cambodia</option>
+                        <option value="CM">Cameroon</option>
+                        <option value="CA">Canada</option>
+                        <option value="CL">Chile</option>
+                        <option value="CN">China</option>
+                        <option value="CO">Colombia</option>
+                        <option value="CR">Costa Rica</option>
+                        <option value="HR">Croatia</option>
+                        <option value="CU">Cuba</option>
+                        <option value="CY">Cyprus</option>
+                        <option value="CZ">Czech Republic</option>
+                        <option value="DK">Denmark</option>
+                        <option value="DO">Dominican Republic</option>
+                        <option value="EC">Ecuador</option>
+                        <option value="EG">Egypt</option>
+                        <option value="SV">El Salvador</option>
+                        <option value="EE">Estonia</option>
+                        <option value="ET">Ethiopia</option>
+                        <option value="FI">Finland</option>
+                        <option value="FR">France</option>
+                        <option value="GE">Georgia</option>
+                        <option value="DE">Germany</option>
+                        <option value="GH">Ghana</option>
+                        <option value="GR">Greece</option>
+                        <option value="GT">Guatemala</option>
+                        <option value="HK">Hong Kong</option>
+                        <option value="HU">Hungary</option>
+                        <option value="IS">Iceland</option>
+                        <option value="IN">India</option>
+                        <option value="ID">Indonesia</option>
+                        <option value="IR">Iran</option>
+                        <option value="IQ">Iraq</option>
+                        <option value="IE">Ireland</option>
+                        <option value="IL">Israel</option>
+                        <option value="IT">Italy</option>
+                        <option value="JM">Jamaica</option>
+                        <option value="JP">Japan</option>
+                        <option selected value="JO">Jordan</option>
+                        <option value="KZ">Kazakhstan</option>
+                        <option value="KE">Kenya</option>
+                        <option value="KW">Kuwait</option>
+                        <option value="KG">Kyrgyzstan</option>
+                        <option value="LA">Laos</option>
+                        <option value="LV">Latvia</option>
+                        <option value="LB">Lebanon</option>
+                        <option value="LY">Libya</option>
+                        <option value="LT">Lithuania</option>
+                        <option value="LU">Luxembourg</option>
+                        <option value="MO">Macau</option>
+                        <option value="MG">Madagascar</option>
+                        <option value="MY">Malaysia</option>
+                        <option value="MV">Maldives</option>
+                        <option value="MT">Malta</option>
+                        <option value="MX">Mexico</option>
+                        <option value="MD">Moldova</option>
+                        <option value="MN">Mongolia</option>
+                        <option value="ME">Montenegro</option>
+                        <option value="MA">Morocco</option>
+                        <option value="MM">Myanmar</option>
+                        <option value="NP">Nepal</option>
+                        <option value="NL">Netherlands</option>
+                        <option value="NZ">New Zealand</option>
+                        <option value="NG">Nigeria</option>
+                        <option value="KP">North Korea</option>
+                        <option value="MK">North Macedonia</option>
+                        <option value="NO">Norway</option>
+                        <option value="OM">Oman</option>
+                        <option value="PK">Pakistan</option>
+                        <option value="PS">Palestine</option>
+                        <option value="PA">Panama</option>
+                        <option value="PY">Paraguay</option>
+                        <option value="PE">Peru</option>
+                        <option value="PH">Philippines</option>
+                        <option value="PL">Poland</option>
+                        <option value="PT">Portugal</option>
+                        <option value="PR">Puerto Rico</option>
+                        <option value="QA">Qatar</option>
+                        <option value="RO">Romania</option>
+                        <option value="RU">Russia</option>
+                        <option value="RW">Rwanda</option>
+                        <option value="SA">Saudi Arabia</option>
+                        <option value="SN">Senegal</option>
+                        <option value="RS">Serbia</option>
+                        <option value="SG">Singapore</option>
+                        <option value="SK">Slovakia</option>
+                        <option value="SI">Slovenia</option>
+                        <option value="ZA">South Africa</option>
+                        <option value="KR">South Korea</option>
+                        <option value="ES">Spain</option>
+                        <option value="LK">Sri Lanka</option>
+                        <option value="SD">Sudan</option>
+                        <option value="SE">Sweden</option>
+                        <option value="CH">Switzerland</option>
+                        <option value="SY">Syria</option>
+                        <option value="TW">Taiwan</option>
+                        <option value="TJ">Tajikistan</option>
+                        <option value="TZ">Tanzania</option>
+                        <option value="TH">Thailand</option>
+                        <option value="TN">Tunisia</option>
+                        <option value="TR">Turkey</option>
+                        <option value="TM">Turkmenistan</option>
+                        <option value="UG">Uganda</option>
+                        <option value="UA">Ukraine</option>
+                        <option value="AE">United Arab Emirates</option>
+                        <option value="GB">United Kingdom</option>
+                        <option value="US">United States</option>
+                        <option value="UY">Uruguay</option>
+                        <option value="UZ">Uzbekistan</option>
+                        <option value="VE">Venezuela</option>
+                        <option value="VN">Vietnam</option>
+                        <option value="YE">Yemen</option>
+                        <option value="ZM">Zambia</option>
+                        <option value="ZW">Zimbabwe</option>
+                    </select>
+                    <svg class="form-select-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                    </svg>
                 </div>
+                <div class="form-hint">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    Tax will be calculated based on your billing country regulations.
+                </div>
+            </div>
 
-                <div class="ticket-ref">
-                    <div class="barcode"></div>
-                    <div class="barcode-caption">
-                        <span>TRIAL · VOUCHER</span>
-                        <span>NO CARD ON FILE</span>
+            <!-- Payment Method -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-label">Payment Method</div>
+                    <div class="section-title">Choose how to pay</div>
+                </div>
+                <div class="payment-options">
+                    <div class="payment-option selected" onclick="selectPayment('card', this)">
+                        <div class="payment-option-left">
+                            <div class="payment-radio"></div>
+                            <span class="payment-name">Credit or Debit Card</span>
+                        </div>
+                        <div class="payment-badges" style="display: flex; gap: 8px; align-items: center;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/9/98/Visa_Inc._logo_%282005%E2%80%932014%29.svg" alt="Visa" style="height: 12px; width: auto; filter: grayscale(0.2) contrast(1.1);">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a4/Mastercard_2019_logo.svg" alt="Mastercard" style="height: 16px; width: auto;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/f/fa/American_Express_logo_%282018%29.svg" alt="Amex" style="height: 14px; width: auto;">
+                        </div>
+                    </div>
+                    <div class="payment-option" onclick="selectPayment('paypal', this)">
+                        <div class="payment-option-left">
+                            <div class="payment-radio"></div>
+                            <span class="payment-name">PayPal</span>
+                        </div>
+                        <div class="payment-badges" style="display: flex; align-items: center;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal" style="height: 16px; width: auto;">
+                        </div>
+                    </div>
+                    <div class="payment-option" onclick="selectPayment('googlepay', this)">
+                        <div class="payment-option-left">
+                            <div class="payment-radio"></div>
+                            <span class="payment-name">Google Pay</span>
+                        </div>
+                        <div class="payment-badges" style="display: flex; align-items: center;">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/f/f2/Google_Pay_Logo.svg" alt="Google Pay" style="height: 18px; width: auto;">
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="benefits-card">
-                <div class="benefits-header">
-                    <i class="bi bi-patch-check-fill"></i>
-                    <span>Included in Pro Trial</span>
+            <!-- Order Summary -->
+            <div class="section">
+                <div class="section-header">
+                    <div class="section-label">Order Details</div>
+                    <div class="section-title">Your plan</div>
                 </div>
-
-                <div class="benefit-list">
-                    <div class="benefit-item">
-                        <span class="tick"><i class="bi bi-check-lg"></i></span>
-                        <span><strong>Unlimited</strong> AI roadmap generation</span>
+                <div class="order-items">
+                    <div class="order-item">
+                        <div class="order-item-thumb">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                            </svg>
+                        </div>
+                        <div class="order-item-info">
+                            <div class="order-item-name">Pro Plan</div>
+                            <div class="order-item-meta">Billed monthly • Cancel anytime</div>
+                        </div>
+                        <div class="order-item-price">
+                            <div class="order-item-price-current">$19.00</div>
+                            <div class="order-item-price-original">$49.99</div>
+                        </div>
                     </div>
-                    <div class="benefit-item">
-                        <span class="tick"><i class="bi bi-check-lg"></i></span>
-                        <span><strong>Full</strong> browser history — no 7-day limit</span>
-                    </div>
-                    <div class="benefit-item">
-                        <span class="tick"><i class="bi bi-check-lg"></i></span>
-                        <span><strong>Connect</strong> unlimited extension devices</span>
-                    </div>
-                    <div class="benefit-item">
-                        <span class="tick"><i class="bi bi-check-lg"></i></span>
-                        <span><strong>Full</strong> "My Team" dashboard access</span>
-                    </div>
-                    <div class="benefit-item">
-                        <span class="tick"><i class="bi bi-check-lg"></i></span>
-                        <span><strong>Real-time</strong> AI video recommendations</span>
-                    </div>
-                </div>
-
-                <div class="benefits-divider"></div>
-
-                <div class="trust-grid">
-                    <div class="trust-item">
-                        <i class="bi bi-lock-fill"></i>
-                        <span>No card required</span>
-                    </div>
-                    <div class="trust-item">
-                        <i class="bi bi-shield-check"></i>
-                        <span>Instant activation</span>
-                    </div>
-                    <div class="trust-item">
-                        <i class="bi bi-arrow-counterclockwise"></i>
-                        <span>Cancel anytime</span>
-                    </div>
+                    <ul class="feature-list">
+                        <li>Unlimited AI Roadmaps</li>
+                        <li>Unlimited AI Mentor</li>
+                        <li>Full video library</li>
+                        <li>Multi-device sync</li>
+                        <li>Team management</li>
+                        <li>Activity history</li>
+                    </ul>
                 </div>
             </div>
         </div>
 
-        <div class="form-panel">
+        <!-- Right Column -->
+        <div class="checkout-right">
+            <div class="summary-header">Summary</div>
+            
+            <table class="summary-table">
+                <tr>
+                    <td>Subtotal</td>
+                    <td>$49.99</td>
+                </tr>
+                <tr>
+                    <td>Discount (62%)</td>
+                    <td>−$30.99</td>
+                </tr>
+                <tr>
+                    <td>Tax</td>
+                    <td>Calculated at next step</td>
+                </tr>
+                <tr class="summary-total">
+                    <td>Total due</td>
+                    <td>
+                        $19.00
+                        <span class="savings-tag">Save 62%</span>
+                    </td>
+                </tr>
+            </table>
 
-            <div class="stepper">
-                <div class="stepper-track"><div class="stepper-progress" id="stepperProgress"></div></div>
-                <div class="stepper-nodes">
-                    <div class="stepper-node active" id="step-nav-1">
-                        <span class="node-dot"><span class="node-num">1</span><i class="bi bi-check-lg node-check"></i></span>
-                        <span class="node-label">Review</span>
-                    </div>
-                    <div class="stepper-node" id="step-nav-2">
-                        <span class="node-dot"><span class="node-num">2</span><i class="bi bi-check-lg node-check"></i></span>
-                        <span class="node-label">Verify</span>
-                    </div>
-                    <div class="stepper-node" id="step-nav-3">
-                        <span class="node-dot"><span class="node-num">3</span><i class="bi bi-check-lg node-check"></i></span>
-                        <span class="node-label">Confirm</span>
-                    </div>
+            <div class="secure-notice">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+                Secured by 256-bit encryption
+            </div>
+
+            <p class="terms">
+                By confirming, you agree to our 
+                <a href="/terms" target="_blank">Terms of Service</a> and 
+                <a href="/privacy" target="_blank">Privacy Policy</a>.
+            </p>
+
+            <div class="checkout-success-message" id="checkoutSuccessMessage" role="status" aria-live="polite">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+                <div>
+                    Payment successful. Activating your Pro access now...
                 </div>
             </div>
 
-            <div class="pane active" id="step-pane-1">
-                <div class="pane-title">Review your upgrade</div>
-                <div class="pane-subtitle">Check the trial details below, then continue to verify your account.</div>
-
-                <div class="review-card">
-                    <div>
-                        <strong>3-Month Pro Trial Voucher</strong>
-                        <span>Free activation · nothing due today</span>
-                    </div>
-                    <span class="review-badge">$0.00</span>
-                </div>
-
-                <button type="button" class="btn-checkout btn-primary-checkout" onclick="changeStep(2)">
-                    Continue <i class="bi bi-arrow-right"></i>
+            <form method="POST" action="{{ route('upgrade.activate') }}" id="checkoutPayForm">
+                @csrf
+                <input type="hidden" name="phone" value="">
+                <input type="hidden" name="payment_method" id="payment_method" value="card">
+                <button type="submit" class="btn-pay" id="paySubmitBtn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    Pay $19.00
                 </button>
-            </div>
-
-            <div class="pane" id="step-pane-2">
-                <div class="pane-title">Verify your details</div>
-                <div class="pane-subtitle">Confirm your account and add a phone number so we can reach you about your trial.</div>
-
-                <div class="field">
-                    <label class="field-label">Name</label>
-                    <input type="text" class="field-input" value="{{ $user->name }}" readonly>
-                </div>
-
-                <div class="field">
-                    <label class="field-label">Email</label>
-                    <input type="email" class="field-input" value="{{ $user->email }}" readonly>
-                </div>
-
-                <div class="field">
-                    <label class="field-label">Phone <span class="req">*</span></label>
-                    <input type="tel" class="field-input" id="phone-input" placeholder="e.g. +880 1XXXXXXXXX" value="{{ $user->phone ?? '' }}" maxlength="20" required>
-                    <div id="phone-error" class="phone-error"><i class="bi bi-exclamation-circle-fill"></i> Enter a valid phone number to continue.</div>
-                </div>
-
-                <div class="action-row">
-                    <button type="button" class="btn-checkout btn-secondary-checkout" onclick="changeStep(1)">
-                        <i class="bi bi-arrow-left"></i> Back
-                    </button>
-                    <button type="button" class="btn-checkout btn-primary-checkout" onclick="changeStep(3)">
-                        Continue <i class="bi bi-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
-
-            <div class="pane" id="step-pane-3">
-                <div class="pane-title">Confirm and activate</div>
-                <div class="pane-subtitle">This is your final confirmation before the trial is activated.</div>
-
-                <div class="confirm-hero">
-                    <strong>3-Month Pro Trial — $0.00</strong>
-                    <span>Runs through {{ now()->addMonths(3)->format('F j, Y') }}</span>
-                </div>
-
-                <div class="confirm-list">
-                    <div class="summary-row">
-                        <span class="summary-key">Member</span>
-                        <span class="summary-val">{{ $user->name }}</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="summary-key">Phone</span>
-                        <span class="summary-val" id="summary-phone-text">—</span>
-                    </div>
-                    <div class="summary-row">
-                        <span class="summary-key">Total due today</span>
-                        <span class="summary-val discount">$0.00</span>
-                    </div>
-                </div>
-
-                <div class="fine-print">
-                    <i class="bi bi-info-circle"></i>
-                    <span>No payment method is stored. You can cancel or downgrade from your account settings at any time before the trial ends.</span>
-                </div>
-
-                <form method="POST" action="{{ route('upgrade.activate') }}" id="upgradeSubmitForm">
-                    @csrf
-                    <input type="hidden" name="phone" id="submit-phone-hidden">
-
-                    <div class="action-row">
-                        <button type="button" class="btn-checkout btn-secondary-checkout" onclick="changeStep(2)">
-                            <i class="bi bi-arrow-left"></i> Back
-                        </button>
-                        <button type="submit" class="btn-checkout btn-primary-checkout" id="activateBtnSubmit">
-                            <i class="bi bi-patch-check-fill"></i> Activate Pro trial
-                        </button>
-                    </div>
-                </form>
-            </div>
-
+            </form>
         </div>
+
     </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-    function setStepper(step) {
-        document.getElementById('stepperProgress').style.width = ((step - 1) / 2 * 100) + '%';
-
-        for (let i = 1; i <= 3; i++) {
-            const node = document.getElementById('step-nav-' + i);
-            node.classList.remove('active', 'completed');
-            if (i < step) node.classList.add('completed');
-            if (i === step) node.classList.add('active');
-        }
+    function selectPayment(method, element) {
+        // Remove selected class from all options
+        document.querySelectorAll('.payment-option').forEach(el => {
+            el.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked option
+        element.classList.add('selected');
+        
+        // Update hidden input
+        document.getElementById('payment_method').value = method;
     }
 
-    function changeStep(step) {
-        if (step === 3) {
-            const input = document.getElementById('phone-input');
-            const phone = input.value.trim();
-            const err = document.getElementById('phone-error');
+    let checkoutSubmitting = false;
 
-            if (phone.length < 5) {
-                err.classList.add('show');
-                input.classList.add('invalid', 'shake');
-                input.focus();
-                setTimeout(() => input.classList.remove('shake'), 500);
-                return;
-            }
+    document.getElementById('checkoutPayForm').addEventListener('submit', function(e) {
+        if (checkoutSubmitting) return;
 
-            err.classList.remove('show');
-            input.classList.remove('invalid');
-            document.getElementById('summary-phone-text').textContent = phone;
-            document.getElementById('submit-phone-hidden').value = phone;
+        e.preventDefault();
+        checkoutSubmitting = true;
+
+        const btn = document.getElementById('paySubmitBtn');
+        const successMessage = document.getElementById('checkoutSuccessMessage');
+
+        if (successMessage) {
+            successMessage.classList.add('show');
         }
 
-        document.querySelectorAll('.pane').forEach(el => el.classList.remove('active'));
-        document.getElementById('step-pane-' + step).classList.add('active');
-        setStepper(step);
-    }
+        if (typeof showToast === 'function') {
+            showToast('Payment successful. Activating Pro access...', 'success');
+        }
 
-    document.getElementById('phone-input').addEventListener('input', function () {
-        this.classList.remove('invalid');
-        document.getElementById('phone-error').classList.remove('show');
-    });
-
-    document.getElementById('upgradeSubmitForm').addEventListener('submit', function () {
-        const btn = document.getElementById('activateBtnSubmit');
         btn.disabled = true;
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Activating...';
+        btn.innerHTML = '<div class="spinner"></div> Processing...';
+
+        setTimeout(() => this.submit(), 900);
     });
 </script>
 @endsection

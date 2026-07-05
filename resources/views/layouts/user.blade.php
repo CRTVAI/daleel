@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title', 'Daleel AI Mentor')</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/dashboard/fav.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -248,11 +249,7 @@
 <body>
     <nav class="navbar-main">
         <a href="{{ route('dashboard') }}" class="navbar-brand-neo">
-            <div class="brand-mark">DA</div>
-            <div class="brand-copy">
-                <strong>Daleel AI</strong>
-                <small>by Creative AI</small>
-            </div>
+            <x-application-logo style="height: 38px; width: auto;" />
         </a>
 
         <div class="nav-links-center">
@@ -261,14 +258,12 @@
             <a href="{{ route('bookmarks') }}" class="nav-link-neo {{ Route::is('bookmarks') ? 'active' : '' }}">Bookmarks</a>
             <a href="{{ route('roadmap') }}" class="nav-link-neo {{ Request::is('roadmap*') ? 'active' : '' }}">Roadmaps</a>
             <a href="{{ route('extension.install') }}" class="nav-link-neo {{ Route::is('extension.install') ? 'active' : '' }}">AI Extension</a>
-            @if(auth()->user()->can_access_team || auth()->user()->account_type === 'Free Plan')
             <a href="{{ route('team.index') }}" class="nav-link-neo {{ Route::is('team.index') ? 'active' : '' }}">
                 My Team
-                @if(auth()->user()->account_type === 'Free Plan')
+                @if(!auth()->user()->can_access_team)
                     <span class="badge bg-danger ms-1" style="font-size: 8px; vertical-align: middle;">PRO</span>
                 @endif
             </a>
-            @endif
         </div>
 
         <div class="navbar-actions">

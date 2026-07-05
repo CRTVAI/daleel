@@ -399,6 +399,132 @@
         .kpi-item { min-width: 140px; }
         .telemetry-banner { flex-direction: column; align-items: flex-start; }
     }
+
+    @media (max-width: 768px) {
+        .kpi-item { min-width: 140px; }
+        .telemetry-banner { flex-direction: column; align-items: flex-start; }
+    }
+
+    /* ── Team Restricted Overlay & Blur ── */
+    .team-restricted-wrapper {
+        position: relative;
+        min-height: 85vh;
+        border-radius: 16px;
+        background: #f8f9fb;
+    }
+    .team-blur-container {
+        filter: blur(8px) grayscale(30%);
+        pointer-events: none;
+        user-select: none;
+        opacity: 0.5;
+        transition: filter 0.3s ease;
+    }
+    .team-gate-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(248, 249, 251, 0.4);
+        padding: 2rem 1.5rem;
+    }
+    .team-gate-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.7);
+        border-radius: 24px;
+        box-shadow: 0 30px 70px rgba(0,0,0,0.12);
+        padding: 3rem 2.5rem;
+        max-width: 580px;
+        width: 100%;
+        text-align: center;
+    }
+    .gate-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #eef2ff;
+        color: #4f46e5;
+        font-size: 0.75rem;
+        font-weight: 800;
+        padding: 0.4rem 0.95rem;
+        border-radius: 20px;
+        margin-bottom: 1.25rem;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+    .team-gate-card h2 {
+        font-size: 1.85rem;
+        font-weight: 900;
+        color: #111827;
+        letter-spacing: -0.03em;
+        margin-bottom: 0.85rem;
+        line-height: 1.2;
+    }
+    .team-gate-card p {
+        color: #4b5563;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        margin-bottom: 2rem;
+    }
+    .gate-features-mini {
+        display: flex;
+        flex-direction: column;
+        gap: 0.85rem;
+        margin-bottom: 2.25rem;
+        text-align: left;
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 16px;
+        padding: 1.25rem;
+    }
+    .gate-feature-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    .gate-feature-item i {
+        color: #4f46e5;
+        font-size: 1rem;
+        margin-top: 0.15rem;
+        flex-shrink: 0;
+    }
+    .gate-feature-item span {
+        font-size: 0.85rem;
+        color: #374151;
+        line-height: 1.4;
+    }
+    .btn-request-access {
+        background: linear-gradient(135deg, #4f46e5, #7c3aed);
+        color: #fff;
+        border: none;
+        font-weight: 800;
+        font-size: 0.95rem;
+        border-radius: 12px;
+        padding: 0.85rem 2.2rem;
+        width: 100%;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(79,70,229,0.3);
+    }
+    .btn-request-access:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px rgba(79,70,229,0.45);
+        color: #fff;
+    }
+    /* Modal form config */
+    .contact-modal-icon {
+        width: 56px; height: 56px;
+        border-radius: 14px;
+        background: #eef2ff;
+        color: #4f46e5;
+        font-size: 1.4rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
 </style>
 @endsection
 
@@ -413,6 +539,45 @@
     };
     $colors = ['c1','c2','c3','c4','c5','c6','c7','c8'];
 @endphp
+
+<div class="team-restricted-wrapper">
+    @if(!auth()->user()->can_access_team)
+    <div class="team-gate-overlay">
+        <div class="team-gate-card">
+            <div class="gate-badge"><i class="bi bi-shield-lock-fill"></i> Premium Feature</div>
+            <h2>Team Telemetry & Analytics</h2>
+            <p>Monitor how your entire team uses AI tools in real time. Get department-level insights, track productivity, identify top tools, and make smarter decisions with live telemetry data from every employee's browser.</p>
+
+            <div class="gate-features-mini">
+                <div class="gate-feature-item">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span><strong>Employee Tracking:</strong> Track active time, tool usage, and productivity metrics for every employee.</span>
+                </div>
+                <div class="gate-feature-item">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span><strong>Department Analytics:</strong> Group employees by department and see aggregated tool usage side by side.</span>
+                </div>
+                <div class="gate-feature-item">
+                    <i class="bi bi-check-circle-fill"></i>
+                    <span><strong>Live Telemetry:</strong> See who is online right now, which platforms they are using, and audit requests.</span>
+                </div>
+            </div>
+
+            <button class="btn btn-request-access" data-bs-toggle="modal" data-bs-target="#teamAccessModal">
+                <i class="bi bi-send-fill me-2"></i>Request Team Access
+            </button>
+
+            @if(session('enterprise_contact_success'))
+            <div class="alert d-flex align-items-center gap-2 rounded-3 mt-3 text-start" style="background:#ecfdf5;color:#065f46;border:1px solid #a7f3d0;font-size:0.85rem;">
+                <i class="bi bi-check-circle-fill fs-6"></i>
+                <div><strong>Request sent!</strong> Admin will review and grant access shortly.</div>
+            </div>
+            @endif
+        </div>
+    </div>
+    @endif
+
+    <div class="{{ !auth()->user()->can_access_team ? 'team-blur-container' : '' }}">
 
 {{-- Page Top Row --}}
 <div class="page-top d-flex align-items-center justify-content-between flex-wrap gap-3">
@@ -739,6 +904,44 @@
         <div class="text-center py-5" id="telemetrySidebarSpinner">
             <div class="spinner-border text-primary" role="status" style="width:1.6rem;height:1.6rem;"></div>
             <p class="text-muted small mt-2 mb-0">Loading…</p>
+        </div>
+    </div>
+    </div> {{-- End of team-blur-container --}}
+</div> {{-- End of team-restricted-wrapper --}}
+
+{{-- Contact Modal --}}
+<div class="modal fade" id="teamAccessModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 rounded-4 shadow-lg">
+            <div class="modal-body p-4">
+                <div class="text-center mb-3">
+                    <div class="contact-modal-icon"><i class="bi bi-people-fill"></i></div>
+                    <h5 class="fw-800 text-dark mb-1">Request Team Access</h5>
+                    <p class="text-muted small mb-0">Your request will be sent to the admin for review.</p>
+                </div>
+                <form action="{{ route('enterprise.contact.send') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="name" value="{{ auth()->user()->name }}">
+                    <div class="mb-3">
+                        <label class="form-label fw-600 small text-muted mb-1">Your Email</label>
+                        <input type="email" name="email" class="form-control rounded-3" value="{{ auth()->user()->email }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-600 small text-muted mb-1">Subject</label>
+                        <input type="text" name="subject" class="form-control rounded-3" value="Team Access Request - {{ auth()->user()->name }}" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-600 small text-muted mb-1">Message <span class="text-danger">*</span></label>
+                        <textarea name="message" class="form-control rounded-3" rows="3" placeholder="Hi, I'd like to request access to Team Telemetry for my organization..." required></textarea>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-light fw-600 rounded-3 flex-grow-1" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary fw-700 rounded-3 flex-grow-1">
+                            <i class="bi bi-envelope-fill me-1"></i> Send Request
+                        </button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 </div>

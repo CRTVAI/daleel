@@ -144,7 +144,7 @@ class AdminController extends Controller
                   ->orWhere('language', 'like', "%{$search}%")
                   ->orWhere('video_url', 'like', "%{$search}%")
                   ->orWhere('video_url_ar', 'like', "%{$search}%");
-                
+
                 // Smart language mapping
                 $s = strtolower($search);
                 if ($s === 'arabic' || $s === 'ar') {
@@ -195,7 +195,7 @@ class AdminController extends Controller
         }
 
         $contents = $query->paginate(12)->withQueryString();
-        
+
         $categories = Content::distinct()->whereNotNull('category')->pluck('category')->sort();
         $courses = Course::orderBy('title')->get();
 
@@ -221,7 +221,7 @@ class AdminController extends Controller
             'standalone_videos' => Content::whereNull('course_id')->count(),
             'total_duration' => Content::sum('duration_seconds'),
         ];
-        
+
         $tools = \App\Models\Tool::where('status', 'active')->orderBy('name')->get();
         $allCategories = Category::where('status', 'active')->orderBy('name')->get();
 
@@ -247,9 +247,11 @@ class AdminController extends Controller
             'duration_seconds' => 'nullable|integer',
             'type' => 'nullable|string|in:video,article,course',
             'is_featured' => 'nullable|boolean',
+            'srt_file_en' => 'nullable|file|max:10240',
+            'srt_file_ar' => 'nullable|file|max:10240',
         ]);
 
-        $data = $request->except(['video_file', 'thumbnail_base64']);
+        $data = $request->except(['video_file', 'thumbnail_base64', 'srt_file_en', 'srt_file_ar']);
         $data['is_featured'] = $request->has('is_featured');
         $data['language'] = $request->filled('video_url_ar') ? 'both' : 'en';
         $data['duration_seconds'] = $request->get('duration_seconds', 0);
@@ -287,6 +289,22 @@ class AdminController extends Controller
             $data['connected_tools'] = [];
         }
 
+        // Handle English SRT Upload
+        if ($request->hasFile('srt_file_en')) {
+            $file = $request->file('srt_file_en');
+            $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+            $path = $file->store('subtitles/' . date('Y-m-d'), $disk);
+            $data['srt_file_en'] = \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
+        }
+
+        // Handle Arabic SRT Upload
+        if ($request->hasFile('srt_file_ar')) {
+            $file = $request->file('srt_file_ar');
+            $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+            $path = $file->store('subtitles/' . date('Y-m-d'), $disk);
+            $data['srt_file_ar'] = \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
+        }
+
         Content::create($data);
 
         return redirect()->back()->with('success', 'Content added successfully.');
@@ -311,9 +329,11 @@ class AdminController extends Controller
             'duration_seconds' => 'nullable|integer',
             'type' => 'nullable|string|in:video,article,course',
             'is_featured' => 'nullable|boolean',
+            'srt_file_en' => 'nullable|file|max:10240',
+            'srt_file_ar' => 'nullable|file|max:10240',
         ]);
 
-        $data = $request->except(['video_file', 'thumbnail_base64']);
+        $data = $request->except(['video_file', 'thumbnail_base64', 'srt_file_en', 'srt_file_ar']);
         $data['is_featured'] = $request->has('is_featured');
         $data['language'] = $request->filled('video_url_ar') ? 'both' : 'en';
 
@@ -344,6 +364,22 @@ class AdminController extends Controller
             $data['connected_tools'] = array_map('trim', explode(',', $request->connected_tools));
         } else {
             $data['connected_tools'] = [];
+        }
+
+        // Handle English SRT Upload
+        if ($request->hasFile('srt_file_en')) {
+            $file = $request->file('srt_file_en');
+            $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+            $path = $file->store('subtitles/' . date('Y-m-d'), $disk);
+            $data['srt_file_en'] = \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
+        }
+
+        // Handle Arabic SRT Upload
+        if ($request->hasFile('srt_file_ar')) {
+            $file = $request->file('srt_file_ar');
+            $disk = config('filesystems.default') === 's3' ? 's3' : 'public';
+            $path = $file->store('subtitles/' . date('Y-m-d'), $disk);
+            $data['srt_file_ar'] = \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
         }
 
         $content->update($data);
@@ -455,11 +491,11 @@ class AdminController extends Controller
         $uniqueViewers = \App\Models\UserVideoProgress::distinct('user_id')->count();
 
         return view('admin.analytics', compact(
-            'users', 
-            'categoryStats', 
-            'totalViews', 
-            'avgCompletion', 
-            'totalWatchTime', 
+            'users',
+            'categoryStats',
+            'totalViews',
+            'avgCompletion',
+            'totalWatchTime',
             'uniqueViewers'
         ));
     }

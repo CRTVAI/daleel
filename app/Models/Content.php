@@ -29,6 +29,8 @@ class Content extends Model
         'category_id',
         'reference_url',
         'video_duration',
+        'srt_file_en',
+        'srt_file_ar',
     ];
 
     protected $casts = [

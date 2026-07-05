@@ -36,7 +36,7 @@ class UpgradeController extends Controller
         }
 
         $request->validate([
-            'phone' => 'required|string|max:20',
+            'phone' => 'nullable|string|max:20',
         ]);
 
         $expiresAt = now()->addMonths(3);
@@ -46,7 +46,7 @@ class UpgradeController extends Controller
             'account_type'   => 'Pro',
             'pro_expires_at' => $expiresAt,
             'phone'          => $request->phone,
-            'can_access_team' => true,
+            // can_access_team stays false — admin must grant it manually
         ]);
 
         // Record the lead for admin

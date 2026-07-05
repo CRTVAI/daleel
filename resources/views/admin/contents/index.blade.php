@@ -79,7 +79,7 @@
         border: none;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1);
     }
-    
+
     .form-control, .form-select {
         border: 1px solid #e2e8f0;
         padding: 0.75rem 1rem;
@@ -87,7 +87,7 @@
         transition: all 0.2s;
         border-radius: 10px !important;
     }
-    
+
     .form-control:focus, .form-select:focus {
         box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1) !important;
         border-color: #6366f1 !important;
@@ -104,7 +104,7 @@
     }
 
     .fw-800 { font-weight: 800; }
-    
+
     .tagify {
         border-radius: 10px;
         border: 1px solid #e2e8f0;
@@ -113,7 +113,7 @@
         --tag-bg: #f1f5f9;
         --tag-text-color: #1e293b;
     }
-    
+
     .tagify__tag {
         border-radius: 6px;
         font-weight: 600;
@@ -322,9 +322,9 @@
     .modal-section-title i {
         font-size: 1rem;
     }
-    
+
     /* Premium Form Inputs */
-    .modal-body .form-control, 
+    .modal-body .form-control,
     .modal-body .form-select {
         border-radius: 12px;
         padding: 12px 16px;
@@ -334,7 +334,7 @@
         background-color: #fff;
         transition: all 0.2s ease;
     }
-    .modal-body .form-control:focus, 
+    .modal-body .form-control:focus,
     .modal-body .form-select:focus {
         border-color: #6366f1;
         box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
@@ -404,7 +404,7 @@
                     <i class="bi bi-search position-absolute top-50 start-0 translate-middle-y ms-3 text-muted"></i>
                     <input type="text" name="search" class="form-control ps-5 border-0 shadow-sm rounded-4 fw-medium" style="width: 240px; height: 45px;" placeholder="Search title..." value="{{ request('search') }}">
                 </div>
-                
+
                 <select name="category_id" class="form-select border-0 shadow-sm rounded-4 fw-medium h-45 px-3" style="width: 140px;" onchange="this.form.submit()">
                     <option value="">Categories</option>
                     @foreach($allCategories as $cat)
@@ -564,6 +564,24 @@
                                             <input type="file" name="video_file" class="form-control" accept="video/*">
                                             <div class="small text-muted mt-1">Leave empty to keep current video.</div>
                                         </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-file-earmark-text-fill text-indigo"></i> English Subtitles (SRT)</label>
+                                            <input type="file" name="srt_file_en" class="form-control" accept=".srt,.vtt,.txt">
+                                            @if($content->srt_file_en)
+                                                <div class="small text-success mt-1"><i class="bi bi-check-circle-fill"></i> Current file: <a href="{{ $content->srt_file_en }}" target="_blank" class="text-indigo text-decoration-none">View File</a></div>
+                                            @else
+                                                <div class="small text-muted mt-1">Optional English SRT/VTT file.</div>
+                                            @endif
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-file-earmark-text-fill text-indigo"></i> Arabic Subtitles (SRT)</label>
+                                            <input type="file" name="srt_file_ar" class="form-control" accept=".srt,.vtt,.txt">
+                                            @if($content->srt_file_ar)
+                                                <div class="small text-success mt-1"><i class="bi bi-check-circle-fill"></i> Current file: <a href="{{ $content->srt_file_ar }}" target="_blank" class="text-indigo text-decoration-none">View File</a></div>
+                                            @else
+                                                <div class="small text-muted mt-1">Optional Arabic SRT/VTT file.</div>
+                                            @endif
+                                        </div>
                                         <input type="hidden" name="thumbnail_base64" class="auto-thumbnail-input">
                                         <div class="col-md-6">
                                             <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-eye-slash-fill"></i> Status</label>
@@ -685,7 +703,7 @@
                 @csrf
                 <div class="modal-body p-4 bg-light-subtle">
                     <div class="row g-4 text-start">
-                        
+
                         <!-- Left Column: Video Details & Description -->
                         <div class="col-lg-6">
                             <div class="modal-section-card shadow-sm h-100 mb-0">
@@ -701,6 +719,16 @@
                                         <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-cloud-upload text-indigo"></i> Video Upload</label>
                                         <input type="file" name="video_file" class="form-control" accept="video/*">
                                         <div class="small text-muted mt-1">Select an MP4/MOV file to upload.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-file-earmark-text-fill text-indigo"></i> English Subtitles (SRT)</label>
+                                        <input type="file" name="srt_file_en" class="form-control" accept=".srt,.vtt,.txt">
+                                        <div class="small text-muted mt-1">Select English SRT/VTT file.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-file-earmark-text-fill text-indigo"></i> Arabic Subtitles (SRT)</label>
+                                        <input type="file" name="srt_file_ar" class="form-control" accept=".srt,.vtt,.txt">
+                                        <div class="small text-muted mt-1">Select Arabic SRT/VTT file.</div>
                                     </div>
                                     <input type="hidden" name="thumbnail_base64" class="auto-thumbnail-input">
 
@@ -739,7 +767,7 @@
 
                         <!-- Right Column: Extensions, Mapping & Sequence -->
                         <div class="col-lg-6 d-flex flex-column gap-4">
-                            
+
                             <!-- Card 2: Extension Links -->
                             <div class="modal-section-card shadow-sm mb-0">
                                 <div class="modal-section-title text-success">
@@ -896,7 +924,7 @@
             const canvas = document.createElement("canvas");
             canvas.width = 1280; canvas.height = 720;
             const ctx = canvas.getContext("2d");
-            
+
             // 1. Premium Background: Deep Indigo Mesh Gradient
             const grad = ctx.createRadialGradient(300, 200, 0, 640, 360, 1000);
             grad.addColorStop(0, "#1e1b4b"); // Deep Indigo
@@ -924,11 +952,11 @@
             ctx.fillStyle = "#ffffff";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-            
+
             // Dynamic Font Size based on length
             const fontSize = title.length > 50 ? 55 : 72;
             ctx.font = `900 ${fontSize}px "Inter", "system-ui", "-apple-system", sans-serif`;
-            
+
             // 5. Wrap Text with Elegant Spacing
             const words = title.toUpperCase().split(" ");
             const lines = [];
@@ -938,7 +966,7 @@
                 else { lines.push(line.trim()); line = w + " "; }
             });
             lines.push(line.trim());
-            
+
             const lineHeight = fontSize * 1.2;
             lines.forEach((l, i) => {
                 // Gradient text for extra premium feel
@@ -955,7 +983,7 @@
             ctx.fillStyle = "rgba(99, 102, 241, 0.8)";
             ctx.font = '800 24px "Inter", sans-serif';
             ctx.fillText("Daleel MENTOR AI", 640, 600);
-            
+
             // Decorative line below branding
             ctx.beginPath();
             ctx.strokeStyle = "rgba(99, 102, 241, 0.4)";
@@ -963,7 +991,7 @@
             ctx.moveTo(540, 620);
             ctx.lineTo(740, 620);
             ctx.stroke();
-            
+
             return canvas.toDataURL("image/jpeg", 0.9);
         }
 

@@ -55,6 +55,11 @@ class ApiAuthController extends Controller
             ], 401);
         }
 
+        if (!$user->hasVerifiedEmail() && method_exists($user, 'shouldBypassEmailVerification') && $user->shouldBypassEmailVerification()) {
+            $user->markEmailAsVerified();
+            $user->refresh();
+        }
+
         $token = $user->createToken('chrome-extension')->plainTextToken;
 
         return response()->json([

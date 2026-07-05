@@ -3,6 +3,477 @@
 @section('title', $content->title . ' — Daleel AI')
 
 @section('styles')
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+    /* ==================== SHARED ROADMAP TIMELINE STYLES ==================== */
+    :root {
+        --primary: #4f46e5;
+        --primary-light: #818cf8;
+        --primary-dark: #3730a3;
+        --primary-bg: #eef2ff;
+        --success: #10b981;
+        --warning: #f59e0b;
+        --orange: #f97316;
+        --pink: #ec4899;
+        --purple: #8b5cf6;
+        --teal: #14b8a6;
+        --indigo: #6366f1;
+        --gradient-1: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+        --gradient-2: linear-gradient(135deg, #f59e0b 0%, #f97316 100%);
+        --gradient-3: linear-gradient(135deg, #10b981 0%, #14b8a6 100%);
+        --gradient-4: linear-gradient(135deg, #ec4899 0%, #8b5cf6 100%);
+    }
+
+    .timeline-wrapper { position: relative; padding-left: 36px; }
+    .timeline-line {
+        position: absolute;
+        left: 12px;
+        top: 12px;
+        bottom: 12px;
+        width: 2px;
+        background: linear-gradient(180deg, #4f46e5, #7c3aed, #8b5cf6, #a78bfa);
+        border-radius: 4px;
+    }
+
+    .step-item {
+        position: relative;
+        margin-bottom: 16px;
+        padding-left: 0;
+    }
+
+    .step-dot {
+        position: absolute;
+        left: -36px;
+        top: 4px;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 900;
+        color: #94a3b8;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 2;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .step-item.completed .step-dot {
+        background: var(--gradient-1);
+        border-color: #4f46e5;
+        color: #fff;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+    }
+    .step-item.active .step-dot {
+        border-color: #4f46e5;
+        color: #4f46e5;
+        width: 30px;
+        height: 30px;
+        left: -38px;
+        top: 2px;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+    }
+
+    .step-card {
+        background: #fff;
+        border-radius: 16px;
+        padding: 16px 20px;
+        border: 1px solid rgba(79, 70, 229, 0.06);
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+        position: relative;
+        overflow: hidden;
+    }
+    .step-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--gradient-1);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .step-item:nth-child(1) .step-card::after { background: var(--gradient-1); }
+    .step-item:nth-child(2) .step-card::after { background: var(--gradient-2); }
+    .step-item:nth-child(3) .step-card::after { background: var(--gradient-3); }
+    .step-item:nth-child(4) .step-card::after { background: var(--gradient-4); }
+    .step-item:nth-child(5) .step-card::after { background: var(--gradient-2); }
+
+    .step-card:hover {
+        border-color: rgba(79, 70, 229, 0.15);
+        box-shadow: 0 4px 16px rgba(79, 70, 229, 0.06);
+    }
+    .step-card:hover::after { opacity: 1; }
+
+    .step-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 10px;
+    }
+    .step-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #f8faff, #f0f4ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+        color: #475569;
+        flex-shrink: 0;
+        border: 1px solid rgba(79, 70, 229, 0.08);
+        transition: 0.3s;
+    }
+    .step-item:nth-child(1) .step-icon { background: linear-gradient(135deg, #eef2ff, #dbeafe); color: #4f46e5; }
+    .step-item:nth-child(2) .step-icon { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #f59e0b; }
+    .step-item:nth-child(3) .step-icon { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #10b981; }
+    .step-item:nth-child(4) .step-icon { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: #ec4899; }
+    .step-item:nth-child(5) .step-icon { background: linear-gradient(135deg, #ede9fe, #ddd6fe); color: #7c3aed; }
+    .step-icon img { width: 20px; height: 20px; object-fit: contain; }
+
+    .step-title-group {
+        flex: 1;
+        min-width: 0;
+    }
+    .step-title {
+        font-size: 14px;
+        font-weight: 800;
+        color: #0f172a;
+        margin: 0;
+        line-height: 1.3;
+    }
+    .step-subtitle {
+        font-size: 11px;
+        color: #94a3b8;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .step-progress {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 2px;
+    }
+    .step-progress-bar {
+        flex: 1;
+        height: 5px;
+        background: #f1f5f9;
+        border-radius: 6px;
+        overflow: hidden;
+        min-width: 30px;
+    }
+    .step-progress-bar .fill {
+        height: 100%;
+        border-radius: 6px;
+        transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .step-item:nth-child(1) .fill { background: var(--gradient-1); }
+    .step-item:nth-child(2) .fill { background: var(--gradient-2); }
+    .step-item:nth-child(3) .fill { background: var(--gradient-3); }
+    .step-item:nth-child(4) .fill { background: var(--gradient-4); }
+    .step-item:nth-child(5) .fill { background: var(--gradient-2); }
+
+    .step-progress-text {
+        font-size: 12px;
+        font-weight: 800;
+        color: #0f172a;
+        white-space: nowrap;
+        min-width: 36px;
+        text-align: right;
+    }
+
+    .step-lessons {
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1.5px solid #f1f5f9;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+    .lesson-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: 8px;
+        text-decoration: none !important;
+        color: #334155;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.25s;
+        background: transparent;
+        border: none;
+        width: 100%;
+        text-align: left;
+        position: relative;
+    }
+    .lesson-link:hover {
+        background: #f8fafc;
+        color: #0f172a;
+        transform: translateX(4px);
+    }
+    .lesson-link.active {
+        background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+        color: #4f46e5;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.06);
+    }
+    .lesson-link .check {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid #cbd5e1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        flex-shrink: 0;
+        color: #fff;
+        transition: 0.2s;
+    }
+    .lesson-link.done .check {
+        background: linear-gradient(135deg, #10b981, #34d399);
+        border-color: #10b981;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
+    }
+    .lesson-link.active .check {
+        border-color: #4f46e5;
+        border-width: 2px;
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.15);
+    }
+    .lesson-link.active .check::after {
+        content: '';
+        width: 6px;
+        height: 6px;
+        background: #4f46e5;
+        border-radius: 50%;
+    }
+    .lesson-link .play-icon {
+        margin-left: auto;
+        color: #94a3b8;
+        font-size: 14px;
+        transition: 0.2s;
+    }
+    .lesson-link.active .play-icon {
+        color: #4f46e5;
+    }
+    /* ==================== CUSTOM SUBTITLE SYSTEM ==================== */
+    .player-shadow, .player-wrapper {
+        position: relative !important;
+    }
+    
+    .custom-subtitles-overlay {
+        position: absolute;
+        bottom: 70px;
+        left: 5%;
+        right: 5%;
+        z-index: 99;
+        pointer-events: none;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        transition: bottom 0.3s ease;
+    }
+    
+    .plyr--hide-controls ~ .custom-subtitles-overlay,
+    .plyr--hide-controls + .custom-subtitles-overlay {
+        bottom: 25px !important;
+    }
+    
+    .subtitle-text {
+        color: #ffffff;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        text-align: center;
+        max-width: 90%;
+        line-height: 1.4;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.1);
+        text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        transition: opacity 0.15s ease;
+        word-wrap: break-word;
+    }
+    
+    .subtitle-ar {
+        font-family: 'Cairo', sans-serif;
+        direction: rtl;
+        font-size: 1.25rem;
+        border-color: rgba(99, 102, 241, 0.2);
+    }
+    
+    /* Subtitle control card styles */
+    .translation-controls-card {
+        border: 1px solid rgba(99, 102, 241, 0.08) !important;
+        transition: all 0.3s ease;
+    }
+    .translation-controls-card:hover {
+        border-color: rgba(99, 102, 241, 0.15) !important;
+        box-shadow: 0 6px 18px rgba(99, 102, 241, 0.04) !important;
+    }
+    
+    /* ==================== INTERACTIVE TRANSCRIPT ==================== */
+    .transcript-tab-container {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 1px solid rgba(99, 102, 241, 0.08);
+        box-shadow: 0 4px 20px rgba(0,0,0,0.02);
+        background: #fff;
+    }
+    
+    .transcript-tabs {
+        display: flex;
+        border-bottom: 1px solid #f1f5f9;
+        background: #fafbfe;
+        padding: 0 16px;
+    }
+    
+    .transcript-tab-btn {
+        padding: 14px 20px;
+        background: none;
+        border: none;
+        font-weight: 700;
+        font-size: 0.9rem;
+        color: #64748b;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s;
+    }
+    
+    .transcript-tab-btn:hover {
+        color: #4f46e5;
+    }
+    
+    .transcript-tab-btn.active {
+        color: #4f46e5;
+    }
+    
+    .transcript-tab-btn.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--gradient-1);
+        border-radius: 3px 3px 0 0;
+    }
+    
+    .transcript-panel {
+        display: none;
+        padding: 24px;
+    }
+    
+    .transcript-panel.active {
+        display: block;
+    }
+    
+    .transcript-scroll-area {
+        max-height: 350px;
+        overflow-y: auto;
+        padding-right: 8px;
+    }
+    
+    .transcript-scroll-area::-webkit-scrollbar {
+        width: 6px;
+    }
+    .transcript-scroll-area::-webkit-scrollbar-track {
+        background: #f1f5f9;
+        border-radius: 8px;
+    }
+    .transcript-scroll-area::-webkit-scrollbar-thumb {
+        background: #cbd5e1;
+        border-radius: 8px;
+    }
+    .transcript-scroll-area::-webkit-scrollbar-thumb:hover {
+        background: #94a3b8;
+    }
+
+    .transcript-line {
+        padding: 10px 14px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-bottom: 6px;
+        border: 1px solid transparent;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    
+    .transcript-line:hover {
+        background: #f8faff;
+        border-color: rgba(99, 102, 241, 0.15);
+        transform: translateX(4px);
+    }
+    
+    .transcript-line.active {
+        background: #eef2ff;
+        border-color: rgba(99, 102, 241, 0.25);
+        box-shadow: 0 2px 8px rgba(79, 70, 229, 0.06);
+    }
+    
+    .transcript-timestamp {
+        font-family: monospace;
+        font-size: 0.8rem;
+        color: #818cf8;
+        font-weight: 600;
+        background: #f1f5f9;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+    
+    .transcript-line.active .transcript-timestamp {
+        background: #4f46e5;
+        color: #fff;
+    }
+    
+    .transcript-text-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+    
+    .transcript-text-en {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #334155;
+    }
+    
+    .transcript-text-ar {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #1e293b;
+        font-family: 'Cairo', sans-serif;
+        text-align: right;
+        direction: rtl;
+    }
+    
+    .transcript-line.active .transcript-text-en {
+        color: #1e1b4b;
+        font-weight: 600;
+    }
+    
+    .transcript-line.active .transcript-text-ar {
+        color: #1e1b4b;
+        font-weight: 750;
+    }
+</style>
+
 @if(!auth()->check())
 <style>
     /* ==================== PUBLIC WATCH PAGE DESIGN ==================== */
@@ -328,7 +799,7 @@
         <div class="row g-5">
             <div class="col-lg-8">
                 <div class="watch-hero">
-                    <div class="player-shadow">
+                    <div class="player-shadow position-relative">
                         @if($content->video_url && (str_contains($content->video_url, 'amazonaws.com') || str_ends_with($content->video_url, '.mp4')))
                             <video id="player" playsinline controls data-poster="{{ $content->thumbnail_url }}">
                                 <source src="{{ $content->video_url }}" type="video/mp4" />
@@ -336,15 +807,48 @@
                         @else
                             <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="{{ $content->youtube_id }}"></div>
                         @endif
+                        
+                        <!-- Custom Subtitles overlay -->
+                        <div id="custom-subtitles" class="custom-subtitles-overlay d-none">
+                            <div id="sub-en" class="subtitle-text subtitle-en d-none"></div>
+                            <div id="sub-ar" class="subtitle-text subtitle-ar d-none" dir="rtl"></div>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Subtitle Translation Preferences -->
+                @if($content->srt_file_en || $content->srt_file_ar)
+                <div class="translation-controls-card p-3 mb-4 rounded-4 border bg-white shadow-sm">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="bi bi-translate text-primary fs-5"></i>
+                            <div>
+                                <div class="fw-bold small">Video Subtitles & Translation</div>
+                                <div class="text-muted small" style="font-size: 11px;">Select subtitle preference for learning</div>
+                            </div>
+                        </div>
+                        <div class="btn-group btn-group-sm rounded-3 overflow-hidden" role="group" aria-label="Subtitle Language">
+                            <button type="button" class="btn btn-dark active px-3" data-lang="off" onclick="setSubtitleLang('off')">Off</button>
+                            @if($content->srt_file_en)
+                                <button type="button" class="btn btn-outline-dark px-3" data-lang="en" onclick="setSubtitleLang('en')">English</button>
+                            @endif
+                            @if($content->srt_file_ar)
+                                <button type="button" class="btn btn-outline-dark px-3" data-lang="ar" onclick="setSubtitleLang('ar')">Arabic (العربية)</button>
+                            @endif
+                            @if($content->srt_file_en && $content->srt_file_ar)
+                                <button type="button" class="btn btn-outline-dark px-3" data-lang="both" onclick="setSubtitleLang('both')">Dual (En + Ar)</button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+                @endif
 
                 <div class="video-info-box">
                     <div class="info-eyebrow">
                         <i class="bi bi-stars"></i> Free Lesson
                     </div>
                     <h1 class="video-title-main">{{ $content->title }}</h1>
-                    
+
                     <div class="meta-chip-row">
                         <div class="meta-chip"><i class="bi bi-tag-fill me-2"></i>{{ $content->category }}</div>
                         <div class="meta-chip"><i class="bi bi-award-fill me-2"></i>{{ $content->skill_level }}</div>
@@ -354,19 +858,138 @@
                     </div>
 
                     <p class="video-desc-text">{{ $content->description }}</p>
-                    
+
                     @if($content->tags)
-                    <div class="mt-4 d-flex flex-wrap gap-2">
+                    <div class="mt-4 d-flex flex-wrap gap-2 mb-4">
                         @foreach(array_map('trim', explode(',', $content->tags)) as $tag)
                             <span class="badge bg-light text-secondary border px-3 py-2 rounded-pill small">{{ $tag }}</span>
                         @endforeach
                     </div>
                     @endif
+                    
+                    <!-- Tabbed container for Info vs Transcripts -->
+                    <div class="transcript-tab-container mt-4 mb-2">
+                        <div class="transcript-tabs">
+                            <button type="button" class="transcript-tab-btn active" onclick="switchWatchTab('overview')">
+                                <i class="bi bi-info-circle me-1"></i> Lesson Info
+                            </button>
+                            @if($content->srt_file_en || $content->srt_file_ar)
+                            <button type="button" class="transcript-tab-btn" id="btn-transcript-tab" onclick="switchWatchTab('transcript')">
+                                <i class="bi bi-file-text me-1"></i> Live Translation & Transcript
+                            </button>
+                            @endif
+                        </div>
+                        
+                        <!-- Overview Panel -->
+                        <div class="transcript-panel active" id="panel-overview">
+                            <div class="row g-4">
+                                <div class="col-md-4">
+                                    <div class="lesson-meta-item">
+                                        <span class="meta-label"><i class="bi bi-briefcase"></i> Use Case</span>
+                                        <span class="meta-value text-muted" style="font-size: 13px;">Automating recurring professional workflows using specialized AI interactions and real-time behavioral mapping.</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="lesson-meta-item">
+                                        <span class="meta-label"><i class="bi bi-person-badge"></i> Role Relevance</span>
+                                        <span class="meta-value text-muted" style="font-size: 13px;">Essential for professionals looking to minimize cognitive load during tool-switching and repetitive digital tasks.</span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="lesson-meta-item">
+                                        <span class="meta-label"><i class="bi bi-journal-check"></i> Lesson Outcome</span>
+                                        <span class="meta-value text-muted" style="font-size: 13px;">Competency in deploying modern AI strategies to save at least 15-20% of daily digital operation time.</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Transcript Panel -->
+                        @if($content->srt_file_en || $content->srt_file_ar)
+                        <div class="transcript-panel" id="panel-transcript">
+                            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                                <div class="text-muted small">
+                                    <i class="bi bi-info-circle me-1"></i> Click on any line below to jump directly to that part of the video!
+                                </div>
+                                <div class="position-relative">
+                                    <input type="text" id="transcript-search" class="form-control form-control-sm pe-4 rounded-pill" placeholder="Search transcript..." onkeyup="filterTranscript()">
+                                    <i class="bi bi-search position-absolute text-muted" style="right:12px;top:50%;transform:translateY(-50%);font-size:11px;"></i>
+                                </div>
+                            </div>
+                            <div class="transcript-scroll-area" id="transcript-lines-list">
+                                <div class="text-center py-4 text-muted">
+                                    <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                                    <div>Loading synced translation...</div>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+                    </div>
                 </div>
             </div>
 
             <div class="col-lg-4">
-                @if($course)
+                @if($roadmapContext)
+                    <div class="sidebar-label">Roadmap Playlist</div>
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                        <div class="card-header text-white py-3 px-3" style="background: linear-gradient(135deg,#4f46e5,#7c3aed);">
+                            <div class="small opacity-75 fw-bold text-uppercase" style="font-size: 10px; letter-spacing: 0.05em;">Playing from Roadmap</div>
+                            <h6 class="fw-bold mb-0 text-truncate" title="{{ $roadmapContext->title }}">{{ $roadmapContext->title }}</h6>
+                        </div>
+                        <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
+                            @php $lessonNumber = 1; @endphp
+                            @foreach($roadmapData as $phaseIndex => $phase)
+                                <div class="px-3 py-2 border-bottom" style="background:#f8fafc;">
+                                    <div class="d-flex align-items-center gap-2">
+                                        @if($phase['tool'] && $phase['tool']->logo)
+                                            <img src="{{ asset($phase['tool']->logo) }}" alt="{{ $phase['tool']->name }}" style="width:22px;height:22px;object-fit:contain;">
+                                        @else
+                                            <i class="bi bi-gear-fill text-primary"></i>
+                                        @endif
+                                        <div style="min-width:0;flex:1;">
+                                            <div class="small fw-bold text-dark text-truncate">{{ $phase['tool']->name ?? ($phase['name'] ?? 'Phase '.($phaseIndex + 1)) }}</div>
+                                            <div class="text-muted" style="font-size:10px;">{{ $phase['completed'] }} of {{ $phase['total'] }} lessons complete</div>
+                                        </div>
+                                        <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill" style="font-size:10px;">{{ $phase['percent'] }}%</span>
+                                    </div>
+                                </div>
+                                @foreach($phase['contents'] as $lesson)
+                                    <a href="{{ route('learn.watch', [$lesson, 'roadmap_id' => $roadmapContext->id]) }}"
+                                       class="rec-card-mini border-0 rounded-0 m-0 border-bottom text-decoration-none {{ $lesson->id == $content->id ? 'bg-light' : '' }}"
+                                       style="padding: 14px 15px;">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <div class="lesson-num-circle flex-shrink-0 {{ $lesson->id == $content->id ? 'text-white' : '' }}"
+                                                 style="{{ $lesson->id == $content->id ? 'background:linear-gradient(135deg,#4f46e5,#818cf8);' : '' }}">
+                                                {{ $lessonNumber++ }}
+                                            </div>
+                                            <div style="flex:1;min-width:0;">
+                                                <h4 class="small fw-bold mb-0 text-truncate {{ $lesson->id == $content->id ? 'text-primary' : 'text-dark' }}">
+                                                    {{ $lesson->title }}
+                                                </h4>
+                                                <div class="d-flex align-items-center gap-2 mt-1">
+                                                    @if(($lesson->completion_pct ?? 0) > 0)
+                                                        <span class="text-primary fw-bold" style="font-size: 10px;">{{ $lesson->completion_pct }}%</span>
+                                                    @endif
+                                                    @if($lesson->duration_label)
+                                                        <span class="text-muted" style="font-size: 10px;">{{ $lesson->duration_label }}</span>
+                                                    @endif
+                                                </div>
+                                            </div>
+                                            @if($lesson->id == $content->id)
+                                                <i class="bi bi-play-circle-fill text-primary"></i>
+                                            @endif
+                                        </div>
+                                    </a>
+                                @endforeach
+                            @endforeach
+                        </div>
+                        <div class="card-footer bg-white border-top text-center py-2">
+                            <a href="{{ route('roadmap.show', $roadmapContext) }}" class="small fw-bold text-primary text-decoration-none">
+                                <i class="bi bi-map me-1"></i>Back to Roadmap
+                            </a>
+                        </div>
+                    </div>
+                @elseif($course)
                     <div class="sidebar-label">Course Curriculum</div>
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                         <div class="card-header bg-dark text-white py-3 px-3">
@@ -375,7 +998,7 @@
                         </div>
                         <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
                             @foreach($course->contents as $lesson)
-                                <a href="{{ route('learn.watch', $lesson) }}" class="rec-card-mini border-0 rounded-0 m-0 border-bottom {{ $lesson->id == $content->id ? 'bg-light' : '' }}" style="padding: 15px;">
+                                <a href="{{ route('learn.watch', [$lesson, 'course_id' => $course->id]) }}" class="rec-card-mini border-0 rounded-0 m-0 border-bottom {{ $lesson->id == $content->id ? 'bg-light' : '' }}" style="padding: 15px;">
                                     <div class="d-flex align-items-center gap-3">
                                         <div class="lesson-num-circle @if($lesson->id == $content->id) bg-primary text-white @endif">{{ $loop->iteration }}</div>
                                         <div>
@@ -436,7 +1059,7 @@
     <div class="row g-4">
         <div class="col-lg-8">
             <div class="player-wrapper mb-4">
-                <div id="player-wrap">
+                <div id="player-wrap" class="position-relative w-100 h-100">
                     @if($content->video_url && (str_contains($content->video_url, 'amazonaws.com') || str_ends_with($content->video_url, '.mp4')))
                         <video id="player" playsinline controls data-poster="{{ $content->thumbnail_url }}">
                             <source src="{{ $content->video_url }}" type="video/mp4" />
@@ -444,6 +1067,12 @@
                     @else
                         <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="{{ $content->youtube_id }}"></div>
                     @endif
+                    
+                    <!-- Custom Subtitles overlay -->
+                    <div id="custom-subtitles" class="custom-subtitles-overlay d-none">
+                        <div id="sub-en" class="subtitle-text subtitle-en d-none"></div>
+                        <div id="sub-ar" class="subtitle-text subtitle-ar d-none" dir="rtl"></div>
+                    </div>
                 </div>
             </div>
 
@@ -456,6 +1085,33 @@
                     <div class="progress-bar bg-dark rounded-pill" id="progress-bar" style="width: {{ $progress ? $progress->completion_percent : 0 }}%;"></div>
                 </div>
             </div>
+
+            <!-- Subtitle Translation Preferences -->
+            @if($content->srt_file_en || $content->srt_file_ar)
+            <div class="translation-controls-card p-3 mb-4 rounded-4 border bg-white shadow-sm">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-translate text-primary fs-5"></i>
+                        <div>
+                            <div class="fw-bold small">Video Subtitles & Translation</div>
+                            <div class="text-muted" style="font-size: 11px;">Select subtitle preference for learning</div>
+                        </div>
+                    </div>
+                    <div class="btn-group btn-group-sm rounded-3 overflow-hidden" role="group" aria-label="Subtitle Language">
+                        <button type="button" class="btn btn-dark active px-3" data-lang="off" onclick="setSubtitleLang('off')">Off</button>
+                        @if($content->srt_file_en)
+                            <button type="button" class="btn btn-outline-dark px-3" data-lang="en" onclick="setSubtitleLang('en')">English</button>
+                        @endif
+                        @if($content->srt_file_ar)
+                            <button type="button" class="btn btn-outline-dark px-3" data-lang="ar" onclick="setSubtitleLang('ar')">Arabic (العربية)</button>
+                        @endif
+                        @if($content->srt_file_en && $content->srt_file_ar)
+                            <button type="button" class="btn btn-outline-dark px-3" data-lang="both" onclick="setSubtitleLang('both')">Dual (En + Ar)</button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <div class="video-meta-card p-4 mb-4">
                 <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
@@ -476,19 +1132,63 @@
                 </div>
                 <p class="text-muted mb-0">{{ $content->description }}</p>
 
-                <div class="lesson-meta-grid">
-                    <div class="lesson-meta-item">
-                        <span class="meta-label"><i class="bi bi-briefcase"></i> Use Case</span>
-                        <span class="meta-value">Automating recurring professional workflows using specialized AI interactions and real-time behavioral mapping.</span>
+                <!-- Tabbed container for Info vs Transcripts -->
+                <div class="transcript-tab-container mt-4 mb-2">
+                    <div class="transcript-tabs">
+                        <button type="button" class="transcript-tab-btn active" onclick="switchWatchTab('overview')">
+                            <i class="bi bi-info-circle me-1"></i> Lesson Info
+                        </button>
+                        @if($content->srt_file_en || $content->srt_file_ar)
+                        <button type="button" class="transcript-tab-btn" id="btn-transcript-tab" onclick="switchWatchTab('transcript')">
+                            <i class="bi bi-file-text me-1"></i> Live Translation & Transcript
+                        </button>
+                        @endif
                     </div>
-                    <div class="lesson-meta-item">
-                        <span class="meta-label"><i class="bi bi-person-badge"></i> Role Relevance</span>
-                        <span class="meta-value">Essential for professionals looking to minimize cognitive load during tool-switching and repetitive digital tasks.</span>
+                    
+                    <!-- Overview Panel -->
+                    <div class="transcript-panel active" id="panel-overview">
+                        <div class="row g-4">
+                            <div class="col-md-4">
+                                <div class="lesson-meta-item">
+                                    <span class="meta-label"><i class="bi bi-briefcase"></i> Use Case</span>
+                                    <span class="meta-value">Automating recurring professional workflows using specialized AI interactions and real-time behavioral mapping.</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="lesson-meta-item">
+                                    <span class="meta-label"><i class="bi bi-person-badge"></i> Role Relevance</span>
+                                    <span class="meta-value">Essential for professionals looking to minimize cognitive load during tool-switching and repetitive digital tasks.</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="lesson-meta-item">
+                                    <span class="meta-label"><i class="bi bi-journal-check"></i> Lesson Outcome</span>
+                                    <span class="meta-value">Competency in deploying modern AI strategies to save at least 15-20% of daily digital operation time.</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="lesson-meta-item">
-                        <span class="meta-label"><i class="bi bi-journal-check"></i> Lesson Outcome</span>
-                        <span class="meta-value">Competency in deploying modern AI strategies to save at least 15-20% of daily digital operation time.</span>
+                    
+                    <!-- Transcript Panel -->
+                    @if($content->srt_file_en || $content->srt_file_ar)
+                    <div class="transcript-panel" id="panel-transcript">
+                        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+                            <div class="text-muted small">
+                                <i class="bi bi-info-circle me-1"></i> Click on any line below to jump directly to that part of the video!
+                            </div>
+                            <div class="position-relative">
+                                <input type="text" id="transcript-search" class="form-control form-control-sm pe-4 rounded-pill" placeholder="Search transcript..." onkeyup="filterTranscript()">
+                                <i class="bi bi-search position-absolute text-muted" style="right:12px;top:50%;transform:translateY(-50%);font-size:11px;"></i>
+                            </div>
+                        </div>
+                        <div class="transcript-scroll-area" id="transcript-lines-list">
+                            <div class="text-center py-4 text-muted">
+                                <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
+                                <div>Loading synced translation...</div>
+                            </div>
+                        </div>
                     </div>
+                    @endif
                 </div>
 
                 <a href="#" class="btn-report-outdated" onclick="event.preventDefault(); reportOutdated({{ $content->id }})">
@@ -499,7 +1199,63 @@
 
         <div class="col-lg-4">
             <div class="sidebar-section">
-                @if($course)
+                @if($roadmapContext)
+                    <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
+                        <div class="card-header text-white py-3 px-4" style="background: linear-gradient(135deg,#4f46e5,#7c3aed);">
+                            <div class="small opacity-75 fw-bold text-uppercase mb-1" style="font-size: 11px;">Playing from Roadmap</div>
+                            <h6 class="fw-bold mb-0 text-truncate" title="{{ $roadmapContext->title }}">{{ $roadmapContext->title }}</h6>
+                        </div>
+                        <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
+                            @php $lessonNumber = 1; @endphp
+                            @foreach($roadmapData as $phaseIndex => $phase)
+                                <div class="px-4 py-3 border-bottom" style="background:#f8fafc;">
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        @if($phase['tool'] && $phase['tool']->logo)
+                                            <img src="{{ asset($phase['tool']->logo) }}" alt="{{ $phase['tool']->name }}" style="width:24px;height:24px;object-fit:contain;">
+                                        @else
+                                            <i class="bi bi-gear-fill text-primary"></i>
+                                        @endif
+                                        <div class="fw-800 small text-dark text-truncate" style="min-width:0;flex:1;">
+                                            {{ $phase['tool']->name ?? ($phase['name'] ?? 'Phase '.($phaseIndex + 1)) }}
+                                        </div>
+                                        <span class="fw-bold text-primary" style="font-size:11px;">{{ $phase['percent'] }}%</span>
+                                    </div>
+                                    <div class="progress rounded-pill" style="height:4px;background:#e2e8f0;">
+                                        <div class="progress-bar rounded-pill" style="width:{{ $phase['percent'] }}%;background:linear-gradient(90deg,#4f46e5,#818cf8);"></div>
+                                    </div>
+                                    <div class="text-muted mt-1" style="font-size:10px;">{{ $phase['completed'] }} of {{ $phase['total'] }} lessons complete</div>
+                                </div>
+                                @foreach($phase['contents'] as $lesson)
+                                    <a href="{{ route('learn.watch', [$lesson, 'roadmap_id' => $roadmapContext->id]) }}"
+                                       class="curriculum-item d-flex align-items-center gap-3 py-3 px-4 text-decoration-none {{ $lesson->id == $content->id ? 'active' : '' }}">
+                                        <div class="lesson-num-circle {{ $lesson->id == $content->id ? 'bg-primary text-white' : '' }}">{{ $lessonNumber++ }}</div>
+                                        <div class="text-truncate" style="min-width:0;flex:1;">
+                                            <div class="fw-bold small text-truncate">{{ $lesson->title }}</div>
+                                            @if(($lesson->completion_pct ?? 0) > 0 || $lesson->duration_label)
+                                                <div class="d-flex align-items-center gap-2 mt-1">
+                                                    @if(($lesson->completion_pct ?? 0) > 0)
+                                                        <span class="text-primary fw-bold" style="font-size:10px;">{{ $lesson->completion_pct }}%</span>
+                                                    @endif
+                                                    @if($lesson->duration_label)
+                                                        <span class="text-muted" style="font-size:10px;">{{ $lesson->duration_label }}</span>
+                                                    @endif
+                                                </div>
+                                            @endif
+                                        </div>
+                                        @if($lesson->id == $content->id)
+                                            <i class="bi bi-play-circle-fill text-primary ms-auto flex-shrink-0"></i>
+                                        @endif
+                                    </a>
+                                @endforeach
+                            @endforeach
+                        </div>
+                        <div class="card-footer bg-white border-top text-center py-2">
+                            <a href="{{ route('roadmap.show', $roadmapContext) }}" class="small fw-bold text-primary text-decoration-none">
+                                <i class="bi bi-map me-1"></i>Back to Roadmap
+                            </a>
+                        </div>
+                    </div>
+                @elseif($course)
                     <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
                         <div class="card-header bg-dark text-white py-3 px-4">
                             <div class="small opacity-75 fw-bold text-uppercase mb-1" style="font-size: 11px;">Current Course</div>
@@ -507,7 +1263,7 @@
                         </div>
                         <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
                             @foreach($course->contents as $lesson)
-                                <a href="{{ route('learn.watch', $lesson) }}" class="curriculum-item d-flex align-items-center gap-3 py-3 px-4 text-decoration-none {{ $lesson->id == $content->id ? 'active' : '' }}">
+                                <a href="{{ route('learn.watch', [$lesson, 'course_id' => $course->id]) }}" class="curriculum-item d-flex align-items-center gap-3 py-3 px-4 text-decoration-none {{ $lesson->id == $content->id ? 'active' : '' }}">
                                     <div class="lesson-num-circle {{ $lesson->id == $content->id ? 'bg-primary text-white' : '' }}">{{ $loop->iteration }}</div>
                                     <div class="fw-bold small text-truncate">{{ $lesson->title }}</div>
                                 </a>
@@ -542,6 +1298,340 @@
         youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
     });
 
+    // Subtitle & Translation timing configuration
+    @if($content->srt_file_en)
+        const srtUrlEn = "{{ route('subtitles.convert', ['url' => $content->srt_file_en]) }}";
+    @else
+        const srtUrlEn = null;
+    @endif
+
+    @if($content->srt_file_ar)
+        const srtUrlAr = "{{ route('subtitles.convert', ['url' => $content->srt_file_ar]) }}";
+    @else
+        const srtUrlAr = null;
+    @endif
+
+    let englishCues = [];
+    let arabicCues = [];
+    let mergedCuesList = [];
+    let activeSubtitleLang = localStorage.getItem('activeSubtitleLang') || 'off'; // Persist choice!
+    let lastHighlightedIndex = -1;
+
+    // Parse VTT format file
+    function parseVTT(text) {
+        const cues = [];
+        const lines = text.split(/\r?\n/);
+        let currentCue = null;
+        const timeRegex = /(\d{2}):(\d{2}):(\d{2})[.,](\d{3})\s*-->\s*(\d{2}):(\d{2}):(\d{2})[.,](\d{3})/;
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            const match = timeRegex.exec(line);
+            if (match) {
+                const start = parseFloat(match[1]) * 3600 + parseFloat(match[2]) * 60 + parseFloat(match[3]) + parseFloat(match[4]) / 1000;
+                const end = parseFloat(match[5]) * 3600 + parseFloat(match[6]) * 60 + parseFloat(match[7]) + parseFloat(match[8]) / 1000;
+                currentCue = { start, end, text: '' };
+                cues.push(currentCue);
+            } else if (currentCue) {
+                if (line !== 'WEBVTT' && !/^\d+$/.test(line)) {
+                    if (currentCue.text) {
+                        currentCue.text += ' ' + line;
+                    } else {
+                        currentCue.text = line;
+                    }
+                }
+            }
+        }
+        return cues;
+    }
+
+    // Merge English and Arabic subtitles into a unified structure
+    function mergeCues(enCues, arCues) {
+        const merged = [];
+        
+        if (enCues.length > 0 && arCues.length === 0) {
+            return enCues.map(c => ({ start: c.start, end: c.end, en: c.text, ar: '' }));
+        }
+        
+        if (arCues.length > 0 && enCues.length === 0) {
+            return arCues.map(c => ({ start: c.start, end: c.end, en: '', ar: c.text }));
+        }
+        
+        enCues.forEach(enCue => {
+            const mid = (enCue.start + enCue.end) / 2;
+            const arCue = arCues.find(ar => mid >= ar.start && mid <= ar.end) || 
+                          arCues.find(ar => Math.abs(ar.start - enCue.start) < 1.0);
+                          
+            merged.push({
+                start: enCue.start,
+                end: enCue.end,
+                en: enCue.text,
+                ar: arCue ? arCue.text : ''
+            });
+        });
+        
+        arCues.forEach(arCue => {
+            const isMerged = merged.some(m => {
+                const mid = (m.start + m.end) / 2;
+                return mid >= arCue.start && mid <= arCue.end;
+            });
+            
+            if (!isMerged) {
+                const index = merged.findIndex(m => m.start > arCue.start);
+                const newline = { start: arCue.start, end: arCue.end, en: '', ar: arCue.text };
+                if (index === -1) {
+                    merged.push(newline);
+                } else {
+                    merged.splice(index, 0, newline);
+                }
+            }
+        });
+        
+        return merged;
+    }
+
+    // Helper format seconds -> MM:SS
+    function formatTime(seconds) {
+        const h = Math.floor(seconds / 3600);
+        const m = Math.floor((seconds % 3600) / 60);
+        const s = Math.floor(seconds % 60);
+        
+        const pad = (num) => String(num).padStart(2, '0');
+        
+        if (h > 0) {
+            return `${h}:${pad(m)}:${pad(s)}`;
+        }
+        return `${pad(m)}:${pad(s)}`;
+    }
+
+    // Update active subtitles on screen
+    function updateSubtitles() {
+        if (!player || activeSubtitleLang === 'off') {
+            const container = document.getElementById('custom-subtitles');
+            if (container) container.classList.add('d-none');
+            return;
+        }
+
+        const currentTime = player.currentTime;
+        let showEn = false;
+        let showAr = false;
+        let enText = '';
+        let arText = '';
+
+        if (activeSubtitleLang === 'en' || activeSubtitleLang === 'both') {
+            const cue = englishCues.find(c => currentTime >= c.start && currentTime <= c.end);
+            if (cue) {
+                enText = cue.text;
+                showEn = true;
+            }
+        }
+
+        if (activeSubtitleLang === 'ar' || activeSubtitleLang === 'both') {
+            const cue = arabicCues.find(c => currentTime >= c.start && currentTime <= c.end);
+            if (cue) {
+                arText = cue.text;
+                showAr = true;
+            }
+        }
+
+        const container = document.getElementById('custom-subtitles');
+        const enDiv = document.getElementById('sub-en');
+        const arDiv = document.getElementById('sub-ar');
+
+        if (container) {
+            if (showEn || showAr) {
+                container.classList.remove('d-none');
+                
+                if (showEn && enDiv) {
+                    enDiv.classList.remove('d-none');
+                    enDiv.innerHTML = enText;
+                } else if (enDiv) {
+                    enDiv.classList.add('d-none');
+                }
+
+                if (showAr && arDiv) {
+                    arDiv.classList.remove('d-none');
+                    arDiv.innerHTML = arText;
+                } else if (arDiv) {
+                    arDiv.classList.add('d-none');
+                }
+            } else {
+                container.classList.add('d-none');
+            }
+        }
+    }
+
+    // Highlight current transcript line and scroll
+    function highlightActiveTranscriptLine() {
+        if (!player || mergedCuesList.length === 0) return;
+        
+        const currentTime = player.currentTime;
+        const activeIndex = mergedCuesList.findIndex(c => currentTime >= c.start && currentTime <= c.end);
+        
+        if (activeIndex !== lastHighlightedIndex) {
+            if (lastHighlightedIndex !== -1) {
+                const prev = document.getElementById(`t-line-${lastHighlightedIndex}`);
+                if (prev) prev.classList.remove('active');
+            }
+            
+            if (activeIndex !== -1) {
+                const current = document.getElementById(`t-line-${activeIndex}`);
+                if (current) {
+                    current.classList.add('active');
+                    
+                    const scrollArea = document.querySelector('.transcript-scroll-area');
+                    if (scrollArea) {
+                        const lineRect = current.offsetTop - scrollArea.offsetTop;
+                        scrollArea.scrollTo({
+                            top: lineRect - (scrollArea.clientHeight / 2) + (current.clientHeight / 2),
+                            behavior: 'smooth'
+                        });
+                    }
+                }
+            }
+            lastHighlightedIndex = activeIndex;
+        }
+    }
+
+    // Subtitle lang setter
+    window.setSubtitleLang = function(lang) {
+        activeSubtitleLang = lang;
+        localStorage.setItem('activeSubtitleLang', lang);
+        
+        updateSubtitleControlsUI();
+        updateSubtitles();
+    };
+
+    function updateSubtitleControlsUI() {
+        document.querySelectorAll('.translation-controls-card button').forEach(btn => {
+            if (btn.dataset.lang === activeSubtitleLang) {
+                btn.classList.remove('btn-outline-dark');
+                btn.classList.add('btn-dark');
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('btn-dark');
+                btn.classList.remove('active');
+                btn.classList.add('btn-outline-dark');
+            }
+        });
+    }
+
+    // Switch between info and transcript tabs
+    window.switchWatchTab = function(tabName) {
+        document.querySelectorAll('.transcript-tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.transcript-panel').forEach(p => p.classList.remove('active'));
+        
+        if (tabName === 'overview') {
+            const btn = document.querySelector('.transcript-tab-btn[onclick*="overview"]');
+            if (btn) btn.classList.add('active');
+            const panel = document.getElementById('panel-overview');
+            if (panel) panel.classList.add('active');
+        } else if (tabName === 'transcript') {
+            const btn = document.getElementById('btn-transcript-tab');
+            if (btn) btn.classList.add('active');
+            const panel = document.getElementById('panel-transcript');
+            if (panel) panel.classList.add('active');
+        }
+    };
+
+    // Render loaded transcript lines
+    function renderTranscript() {
+        const listEl = document.getElementById('transcript-lines-list');
+        if (!listEl) return;
+        
+        mergedCuesList = mergeCues(englishCues, arabicCues);
+        
+        if (mergedCuesList.length === 0) {
+            listEl.innerHTML = '<div class="text-center py-4 text-muted">No transcription lines available.</div>';
+            return;
+        }
+        
+        let html = '';
+        mergedCuesList.forEach((cue, index) => {
+            html += `
+                <div class="transcript-line" id="t-line-${index}" onclick="jumpToTime(${cue.start})">
+                    <span class="transcript-timestamp">${formatTime(cue.start)}</span>
+                    <div class="transcript-text-wrapper">
+                        ${cue.en ? `<span class="transcript-text-en">${cue.en}</span>` : ''}
+                        ${cue.ar ? `<span class="transcript-text-ar">${cue.ar}</span>` : ''}
+                    </div>
+                </div>
+            `;
+        });
+        listEl.innerHTML = html;
+    }
+
+    // Jump video to specified time
+    window.jumpToTime = function(seconds) {
+        if (player) {
+            player.currentTime = seconds;
+            player.play();
+        }
+    };
+
+    // Filter transcript via search
+    window.filterTranscript = function() {
+        const query = document.getElementById('transcript-search').value.toLowerCase();
+        const lines = document.querySelectorAll('.transcript-line');
+        
+        lines.forEach((line, index) => {
+            const cue = mergedCuesList[index];
+            if (!cue) return;
+            
+            const matchEn = cue.en && cue.en.toLowerCase().includes(query);
+            const matchAr = cue.ar && cue.ar.toLowerCase().includes(query);
+            
+            if (matchEn || matchAr) {
+                line.style.display = 'flex';
+            } else {
+                line.style.display = 'none';
+            }
+        });
+    };
+
+    // Load Subtitles from conversion API
+    async function loadSubtitles() {
+        const loaders = [];
+        
+        if (srtUrlEn) {
+            loaders.push(
+                fetch(srtUrlEn)
+                    .then(res => res.ok ? res.text() : Promise.reject())
+                    .then(text => { englishCues = parseVTT(text); })
+                    .catch(() => console.warn("Failed to load English subtitles"))
+            );
+        }
+        
+        if (srtUrlAr) {
+            loaders.push(
+                fetch(srtUrlAr)
+                    .then(res => res.ok ? res.text() : Promise.reject())
+                    .then(text => { arabicCues = parseVTT(text); })
+                    .catch(() => console.warn("Failed to load Arabic subtitles"))
+            );
+        }
+        
+        if (loaders.length > 0) {
+            await Promise.all(loaders);
+            renderTranscript();
+        }
+        
+        updateSubtitleControlsUI();
+    }
+
+    // Event hooks on player time update
+    player.on('timeupdate', () => {
+        updateSubtitles();
+        highlightActiveTranscriptLine();
+    });
+
+    // Run load
+    document.addEventListener('DOMContentLoaded', () => {
+        loadSubtitles();
+    });
+
     if (!isAuthenticated) {
         let playbackStartTime = 0;
         let totalPlaybackTime = 0;
@@ -568,23 +1658,53 @@
         });
     } else {
         // Progress Saving Logic
-        setInterval(() => {
-            if (player.playing) {
-                fetch("{{ route('learn.progress.save') }}", {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': "{{ csrf_token() }}" },
-                    body: JSON.stringify({ content_id: {{ $content->id }}, watched_seconds: Math.floor(player.currentTime), duration_seconds: Math.floor(player.duration || 0) })
+        const saveProgress = (force = false) => {
+            if (!player) return;
+            if (!force && !player.playing) return;
+
+            const current = Number(player.currentTime || 0);
+            const duration = Number(player.duration || 0);
+            const safeDuration = Math.max(0, duration);
+            const safeWatched = Math.max(0, current);
+
+            fetch("{{ route('learn.progress.save') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({
+                    content_id: {{ $content->id }},
+                    // Avoid truncation issues at the end; backend will clamp to [0..100]
+                    watched_seconds: Math.min(Math.floor(safeWatched), Math.floor(safeDuration)),
+                    duration_seconds: Math.floor(safeDuration)
                 })
-                .then(r => r.json())
-                .then(data => {
-                    const bar = document.getElementById('progress-bar');
-                    const label = document.getElementById('progress-label');
-                    if (bar) bar.style.width = data.completion_percent + '%';
-                    if (label) label.textContent = Math.round(data.completion_percent) + '%';
-                });
-            }
+            })
+            .then(r => r.json())
+            .then(data => {
+                const bar = document.getElementById('progress-bar');
+                const label = document.getElementById('progress-label');
+                if (bar) bar.style.width = data.completion_percent + '%';
+                if (label) label.textContent = Math.round(data.completion_percent) + '%';
+            });
+        };
+
+        // Save immediately when playback starts (helps accuracy)
+        player.on('playing', () => {
+            saveProgress(true);
+        });
+
+        // Save at the very end so 100% is reflected
+        player.on('ended', () => {
+            saveProgress(true);
+        });
+
+        // Periodic fallback
+        setInterval(() => {
+            saveProgress(false);
         }, 10000);
     }
+
 
     function toggleBookmark(contentId, btn) {
         fetch(`/bookmarks/${contentId}/toggle`, {
@@ -603,15 +1723,15 @@
             }
         });
     }
+    
     function toggleLike(contentId, type, btn) {
         const controls = btn.closest('.interaction-controls');
         const likeBtn = controls.querySelector('.btn-like');
         const dislikeBtn = controls.querySelector('.btn-dislike');
-        
+
         if (type === 'like') {
             likeBtn.classList.toggle('active');
             dislikeBtn.classList.remove('active');
-            // Simulated sentiment toast
             if (typeof showToast !== 'undefined') showToast(likeBtn.classList.contains('active') ? 'Liked' : 'Removed Like', 'success');
         } else {
             dislikeBtn.classList.toggle('active');
