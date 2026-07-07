@@ -255,7 +255,7 @@
     </div>
     
     <div class="text-center mt-5">
-      <a href="{{ url('how-it-works') }}" class="btn btn-outline-primary btn-lg">
+      <a href="{{ url('how-it-works') }}" class="btn btn-outline btn-lg">
         Learn More About Our Methodology <i class="bi bi-arrow-right"></i>
       </a>
     </div>
@@ -265,7 +265,7 @@
 <!-- ==================== BUILT FOR TEAMS SECTION ==================== -->
 <section class="teams-showcase" style="padding: 100px 0; background: var(--bg-tertiary);">
   <div class="container">
-    <div class="showcase-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;">
+    <div class="showcase-grid">
       <div class="showcase-content">
         <span class="section-badge">👥 FOR ENTERPRISE</span>
         <h2 class="section-title">
@@ -1857,26 +1857,27 @@ body {
     font-size: 32px;
   }
 
-  .steps-grid {
-    grid-template-columns: 1fr;
-    max-width: 500px;
-    margin: 0 auto;
+  .steps-grid,
+  .video-grid,
+  .testimonials-grid {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x mandatory;
+    padding: 8px 0 16px;
+    scrollbar-width: thin;
+  }
+
+  .steps-grid > *,
+  .video-grid > *,
+  .testimonials-grid > * {
+    flex: 0 0 320px;
+    scroll-snap-align: start;
   }
 
   .trusted-grid {
     grid-template-columns: repeat(3, 1fr);
-  }
-
-  .video-grid {
-    grid-template-columns: 1fr;
-    max-width: 500px;
-    margin: 0 auto;
-  }
-
-  .testimonials-grid {
-    grid-template-columns: 1fr;
-    max-width: 500px;
-    margin: 48px auto 0;
   }
 
   .cta-content {
@@ -1894,6 +1895,20 @@ body {
 
   .floating-card {
     display: none;
+  }
+
+  .teams-showcase {
+    padding: 60px 0 !important;
+  }
+
+  .showcase-content .btn-lg {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .team-stats-mockup {
+    padding: 24px !important;
   }
 }
 
@@ -1928,6 +1943,23 @@ body {
 
   .cta-left h2 {
     font-size: 28px;
+  }
+
+  .teams-showcase {
+    padding: 40px 0 !important;
+  }
+
+  .team-stats-mockup {
+    padding: 16px !important;
+  }
+
+  .team-stats-mockup h4 {
+    font-size: 16px;
+  }
+
+  .how-section .btn-lg {
+    width: 100%;
+    justify-content: center;
   }
 
   .floating-image-1,

@@ -92,22 +92,27 @@
 
     .quick-tags {
         display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+        align-items: center;
         margin-top: 1.2rem;
         z-index: 10;
         position: relative;
+        overflow: hidden;
     }
 
-    .quick-tag-label {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.6);
-        align-self: center;
-        font-weight: 700;
-        margin-right: 0.25rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+    .quick-tags-track {
+        display: flex;
+        gap: 0.5rem;
+        animation: qt-scroll 40s linear infinite;
+        width: max-content;
+    }
+
+    .quick-tags-track:hover {
+        animation-play-state: paused;
+    }
+
+    @keyframes qt-scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
     }
 
     .quick-tag-btn {
@@ -119,7 +124,9 @@
         font-size: 0.78rem;
         font-weight: 700;
         text-decoration: none;
+        white-space: nowrap;
         transition: all 0.2s;
+        flex-shrink: 0;
     }
 
     .quick-tag-btn:hover {
@@ -431,7 +438,7 @@
             
             <i class="bi bi-search search-icon-premium"></i>
             <input type="text" name="search" value="{{ request('search') }}" 
-                   class="search-input-premium" placeholder="Search by title, category, tag, or connected browser tool...">
+                   class="search-input-premium" placeholder="Search by title, category, tag, or connected browser tool..." autocomplete="off">
             
             @if(request('search'))
                 <a href="{{ route('learn.explore', ['type' => $type, 'category_id' => request('category_id')]) }}" 
@@ -443,28 +450,14 @@
 
         {{-- Tool quick filters --}}
         <div class="quick-tags animate-slide-up delay-1">
-            <span class="quick-tag-label">🔌 Connected Browser Tools:</span>
-            @php
-                $emojiMap = [
-                    'chatgpt' => '🤖',
-                    'notion' => '📝',
-                    'slack' => '💬',
-                    'zapier' => '⚡',
-                    'gmail' => '📧',
-                    'youtube' => '🎥',
-                    'github' => '💻',
-                    'figma' => '🎨',
-                ];
-            @endphp
-            @foreach($connectedTools as $tool)
-                @php
-                    $lowerName = strtolower($tool->name);
-                    $emoji = $emojiMap[$lowerName] ?? '🔌';
-                @endphp
-                <a href="{{ route('learn.explore', ['type' => $type, 'search' => $lowerName]) }}" class="quick-tag-btn">
-                    {{ $emoji }} {{ $tool->name }}
-                </a>
-            @endforeach
+            <div class="quick-tags-track">
+                @foreach($connectedTools as $tool)
+                <a href="{{ route('learn.explore', ['type' => $type, 'search' => urlencode($tool->name)]) }}" class="quick-tag-btn">{{ $tool->name }}</a>
+                @endforeach
+                @foreach($connectedTools as $tool)
+                <a href="{{ route('learn.explore', ['type' => $type, 'search' => urlencode($tool->name)]) }}" class="quick-tag-btn">{{ $tool->name }}</a>
+                @endforeach
+            </div>
         </div>
     </div>
 
@@ -522,7 +515,7 @@
                             </button>
                             <a href="{{ route('course.view', $item) }}" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;height:100%">
                                 <div class="premium-thumb">
-                                    <img src="{{ $item->thumbnail }}" alt="{{ $item->title }}">
+                                    <img src="{{ $item->thumbnail ?? 'https://img.freepik.com/free-vector/cheerful-woman-studying-internet-watching-webinar-computer-taking-online-course-vector-illustration-knowledge-education-distance-learning-concept_778687-3129.jpg?semt=ais_hybrid&w=740&q=80'}}" alt="{{ $item->title }}">
                                     <div class="premium-card-overlay">
                                         <span class="premium-badge">{{ $item->category_rel->name ?? $item->category }}</span>
                                     </div>

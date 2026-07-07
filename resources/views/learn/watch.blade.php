@@ -1067,12 +1067,67 @@
                     @else
                         <div id="player" data-plyr-provider="youtube" data-plyr-embed-id="{{ $content->youtube_id }}"></div>
                     @endif
-                    
+
                     <!-- Custom Subtitles overlay -->
                     <div id="custom-subtitles" class="custom-subtitles-overlay d-none">
                         <div id="sub-en" class="subtitle-text subtitle-en d-none"></div>
                         <div id="sub-ar" class="subtitle-text subtitle-ar d-none" dir="rtl"></div>
                     </div>
+
+                    @php
+                        $nextLessonOverlay = null;
+                        $nextLessonOverlayUrl = null;
+                        if ($roadmapContext && $roadmapContents->count() > 0) {
+                            $currentIdx = $roadmapContents->search(fn($c) => $c->id == $content->id);
+                            if ($currentIdx !== false && $currentIdx + 1 < $roadmapContents->count()) {
+                                $nextLessonOverlay = $roadmapContents[$currentIdx + 1];
+                                $nextLessonOverlayUrl = route('learn.watch', [$nextLessonOverlay, 'roadmap_id' => $roadmapContext->id]);
+                            }
+                        }
+                    @endphp
+
+                    @if($nextLessonOverlay)
+                    <!-- YouTube-style Next Video Overlay Button -->
+                    <div id="next-video-overlay" style="
+                        position: absolute;
+                        top: 16px;
+                        right: 16px;
+                        z-index: 20;
+                        opacity: 0;
+                        transition: opacity 0.25s ease;
+                        pointer-events: none;
+                    ">
+                        <a href="{{ $nextLessonOverlayUrl }}"
+                           style="
+                            display: flex;
+                            align-items: center;
+                            gap: 10px;
+                            background: rgba(15,23,42,0.85);
+                            backdrop-filter: blur(8px);
+                            -webkit-backdrop-filter: blur(8px);
+                            border: 1px solid rgba(255,255,255,0.12);
+                            border-radius: 12px;
+                            padding: 10px 16px;
+                            color: #fff;
+                            text-decoration: none;
+                            font-size: 13px;
+                            font-weight: 700;
+                            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+                            white-space: nowrap;
+                            max-width: 260px;
+                           "
+                           title="Next: {{ $nextLessonOverlay->title }}"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="currentColor" viewBox="0 0 16 16" style="flex-shrink:0;">
+                                <path d="M12.5 4a.5.5 0 0 0-1 0v3.248L5.233 3.612C4.693 3.264 4 3.652 4 4.308v7.384c0 .656.693 1.044 1.233.696L11.5 8.752V12a.5.5 0 0 0 1 0V4z"/>
+                            </svg>
+                            <div style="min-width:0;">
+                                <div style="font-size:10px;opacity:.65;text-transform:uppercase;letter-spacing:.05em;font-weight:600;">Up Next</div>
+                                <div style="font-size:12px;font-weight:700;overflow:hidden;text-overflow:ellipsis;max-width:180px;">{{ Str::limit($nextLessonOverlay->title, 40) }}</div>
+                            </div>
+                        </a>
+                    </div>
+                    @endif
                 </div>
             </div>
 
@@ -1085,6 +1140,34 @@
                     <div class="progress-bar bg-dark rounded-pill" id="progress-bar" style="width: {{ $progress ? $progress->completion_percent : 0 }}%;"></div>
                 </div>
             </div>
+
+            @php
+                // Compute next lesson for the "Up Next" card below progress bar
+                $nextLesson = null;
+                $nextLessonUrl = null;
+                if ($roadmapContext && $roadmapContents->count() > 0) {
+                    $currentIndex = $roadmapContents->search(fn($c) => $c->id == $content->id);
+                    if ($currentIndex !== false && $currentIndex + 1 < $roadmapContents->count()) {
+                        $nextLesson = $roadmapContents[$currentIndex + 1];
+                        $nextLessonUrl = route('learn.watch', [$nextLesson, 'roadmap_id' => $roadmapContext->id]);
+                    }
+                }
+            @endphp
+
+            @if($nextLesson)
+            <div class="d-flex align-items-center gap-3 mb-4 p-3 rounded-4 border bg-white" style="border-color: rgba(79,70,229,0.15) !important; box-shadow: 0 2px 10px rgba(79,70,229,0.06);">
+                <div style="flex:1;min-width:0;">
+                    <div class="text-muted" style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;">Up Next</div>
+                    <div class="fw-bold small text-truncate mt-1">{{ $nextLesson->title }}</div>
+                    @if($nextLesson->duration_label)
+                        <div class="text-muted" style="font-size:11px;">{{ $nextLesson->duration_label }}</div>
+                    @endif
+                </div>
+                <a href="{{ $nextLessonUrl }}" class="btn btn-sm btn-primary rounded-pill px-3 flex-shrink-0" style="background:linear-gradient(135deg,#4f46e5,#7c3aed);border:none;" id="btn-next-video">
+                    <i class="bi bi-skip-end-fill me-1"></i> Next
+                </a>
+            </div>
+            @endif
 
             <!-- Subtitle Translation Preferences -->
             @if($content->srt_file_en || $content->srt_file_ar)
@@ -1226,24 +1309,39 @@
                                     <div class="text-muted mt-1" style="font-size:10px;">{{ $phase['completed'] }} of {{ $phase['total'] }} lessons complete</div>
                                 </div>
                                 @foreach($phase['contents'] as $lesson)
+                                    @php
+                                        $lessonPct = $lesson->completion_pct ?? 0;
+                                        $lessonDone = $lesson->is_completed ?? false;
+                                        $currentNum = $lessonNumber++;
+                                    @endphp
                                     <a href="{{ route('learn.watch', [$lesson, 'roadmap_id' => $roadmapContext->id]) }}"
                                        class="curriculum-item d-flex align-items-center gap-3 py-3 px-4 text-decoration-none {{ $lesson->id == $content->id ? 'active' : '' }}">
-                                        <div class="lesson-num-circle {{ $lesson->id == $content->id ? 'bg-primary text-white' : '' }}">{{ $lessonNumber++ }}</div>
-                                        <div class="text-truncate" style="min-width:0;flex:1;">
-                                            <div class="fw-bold small text-truncate">{{ $lesson->title }}</div>
-                                            @if(($lesson->completion_pct ?? 0) > 0 || $lesson->duration_label)
-                                                <div class="d-flex align-items-center gap-2 mt-1">
-                                                    @if(($lesson->completion_pct ?? 0) > 0)
-                                                        <span class="text-primary fw-bold" style="font-size:10px;">{{ $lesson->completion_pct }}%</span>
-                                                    @endif
-                                                    @if($lesson->duration_label)
-                                                        <span class="text-muted" style="font-size:10px;">{{ $lesson->duration_label }}</span>
-                                                    @endif
-                                                </div>
+                                        <div class="lesson-num-circle flex-shrink-0 {{ $lesson->id == $content->id ? 'bg-primary text-white' : ($lessonDone ? 'bg-success text-white' : '') }}">
+                                            @if($lessonDone && $lesson->id != $content->id)
+                                                <i class="bi bi-check2" style="font-size:12px;"></i>
+                                            @else
+                                                {{ $currentNum }}
                                             @endif
+                                        </div>
+                                        <div style="min-width:0;flex:1;">
+                                            <div class="fw-bold small text-truncate">{{ $lesson->title }}</div>
+                                            <div class="d-flex align-items-center gap-2 mt-1">
+                                                @if($lessonPct > 0 && !$lessonDone)
+                                                    <div style="flex:1;height:3px;background:#e2e8f0;border-radius:4px;overflow:hidden;">
+                                                        <div style="width:{{ $lessonPct }}%;height:100%;background:linear-gradient(90deg,#4f46e5,#818cf8);border-radius:4px;"></div>
+                                                    </div>
+                                                    <span class="text-primary fw-bold" style="font-size:10px;white-space:nowrap;">{{ $lessonPct }}%</span>
+                                                @elseif($lessonDone)
+                                                    <span class="text-success fw-bold" style="font-size:10px;">Completed</span>
+                                                @elseif($lesson->duration_label)
+                                                    <span class="text-muted" style="font-size:10px;">{{ $lesson->duration_label }}</span>
+                                                @endif
+                                            </div>
                                         </div>
                                         @if($lesson->id == $content->id)
                                             <i class="bi bi-play-circle-fill text-primary ms-auto flex-shrink-0"></i>
+                                        @elseif($lessonDone)
+                                            <i class="bi bi-check-circle-fill text-success ms-auto flex-shrink-0" style="font-size:14px;"></i>
                                         @endif
                                     </a>
                                 @endforeach
@@ -1294,9 +1392,74 @@
 <script>
     const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
     const isYoutube = document.querySelector('#player').dataset.plyrProvider === 'youtube';
+
+    // Resume playback from saved progress
+    const savedWatchedSeconds = {{ $progress ? (int) $progress->watched_seconds : 0 }};
+    const savedCompletionPercent = {{ $progress ? (float) $progress->completion_percent : 0 }};
+    const shouldResume = isAuthenticated && savedWatchedSeconds > 5 && savedCompletionPercent < 95;
+
     const player = new Plyr('#player', {
         youtube: { noCookie: true, rel: 0, showinfo: 0, iv_load_policy: 3, modestbranding: 1 }
     });
+
+    // ─── RESUME FROM LAST POSITION ─────────────────────────────────────────────
+    // For YouTube + Plyr: player.duration is 0 until the user clicks play.
+    // The ONLY reliable hook is the first 'playing' event.
+    // We hook it, immediately seek to saved time, which causes a tiny initial
+    // flash at 0:00 but is the same behaviour as YouTube's own resume.
+    if (shouldResume) {
+        let seekApplied = false;
+        const seekTime = savedWatchedSeconds;
+
+        if (!isYoutube) {
+            // For native HTML5 / MP4 videos: use loadedmetadata which fires before play
+            player.on('loadedmetadata', () => {
+                if (!seekApplied) {
+                    try { player.currentTime = seekTime; seekApplied = true; } catch(e) {}
+                }
+            });
+            player.on('canplay', () => {
+                if (!seekApplied) {
+                    try { player.currentTime = seekTime; seekApplied = true; } catch(e) {}
+                }
+            });
+        }
+
+        // For BOTH YouTube and HTML5: hook first 'playing' as the guaranteed fallback.
+        // On first play, seek immediately — player.currentTime is settable at this moment.
+        const onFirstPlay = () => {
+            if (!seekApplied) {
+                try {
+                    player.currentTime = seekTime;
+                    seekApplied = true;
+                } catch(e) {}
+            }
+            // Remove listener so it only runs once
+            player.off('playing', onFirstPlay);
+        };
+        player.on('playing', onFirstPlay);
+    }
+
+    // ─── NEXT VIDEO OVERLAY SHOW/HIDE ──────────────────────────────────────────
+    const nextOverlay = document.getElementById('next-video-overlay');
+    if (nextOverlay) {
+        const playerWrap = document.getElementById('player-wrap');
+        playerWrap.addEventListener('mouseenter', () => {
+            nextOverlay.style.opacity = '1';
+            nextOverlay.style.pointerEvents = 'auto';
+        });
+        playerWrap.addEventListener('mouseleave', () => {
+            nextOverlay.style.opacity = '0';
+            nextOverlay.style.pointerEvents = 'none';
+        });
+        // Also show briefly when near the end of video
+        player.on('timeupdate', () => {
+            if (player.duration > 0 && (player.duration - player.currentTime) < 20) {
+                nextOverlay.style.opacity = '1';
+                nextOverlay.style.pointerEvents = 'auto';
+            }
+        });
+    }
 
     // Subtitle & Translation timing configuration
     @if($content->srt_file_en)

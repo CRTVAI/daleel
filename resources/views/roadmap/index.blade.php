@@ -175,7 +175,7 @@
                 <h1 class="fw-900 display-5 mb-2">Smart Roadmaps</h1>
                 <p class="opacity-75 lead mb-0">Track your progress and master the tools required for your goals.</p>
             </div>
-            <div class="col-lg-4 text-end">
+            <div class="col-lg-4 text-center text-lg-end mt-3 mt-lg-0">
                 @if(auth()->user()->account_type === 'Free Plan' && $manualRoadmapsCount >= 2)
                     <a href="{{ url('/pricing') }}" class="btn btn-danger rounded-pill px-4 py-3 fw-900 shadow-lg border-0" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 100%); text-decoration: none;">
                         <i class="bi bi-exclamation-triangle-fill me-2"></i> Upgrade for More Roadmaps

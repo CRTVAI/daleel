@@ -282,9 +282,9 @@
                                 <h5>Desktop App</h5>
                             </div>
                             <p class="mb-3">Get real-time guidance directly across your desktop software.</p>
-                            <button type="button" class="btn btn-outline-primary rounded-4">
+                            <a href="{{ route('downloads.desktop-app') }}" target="_blank" class="btn btn-outline-primary rounded-4">
                                 <i class="bi bi-download"></i> Download App
-                            </button>
+                            </a>
                         </article>
                         <article class="workflow-connect-card">
                             <span class="coming-soon-badge">Coming Soon</span>

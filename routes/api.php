@@ -25,6 +25,11 @@ Route::get('/external/tools', [\App\Http\Controllers\Api\ExternalToolController:
 Route::post('/external/tools', [\App\Http\Controllers\Api\ExternalToolController::class, 'store']);
 Route::post('/external/content', [\App\Http\Controllers\Api\ExternalContentController::class, 'store']);
 
+// Blog APIs
+Route::get('/blogs', [\App\Http\Controllers\Api\BlogApiController::class, 'index']);
+Route::get('/blogs/{idOrSlug}', [\App\Http\Controllers\Api\BlogApiController::class, 'show']);
+Route::post('/blogs', [\App\Http\Controllers\Api\BlogApiController::class, 'store']);
+
 // Extension suggestion (no auth — resolves user via device_id header)
 Route::get('/extension/suggest', [\App\Http\Controllers\Api\Extension\SuggestionController::class, 'suggest']);
 

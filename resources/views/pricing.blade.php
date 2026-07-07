@@ -326,6 +326,37 @@ input:checked + .slider:before {
     .faq-grid { grid-template-columns: 1fr; }
     .comparison-table { display: block; overflow-x: auto; }
 }
+
+/* Team Spotlight Responsive */
+@media (max-width: 992px) {
+    .team-spotlight .row { gap: 2.5rem !important; }
+    .team-spotlight h2 { font-size: 30px !important; }
+}
+
+@media (max-width: 768px) {
+    .team-spotlight { padding: 48px 0 !important; }
+    .team-spotlight h2 { font-size: 26px !important; }
+    .team-spotlight p { font-size: 15px !important; }
+    .team-spotlight ul li { margin-bottom: 0.75rem !important; font-size: 14px; }
+    .team-spotlight .badge { font-size: 10px !important; padding: 4px 10px !important; }
+    .team-spotlight .rounded-4 { padding: 1rem !important; border-radius: 16px !important; }
+    .team-spotlight .rounded-4 .d-flex.align-items-center.gap-3 { gap: 0.75rem !important; }
+    .team-spotlight .rounded-4 .d-flex.align-items-center.gap-3.mb-4 { margin-bottom: 1rem !important; padding-bottom: 0.75rem !important; }
+    .team-spotlight .d-flex.align-items-center.gap-3.mb-3 { gap: 0.75rem !important; margin-bottom: 0.75rem !important; }
+    .team-spotlight .rounded-4 [style*="font-size:13px"] { font-size: 12px !important; }
+    .team-spotlight .rounded-4 [style*="font-size:14px"] { font-size: 13px !important; }
+}
+
+@media (max-width: 576px) {
+    .team-spotlight { padding: 36px 0 !important; }
+    .team-spotlight h2 { font-size: 22px !important; }
+    .team-spotlight p { font-size: 14px !important; }
+    .team-spotlight .mt-4.d-flex.gap-3 { flex-direction: column; align-items: flex-start; gap: 0.5rem !important; }
+    .team-spotlight .rounded-4 .d-flex.align-items-center.gap-3.mb-4 { flex-wrap: wrap; }
+    .team-spotlight .rounded-4 .ms-auto.badge { margin-left: 0 !important; }
+    .team-spotlight .rounded-4 .d-flex.align-items-center.gap-3.py-2 { flex-wrap: wrap; }
+    .team-spotlight .rounded-4 .d-flex.align-items-center.gap-3.py-2 .ms-auto { margin-left: 0 !important; text-align: left !important; width: 100%; padding-left: 48px; }
+}
 </style>
 @endsection
 
@@ -423,7 +454,7 @@ input:checked + .slider:before {
     </section>
 
     <!-- Team Feature Spotlight -->
-    <section style="padding: 80px 0; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);">
+    <section class="team-spotlight" style="padding: 80px 0; background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);">
         <div class="container">
             <div class="row align-items-center g-5">
                 <div class="col-lg-6">

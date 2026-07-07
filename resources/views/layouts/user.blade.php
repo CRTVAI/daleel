@@ -198,9 +198,45 @@
         }
         .btn-complete-neo:hover { background: #991b1b; transform: translateY(-1px); }
 
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-main);
+            cursor: pointer;
+            padding: 4px;
+            line-height: 1;
+        }
+
         @media (max-width: 1100px) {
             .nav-links-center { gap: 20px; }
             .brand-name-neo { display: none; }
+        }
+
+        @media (max-width: 900px) {
+            .navbar-main { padding: 0 4%; height: 64px; }
+            .navbar-brand-neo { margin-right: auto; }
+            .nav-links-center { display: none; position: absolute; top: 64px; left: 0; width: 100%; flex-direction: column; background: rgba(255,255,255,0.98); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); padding: 12px 4%; gap: 0; box-shadow: 0 12px 24px rgba(0,0,0,0.04); z-index: 999; }
+            .nav-links-center.open { display: flex; }
+            .nav-link-neo { padding: 14px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+            .nav-link-neo.active::after { display: none; }
+            .mobile-menu-toggle { display: inline-flex; align-items: center; justify-content: center; }
+            .navbar-actions .dropdown.d-none { display: none !important; }
+            .navbar-actions .d-none.d-md-flex { display: none !important; }
+            .navbar-actions .d-none.d-lg-block { display: none !important; }
+            .navbar-actions { gap: 12px; }
+            .avatar-neo { width: 34px; height: 34px; font-size: 12px; border-radius: 10px; }
+            .main-container-neo { width: 100%; padding: 12px 16px; }
+            .warning-bar-neo { flex-direction: column; gap: 12px; padding: 14px 18px; border-radius: 16px; text-align: center; }
+            .warning-bar-neo .d-flex { flex-direction: column; text-align: center; }
+        }
+
+        @media (max-width: 480px) {
+            .navbar-main { padding: 0 3%; height: 56px; }
+            .nav-links-center { top: 56px; }
+            .brand-copy strong { font-size: 1rem; }
+            .main-container-neo { width: 96%; }
         }
 
         /* Toast Notifications */
@@ -252,7 +288,10 @@
             <x-application-logo style="height: 38px; width: auto;" />
         </a>
 
-        <div class="nav-links-center">
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-label="Toggle menu" aria-expanded="false">
+            <i class="bi bi-list"></i>
+        </button>
+        <div class="nav-links-center" id="mobileNavLinks">
             <a href="{{ route('dashboard') }}" class="nav-link-neo {{ Route::is('dashboard') ? 'active' : '' }}">Home</a>
             <a href="{{ route('learn.explore') }}" class="nav-link-neo {{ Route::is('learn.explore') ? 'active' : '' }}">Library</a>
             <a href="{{ route('bookmarks') }}" class="nav-link-neo {{ Route::is('bookmarks') ? 'active' : '' }}">Bookmarks</a>
@@ -372,6 +411,25 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle
+            const menuToggle = document.getElementById('mobileMenuToggle');
+            const navLinks = document.getElementById('mobileNavLinks');
+            if (menuToggle && navLinks) {
+                menuToggle.addEventListener('click', function() {
+                    const isOpen = navLinks.classList.toggle('open');
+                    menuToggle.setAttribute('aria-expanded', isOpen);
+                    menuToggle.innerHTML = isOpen ? '<i class="bi bi-x-lg"></i>' : '<i class="bi bi-list"></i>';
+                });
+                // Close menu on link click
+                navLinks.querySelectorAll('.nav-link-neo').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navLinks.classList.remove('open');
+                        menuToggle.setAttribute('aria-expanded', 'false');
+                        menuToggle.innerHTML = '<i class="bi bi-list"></i>';
+                    });
+                });
+            }
+
             @if (session('status') === 'verification-link-sent')
                 showToast('A verification link has been sent to your email address.', 'success');
             @endif

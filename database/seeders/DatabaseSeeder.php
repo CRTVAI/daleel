@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             ContentSeeder::class,
             ConnectedToolsSeeder::class,
             UserSeeder::class,
+            BlogPostSeeder::class,
         ]);
     }
 }

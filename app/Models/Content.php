@@ -87,12 +87,69 @@ class Content extends Model
      */
     public function getDurationLabelAttribute(): string
     {
-        $s = $this->duration_seconds;
+        $s = $this->resolved_duration_seconds;
+        if ($s <= 0 && $this->video_duration) {
+            return $this->video_duration;
+        }
+
         if ($s <= 0) return '';
         $h = floor($s / 3600);
-        $m = floor(($s % 3600) / 60);
+        $m = (int) ceil(($s % 3600) / 60);
         if ($h > 0) return "{$h}h {$m}m";
-        return "{$m}m";
+        return max(1, $m) . 'm';
+    }
+
+    public function getResolvedDurationSecondsAttribute(): int
+    {
+        $seconds = (int) ($this->duration_seconds ?? 0);
+        if ($seconds > 0) {
+            return $seconds;
+        }
+
+        return $this->parseDurationToSeconds($this->video_duration);
+    }
+
+    private function parseDurationToSeconds(?string $duration): int
+    {
+        $duration = trim((string) $duration);
+        if ($duration === '') {
+            return 0;
+        }
+
+        if (preg_match('/^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?$/i', $duration, $matches)) {
+            return ((int) ($matches[1] ?? 0) * 3600)
+                + ((int) ($matches[2] ?? 0) * 60)
+                + (int) ($matches[3] ?? 0);
+        }
+
+        if (preg_match('/^\d{1,2}(?::\d{2}){1,2}$/', $duration)) {
+            $parts = array_map('intval', explode(':', $duration));
+            if (count($parts) === 3) {
+                return ($parts[0] * 3600) + ($parts[1] * 60) + $parts[2];
+            }
+
+            return ($parts[0] * 60) + $parts[1];
+        }
+
+        preg_match_all('/(\d+)\s*(h|hr|hrs|hour|hours|m|min|mins|minute|minutes|s|sec|secs|second|seconds)\b/i', $duration, $matches, PREG_SET_ORDER);
+        if ($matches) {
+            $seconds = 0;
+            foreach ($matches as $match) {
+                $value = (int) $match[1];
+                $unit = strtolower($match[2]);
+                if (str_starts_with($unit, 'h')) {
+                    $seconds += $value * 3600;
+                } elseif (str_starts_with($unit, 'm')) {
+                    $seconds += $value * 60;
+                } else {
+                    $seconds += $value;
+                }
+            }
+
+            return $seconds;
+        }
+
+        return 0;
     }
 
     // ── Relationships ──────────────────────────────────────────

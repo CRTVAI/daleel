@@ -83,6 +83,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::post('/admin/profile-options/experience-levels', [App\Http\Controllers\AdminController::class, 'storeExperienceLevel'])->name('admin.profile-options.experience-levels.store');
     Route::delete('/admin/profile-options/experience-levels/{level}', [App\Http\Controllers\AdminController::class, 'destroyExperienceLevel'])->name('admin.profile-options.experience-levels.destroy');
     Route::resource('/admin/tools', App\Http\Controllers\ToolController::class)->names('admin.tools');
+    Route::resource('/admin/blogs', App\Http\Controllers\AdminBlogController::class)->names('admin.blogs');
 });
 
 // Protected User Routes
@@ -97,6 +98,22 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/learn/progress/save', [App\Http\Controllers\LearningController::class, 'saveProgress'])->name('learn.progress.save');
     Route::post('/extension/verification-codes', [\App\Http\Controllers\Api\Extension\VerificationCodeController::class, 'store'])->name('extension.verify-code');
     Route::post('/extension/device/{device}/revoke', [App\Http\Controllers\HomeController::class, 'revokeDevice'])->name('extension.device.revoke');
+    Route::get('/downloads/desktop-app', function () {
+        $url = 'https://evalia-audio-storage.s3.us-east-1.amazonaws.com/DaleelMentorSetup-0.1.0-x64.exe';
+        $client = new \GuzzleHttp\Client(['stream' => true]);
+        $s3Response = $client->get($url);
+        return response()->stream(function () use ($s3Response) {
+            $body = $s3Response->getBody();
+            while (!$body->eof()) {
+                echo $body->read(8192);
+                flush();
+            }
+        }, 200, [
+            'Content-Type' => $s3Response->getHeaderLine('Content-Type') ?: 'application/octet-stream',
+            'Content-Length' => $s3Response->getHeaderLine('Content-Length'),
+            'Content-Disposition' => 'attachment; filename="DaleelMentorSetup-0.1.0-x64.exe"',
+        ]);
+    })->name('downloads.desktop-app');
 
     // Team Management
     Route::get('/team', [App\Http\Controllers\TeamController::class, 'index'])->name('team.index');
@@ -195,10 +212,14 @@ Route::get('/subtitles/convert', [App\Http\Controllers\SubtitlesController::clas
 
 require __DIR__.'/auth.php';
 
+// Public Blog Routes
+Route::get('/blog', [App\Http\Controllers\BlogController::class, 'index'])->name('public.blog');
+Route::get('/blog/{slug}', [App\Http\Controllers\BlogController::class, 'show'])->name('public.blog.show');
+
 Route::get('/{page}', function ($page) {
     $validPages = [
         'how-it-works', 'enterprise', 'success-stories', 'pricing',
-        'about', 'contact', 'blog', 'tools-directory', 'help-center',
+        'about', 'contact', 'tools-directory', 'help-center',
         'terms', 'privacy', 'cookies', 'learning-paths', 'chrome-extension',
         'lesson'
     ];
@@ -208,4 +229,4 @@ Route::get('/{page}', function ($page) {
     }
 
     abort(404);
-})->where('page', '^(?!admin|user|dashboard|login|register|roadmap|logout|forgot-password|reset-password|verify-email|profile|integrations|bookmarks|progress|activity-history|ai-mentor|learn|clear-cache|team|extension-setup|extension-data|api|videos).*$');
+})->where('page', '^(?!admin|user|dashboard|login|register|roadmap|logout|forgot-password|reset-password|verify-email|profile|integrations|bookmarks|progress|activity-history|ai-mentor|learn|clear-cache|team|extension-setup|extension-data|api|videos|blog).*$');

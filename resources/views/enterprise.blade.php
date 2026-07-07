@@ -418,32 +418,69 @@
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 992px) {
-    .contact-form-card {
-        padding: 32px 24px;
-    }
-    
-    .page-hero h1 {
-        font-size: 36px;
-    }
+    .contact-form-card { padding: 32px 24px; }
+    .page-hero h1 { font-size: 36px; }
+    .page-hero .lead { font-size: 16px; }
+    .info-card { padding: 20px; }
+    .enterprise-demo-card { padding: 24px; }
+}
+
+@media (max-width: 768px) {
+    .page-hero { padding: 40px 0 30px; }
+    .page-hero h1 { font-size: 32px; }
+    .page-hero .lead { font-size: 15px; }
+    .eyebrow { font-size: 12px; padding: 6px 14px; margin-bottom: 16px; }
+
+    .section { padding: 40px 0 60px !important; }
+    .row.g-5 { gap: 2rem !important; }
+    .contact-form-card { padding: 24px 20px; }
+    .contact-form-card h2 { font-size: 22px; }
+    .contact-form-card .text-muted { font-size: 14px !important; }
+    .form-control, .form-select { padding: 12px 14px; font-size: 14px; }
+    .field.mb-4 { margin-bottom: 1rem !important; }
+
+    .info-card { padding: 16px; }
+    .info-card h5 { font-size: 15px !important; }
+    .info-card p { font-size: 14px !important; }
+    .icon-box { width: 44px; height: 44px; }
+    .icon-box svg { width: 18px; height: 18px; }
+
+    .enterprise-demo-card { padding: 24px 20px; }
+    .enterprise-demo-card h4 { font-size: 18px; }
+    .enterprise-demo-card p { font-size: 13px !important; }
+    .enterprise-demo-card .btn { font-size: 14px; padding: 10px 20px; }
+
+    .social-links a { width: 40px; height: 40px; }
+
+    .success-popup { padding: 28px 20px 22px; border-radius: 16px; }
+    .success-popup h3 { font-size: 20px; }
+    .success-popup p { font-size: 14px; }
+    .success-popup-icon { width: 56px; height: 56px; }
+    .success-popup-icon svg { width: 28px; height: 28px; }
 }
 
 @media (max-width: 576px) {
-    .page-hero {
-        padding: 60px 0 40px;
-    }
-    
-    .page-hero h1 {
-        font-size: 30px;
-    }
-    
-    .contact-form-card {
-        padding: 24px 20px;
-    }
+    .page-hero { padding: 30px 0 24px; }
+    .page-hero h1 { font-size: 26px; }
+    .page-hero .lead { font-size: 14px; }
 
-    .success-popup {
-        padding: 30px 22px 24px;
-        border-radius: 20px;
-    }
+    .section { padding: 28px 0 48px !important; }
+    .contact-form-card { padding: 20px 16px; border-radius: 20px; }
+    .contact-form-card h2 { font-size: 20px; }
+    .contact-form-card .row.g-3 { --bs-gutter-y: 0; }
+    .contact-form-card .field { margin-bottom: 0.75rem !important; }
+    .btn-primary-contact { padding: 14px 24px; font-size: 15px; }
+
+    .info-card { border-radius: 14px; }
+    .enterprise-demo-card { border-radius: 20px; }
+    .social-links { justify-content: center; }
+
+    .success-popup { padding: 24px 18px 20px; border-radius: 14px; }
+    .success-popup h3 { font-size: 18px; }
+    .success-popup p { font-size: 13px; }
+    .success-popup-icon { width: 48px; height: 48px; }
+    .success-popup-icon svg { width: 24px; height: 24px; }
+    .success-popup-close { font-size: 14px; padding: 10px 20px; min-height: 40px; }
 }
 </style>
 @endsection

@@ -4,7 +4,9 @@
 
 @section('styles')
 <style>
-    body { background: #f8f9fb; }
+    /* ── RESET & BASE ── */
+    * { box-sizing: border-box; }
+    body { background: #f8f9fb; overflow-x: hidden; }
 
     /* ── Page top row ── */
     .page-top {
@@ -13,16 +15,18 @@
         border-bottom: 1px solid #e9ecef;
     }
     .page-title {
-        font-size: 1.55rem;
+        font-size: clamp(1.3rem, 3vw, 1.55rem);
         font-weight: 800;
         color: #111827;
         letter-spacing: -0.03em;
         margin: 0 0 0.2rem;
+        word-break: break-word;
     }
     .page-sub {
-        font-size: 0.85rem;
+        font-size: clamp(0.75rem, 1.2vw, 0.85rem);
         color: #6b7280;
         margin: 0;
+        word-break: break-word;
     }
 
     /* ── KPI Strip ── */
@@ -31,37 +35,40 @@
         gap: 1rem;
         margin-bottom: 1.75rem;
         flex-wrap: wrap;
+        width: 100%;
+        max-width: 100%;
     }
     .kpi-item {
         background: #fff;
         border: 1px solid #e9ecef;
         border-radius: 14px;
-        padding: 1rem 1.4rem;
+        padding: clamp(0.75rem, 1.5vw, 1rem) clamp(1rem, 2vw, 1.4rem);
         display: flex;
         align-items: center;
         gap: 0.9rem;
-        flex: 1;
-        min-width: 180px;
+        flex: 1 1 180px;
+        min-width: 140px;
+        max-width: 100%;
     }
     .kpi-icon {
-        width: 40px;
-        height: 40px;
+        width: clamp(34px, 4vw, 40px);
+        height: clamp(34px, 4vw, 40px);
         border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.1rem;
+        font-size: clamp(0.9rem, 1.5vw, 1.1rem);
         flex-shrink: 0;
     }
     .kpi-value {
-        font-size: 1.4rem;
+        font-size: clamp(1.1rem, 2.5vw, 1.4rem);
         font-weight: 800;
         color: #111827;
         line-height: 1.1;
         letter-spacing: -0.02em;
     }
     .kpi-label {
-        font-size: 0.72rem;
+        font-size: clamp(0.6rem, 0.9vw, 0.72rem);
         font-weight: 600;
         color: #9ca3af;
         text-transform: uppercase;
@@ -72,35 +79,40 @@
     .telemetry-banner {
         background: #111827;
         border-radius: 16px;
-        padding: 1.5rem 1.75rem;
+        padding: clamp(1rem, 2vw, 1.5rem) clamp(1rem, 2vw, 1.75rem);
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 1.5rem;
         margin-bottom: 1.75rem;
         flex-wrap: wrap;
+        width: 100%;
+        max-width: 100%;
     }
     .telemetry-banner h5 {
         color: #fff;
         font-weight: 700;
-        font-size: 1rem;
+        font-size: clamp(0.85rem, 1.3vw, 1rem);
         margin: 0 0 0.2rem;
+        word-break: break-word;
     }
     .telemetry-banner p {
         color: #9ca3af;
-        font-size: 0.82rem;
+        font-size: clamp(0.7rem, 1vw, 0.82rem);
         margin: 0;
+        word-break: break-word;
     }
     .btn-telemetry {
         background: #fff;
         color: #111827;
         font-weight: 700;
-        font-size: 0.85rem;
+        font-size: clamp(0.7rem, 1vw, 0.85rem);
         border: none;
         border-radius: 10px;
         padding: 0.6rem 1.2rem;
         white-space: nowrap;
         transition: background 0.15s;
+        flex-shrink: 0;
     }
     .btn-telemetry:hover { background: #f3f4f6; color: #111827; }
     .btn-telemetry i { color: #4f46e5; }
@@ -111,20 +123,24 @@
         border: 1px solid #e9ecef;
         border-radius: 16px;
         overflow: hidden;
+        width: 100%;
+        max-width: 100%;
     }
     .section-head {
-        padding: 1.1rem 1.4rem;
+        padding: clamp(0.8rem, 1.5vw, 1.1rem) clamp(1rem, 2vw, 1.4rem);
         border-bottom: 1px solid #f3f4f6;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 1rem;
+        flex-wrap: wrap;
     }
     .section-head h5 {
-        font-size: 0.95rem;
+        font-size: clamp(0.85rem, 1.2vw, 0.95rem);
         font-weight: 700;
         color: #111827;
         margin: 0;
+        word-break: break-word;
     }
     .count-badge {
         background: #f3f4f6;
@@ -133,27 +149,30 @@
         padding: 0.2rem 0.65rem;
         font-size: 0.75rem;
         font-weight: 700;
+        flex-shrink: 0;
     }
 
     /* ── Departments List ── */
     .dept-row {
-        padding: 1rem 1.4rem;
+        padding: clamp(0.75rem, 1.2vw, 1rem) clamp(1rem, 2vw, 1.4rem);
         border-bottom: 1px solid #f9fafb;
         display: flex;
         align-items: center;
         justify-content: space-between;
         gap: 0.75rem;
         transition: background 0.12s;
+        flex-wrap: wrap;
     }
     .dept-row:last-child { border-bottom: none; }
     .dept-row:hover { background: #fafafa; }
     .dept-name {
         font-weight: 700;
-        font-size: 0.9rem;
+        font-size: clamp(0.8rem, 1.1vw, 0.9rem);
         color: #111827;
+        word-break: break-word;
     }
     .dept-meta {
-        font-size: 0.78rem;
+        font-size: clamp(0.65rem, 0.9vw, 0.78rem);
         color: #9ca3af;
         margin-top: 0.1rem;
     }
@@ -162,11 +181,12 @@
         align-items: center;
         gap: 0.5rem;
         flex-shrink: 0;
+        flex-wrap: wrap;
     }
     .btn-analyze {
         background: #f3f4f6;
         color: #374151;
-        font-size: 0.78rem;
+        font-size: clamp(0.65rem, 0.9vw, 0.78rem);
         font-weight: 700;
         border: none;
         border-radius: 8px;
@@ -190,25 +210,28 @@
 
     /* ── Employee Table ── */
     .emp-search-wrap {
-        padding: 0.85rem 1.4rem;
+        padding: clamp(0.6rem, 1.2vw, 0.85rem) clamp(1rem, 2vw, 1.4rem);
         border-bottom: 1px solid #f3f4f6;
         position: relative;
+        width: 100%;
+        max-width: 100%;
     }
     .emp-search-wrap i {
         position: absolute;
         top: 50%;
-        left: 2.15rem;
+        left: clamp(1.8rem, 3vw, 2.15rem);
         transform: translateY(-50%);
         color: #9ca3af;
         font-size: 0.85rem;
     }
     .emp-search-input {
         width: 100%;
+        max-width: 100%;
         background: #f9fafb;
         border: 1px solid #e9ecef;
         border-radius: 8px;
-        padding: 0.5rem 0.9rem 0.5rem 2.2rem;
-        font-size: 0.85rem;
+        padding: 0.5rem 0.9rem 0.5rem clamp(1.8rem, 3vw, 2.2rem);
+        font-size: clamp(0.75rem, 1vw, 0.85rem);
         font-weight: 500;
         color: #111827;
         outline: none;
@@ -220,23 +243,28 @@
         background: #fff;
     }
 
-    .emp-table { width: 100%; border-collapse: collapse; }
+    .emp-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 600px;
+    }
     .emp-table th {
         background: #f9fafb;
         color: #6b7280;
-        font-size: 0.7rem;
+        font-size: clamp(0.6rem, 0.8vw, 0.7rem);
         font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        padding: 0.75rem 1rem;
+        padding: clamp(0.5rem, 1vw, 0.75rem) clamp(0.5rem, 1vw, 1rem);
         border-bottom: 1px solid #f3f4f6;
         white-space: nowrap;
+        text-align: left;
     }
     .emp-table td {
-        padding: 0.85rem 1rem;
+        padding: clamp(0.5rem, 1vw, 0.85rem) clamp(0.5rem, 1vw, 1rem);
         border-bottom: 1px solid #f9fafb;
         vertical-align: middle;
-        font-size: 0.875rem;
+        font-size: clamp(0.75rem, 1vw, 0.875rem);
         color: #374151;
     }
     .emp-table tbody tr:last-child td { border-bottom: none; }
@@ -244,19 +272,29 @@
 
     /* Avatar initials circle */
     .emp-avatar {
-        width: 34px;
-        height: 34px;
+        width: clamp(28px, 3.5vw, 34px);
+        height: clamp(28px, 3.5vw, 34px);
         border-radius: 50%;
         font-weight: 700;
-        font-size: 0.75rem;
+        font-size: clamp(0.6rem, 0.9vw, 0.75rem);
         color: #fff;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
     }
-    .emp-name { font-weight: 700; color: #111827; font-size: 0.875rem; }
-    .emp-dept { font-size: 0.72rem; color: #9ca3af; margin-top: 1px; }
+    .emp-name {
+        font-weight: 700;
+        color: #111827;
+        font-size: clamp(0.75rem, 1vw, 0.875rem);
+        word-break: break-word;
+    }
+    .emp-dept {
+        font-size: clamp(0.6rem, 0.8vw, 0.72rem);
+        color: #9ca3af;
+        margin-top: 1px;
+        word-break: break-word;
+    }
 
     .code-chip {
         background: #f3f4f6;
@@ -264,7 +302,7 @@
         border-radius: 6px;
         padding: 0.25rem 0.55rem;
         font-family: monospace;
-        font-size: 0.78rem;
+        font-size: clamp(0.65rem, 0.9vw, 0.78rem);
         font-weight: 600;
         color: #374151;
         cursor: pointer;
@@ -272,15 +310,17 @@
         align-items: center;
         gap: 0.3rem;
         transition: all 0.15s;
+        word-break: break-all;
+        max-width: 100%;
     }
     .code-chip:hover { background: #e9ecef; color: #111827; }
-    .code-chip i { font-size: 0.7rem; color: #9ca3af; }
+    .code-chip i { font-size: 0.7rem; color: #9ca3af; flex-shrink: 0; }
 
     .time-chip {
         background: #f3f4f6;
         border-radius: 6px;
         padding: 0.25rem 0.6rem;
-        font-size: 0.78rem;
+        font-size: clamp(0.65rem, 0.9vw, 0.78rem);
         font-weight: 700;
         color: #374151;
         display: inline-block;
@@ -289,7 +329,7 @@
     .btn-view-tools {
         background: #4f46e5;
         color: #fff;
-        font-size: 0.75rem;
+        font-size: clamp(0.65rem, 0.8vw, 0.75rem);
         font-weight: 700;
         border: none;
         border-radius: 7px;
@@ -302,43 +342,60 @@
 
     /* ── Sidebar (Offcanvas) ── */
     #telemetrySidebar {
-        width: 480px;
+        width: min(480px, 95vw);
         max-width: 95vw;
         border-left: 1px solid #e9ecef !important;
         box-shadow: -8px 0 40px rgba(0,0,0,0.06);
     }
     .sidebar-header {
-        padding: 1.25rem 1.5rem;
+        padding: clamp(1rem, 1.5vw, 1.25rem) clamp(1rem, 2vw, 1.5rem);
         background: #fff;
         border-bottom: 1px solid #f3f4f6;
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
         gap: 1rem;
+        flex-wrap: wrap;
     }
-    .sidebar-title { font-weight: 800; font-size: 1rem; color: #111827; margin: 0 0 0.15rem; }
-    .sidebar-sub   { font-size: 0.78rem; color: #9ca3af; margin: 0; }
+    .sidebar-title {
+        font-weight: 800;
+        font-size: clamp(0.9rem, 1.3vw, 1rem);
+        color: #111827;
+        margin: 0 0 0.15rem;
+        word-break: break-word;
+    }
+    .sidebar-sub {
+        font-size: clamp(0.7rem, 0.9vw, 0.78rem);
+        color: #9ca3af;
+        margin: 0;
+        word-break: break-word;
+    }
 
     /* ── Empty States ── */
     .empty-state {
         text-align: center;
-        padding: 3rem 1.5rem;
+        padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 2vw, 1.5rem);
         color: #9ca3af;
     }
     .empty-state i { font-size: 2rem; display: block; margin-bottom: 0.75rem; opacity: 0.35; }
-    .empty-state h6 { font-weight: 700; color: #374151; margin-bottom: 0.25rem; }
-    .empty-state p  { font-size: 0.82rem; margin: 0; }
+    .empty-state h6 { font-weight: 700; color: #374151; margin-bottom: 0.25rem; font-size: clamp(0.9rem, 1.2vw, 1rem); }
+    .empty-state p  { font-size: clamp(0.7rem, 1vw, 0.82rem); margin: 0; }
 
     /* ── Action buttons in header ── */
+    .page-top .d-flex.gap-2 {
+        flex-wrap: wrap;
+        gap: 0.5rem !important;
+    }
     .btn-head-outline {
         background: #fff;
         border: 1px solid #d1d5db;
         color: #374151;
         font-weight: 700;
-        font-size: 0.82rem;
+        font-size: clamp(0.7rem, 1vw, 0.82rem);
         border-radius: 9px;
-        padding: 0.5rem 1rem;
+        padding: clamp(0.4rem, 0.8vw, 0.5rem) clamp(0.75rem, 1.2vw, 1rem);
         transition: all 0.15s;
+        white-space: nowrap;
     }
     .btn-head-outline:hover { border-color: #9ca3af; background: #f9fafb; color: #111827; }
     .btn-head-primary {
@@ -346,10 +403,11 @@
         border: none;
         color: #fff;
         font-weight: 700;
-        font-size: 0.82rem;
+        font-size: clamp(0.7rem, 1vw, 0.82rem);
         border-radius: 9px;
-        padding: 0.5rem 1rem;
+        padding: clamp(0.4rem, 0.8vw, 0.5rem) clamp(0.75rem, 1.2vw, 1rem);
         transition: all 0.15s;
+        white-space: nowrap;
     }
     .btn-head-primary:hover { background: #4338ca; color: #fff; }
 
@@ -358,9 +416,9 @@
         border: none;
         color: #fff;
         font-weight: 700;
-        font-size: 0.82rem;
+        font-size: clamp(0.7rem, 1vw, 0.82rem);
         border-radius: 9px;
-        padding: 0.5rem 1rem;
+        padding: clamp(0.4rem, 0.8vw, 0.5rem) clamp(0.75rem, 1.2vw, 1rem);
         transition: all 0.15s;
         white-space: nowrap;
     }
@@ -369,6 +427,11 @@
         background: #6b7280;
         cursor: wait;
         opacity: 0.85;
+    }
+    .page-top .form-select {
+        font-size: clamp(0.7rem, 1vw, 0.875rem);
+        min-width: 100px;
+        max-width: 100%;
     }
 
     /* ── Colors for dept/employee avatar dots ── */
@@ -383,26 +446,16 @@
 
     /* dept dot */
     .dept-dot {
-        width: 36px;
-        height: 36px;
+        width: clamp(30px, 3.5vw, 36px);
+        height: clamp(30px, 3.5vw, 36px);
         border-radius: 9px;
         display: flex;
         align-items: center;
         justify-content: center;
         font-weight: 700;
-        font-size: 0.8rem;
+        font-size: clamp(0.65rem, 0.9vw, 0.8rem);
         color: #fff;
         flex-shrink: 0;
-    }
-
-    @media (max-width: 768px) {
-        .kpi-item { min-width: 140px; }
-        .telemetry-banner { flex-direction: column; align-items: flex-start; }
-    }
-
-    @media (max-width: 768px) {
-        .kpi-item { min-width: 140px; }
-        .telemetry-banner { flex-direction: column; align-items: flex-start; }
     }
 
     /* ── Team Restricted Overlay & Blur ── */
@@ -411,6 +464,9 @@
         min-height: 85vh;
         border-radius: 16px;
         background: #f8f9fb;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
     }
     .team-blur-container {
         filter: blur(8px) grayscale(30%);
@@ -418,6 +474,9 @@
         user-select: none;
         opacity: 0.5;
         transition: filter 0.3s ease;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
     }
     .team-gate-overlay {
         position: absolute;
@@ -428,6 +487,9 @@
         justify-content: center;
         background: rgba(248, 249, 251, 0.4);
         padding: 2rem 1.5rem;
+        width: 100%;
+        max-width: 100%;
+        overflow: hidden;
     }
     .team-gate-card {
         background: rgba(255, 255, 255, 0.95);
@@ -436,7 +498,7 @@
         border: 1px solid rgba(255, 255, 255, 0.7);
         border-radius: 24px;
         box-shadow: 0 30px 70px rgba(0,0,0,0.12);
-        padding: 3rem 2.5rem;
+        padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 2.5rem);
         max-width: 580px;
         width: 100%;
         text-align: center;
@@ -447,7 +509,7 @@
         gap: 0.5rem;
         background: #eef2ff;
         color: #4f46e5;
-        font-size: 0.75rem;
+        font-size: clamp(0.6rem, 0.9vw, 0.75rem);
         font-weight: 800;
         padding: 0.4rem 0.95rem;
         border-radius: 20px;
@@ -456,18 +518,20 @@
         text-transform: uppercase;
     }
     .team-gate-card h2 {
-        font-size: 1.85rem;
+        font-size: clamp(1.3rem, 3.5vw, 1.85rem);
         font-weight: 900;
         color: #111827;
         letter-spacing: -0.03em;
         margin-bottom: 0.85rem;
         line-height: 1.2;
+        word-break: break-word;
     }
     .team-gate-card p {
         color: #4b5563;
-        font-size: 0.95rem;
+        font-size: clamp(0.8rem, 1.2vw, 0.95rem);
         line-height: 1.6;
         margin-bottom: 2rem;
+        word-break: break-word;
     }
     .gate-features-mini {
         display: flex;
@@ -478,7 +542,9 @@
         background: #f9fafb;
         border: 1px solid #e5e7eb;
         border-radius: 16px;
-        padding: 1.25rem;
+        padding: clamp(0.75rem, 2vw, 1.25rem);
+        width: 100%;
+        max-width: 100%;
     }
     .gate-feature-item {
         display: flex;
@@ -487,21 +553,22 @@
     }
     .gate-feature-item i {
         color: #4f46e5;
-        font-size: 1rem;
+        font-size: clamp(0.85rem, 1.2vw, 1rem);
         margin-top: 0.15rem;
         flex-shrink: 0;
     }
     .gate-feature-item span {
-        font-size: 0.85rem;
+        font-size: clamp(0.75rem, 1vw, 0.85rem);
         color: #374151;
         line-height: 1.4;
+        word-break: break-word;
     }
     .btn-request-access {
         background: linear-gradient(135deg, #4f46e5, #7c3aed);
         color: #fff;
         border: none;
         font-weight: 800;
-        font-size: 0.95rem;
+        font-size: clamp(0.8rem, 1.1vw, 0.95rem);
         border-radius: 12px;
         padding: 0.85rem 2.2rem;
         width: 100%;
@@ -513,6 +580,7 @@
         box-shadow: 0 6px 20px rgba(79,70,229,0.45);
         color: #fff;
     }
+
     /* Modal form config */
     .contact-modal-icon {
         width: 56px; height: 56px;
@@ -524,6 +592,388 @@
         align-items: center;
         justify-content: center;
         margin-bottom: 1rem;
+    }
+
+    /* ── RESPONSIVE MEDIA QUERIES ── */
+    @media (max-width: 1200px) {
+        .col-lg-4, .col-lg-8 {
+            flex: 0 0 100%;
+            max-width: 100%;
+        }
+        .row.g-4 > * {
+            padding-left: calc(1.5rem * 0.5);
+            padding-right: calc(1.5rem * 0.5);
+        }
+    }
+
+    @media (max-width: 992px) {
+        .emp-table {
+            min-width: 500px;
+        }
+        .emp-table th,
+        .emp-table td {
+            padding: 0.6rem 0.5rem;
+        }
+        .page-top .d-flex.gap-2 {
+            width: 100%;
+        }
+        .page-top .form-select {
+            min-width: 80px;
+        }
+        .dept-row {
+            flex-wrap: wrap;
+        }
+        .dept-actions {
+            margin-left: auto;
+        }
+        .telemetry-banner .btn-telemetry {
+            white-space: normal;
+            word-break: break-word;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .kpi-item {
+            flex: 1 1 100%;
+            min-width: 100%;
+        }
+        .kpi-strip {
+            gap: 0.75rem;
+        }
+        .telemetry-banner {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .telemetry-banner .btn-telemetry {
+            width: 100%;
+            justify-content: center;
+        }
+        .page-top {
+            flex-direction: column;
+            align-items: stretch !important;
+        }
+        .page-top .d-flex.gap-2 {
+            flex-wrap: wrap;
+            width: 100%;
+        }
+        .page-top .d-flex.gap-2 > * {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .page-top .form-select {
+            min-width: 60px;
+            flex: 0 1 auto;
+        }
+        .btn-head-outline,
+        .btn-head-primary,
+        .btn-sync-extension {
+            font-size: 0.7rem;
+            padding: 0.4rem 0.6rem;
+            white-space: normal;
+            word-break: break-word;
+        }
+        .section-head {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .emp-table {
+            min-width: 100%;
+            display: block;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        .emp-table thead,
+        .emp-table tbody,
+        .emp-table tr {
+            display: block;
+        }
+        .emp-table thead {
+            display: none;
+        }
+        .emp-table tr {
+            margin-bottom: 0.75rem;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            padding: 0.75rem;
+            background: #fff;
+        }
+        .emp-table td {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            border: none;
+            border-bottom: 1px solid #f3f4f6;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .emp-table td:last-child {
+            border-bottom: none;
+        }
+        .emp-table td::before {
+            content: attr(data-label);
+            font-weight: 700;
+            font-size: 0.6rem;
+            text-transform: uppercase;
+            color: #9ca3af;
+            letter-spacing: 0.06em;
+            flex-shrink: 0;
+        }
+        .emp-table td .d-flex.align-items-center.gap-2 {
+            flex-wrap: wrap;
+        }
+        .emp-table td .text-end,
+        .emp-table td .d-flex.justify-content-end {
+            justify-content: flex-start !important;
+            text-align: left !important;
+        }
+        .emp-table td .progress {
+            width: 40px !important;
+        }
+        #telemetrySidebar {
+            width: 100%;
+            max-width: 100%;
+        }
+        .btn-view-tools,
+        .btn-analyze {
+            font-size: 0.65rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .team-gate-card {
+            padding: 1.5rem 1rem;
+        }
+        .team-gate-card h2 {
+            font-size: 1.3rem;
+        }
+        .code-chip {
+            font-size: 0.6rem;
+            padding: 0.2rem 0.4rem;
+        }
+        .time-chip {
+            font-size: 0.6rem;
+            padding: 0.2rem 0.4rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .page-title {
+            font-size: 1.1rem;
+        }
+        .page-sub {
+            font-size: 0.7rem;
+        }
+        .kpi-item {
+            padding: 0.6rem 0.8rem;
+            gap: 0.6rem;
+        }
+        .kpi-icon {
+            width: 30px;
+            height: 30px;
+            font-size: 0.8rem;
+        }
+        .kpi-value {
+            font-size: 0.95rem;
+        }
+        .kpi-label {
+            font-size: 0.55rem;
+        }
+        .telemetry-banner {
+            padding: 0.75rem 1rem;
+        }
+        .telemetry-banner h5 {
+            font-size: 0.8rem;
+        }
+        .telemetry-banner p {
+            font-size: 0.65rem;
+        }
+        .btn-telemetry {
+            font-size: 0.65rem;
+            padding: 0.4rem 0.8rem;
+        }
+        .dept-row {
+            padding: 0.6rem 0.8rem;
+        }
+        .dept-dot {
+            width: 26px;
+            height: 26px;
+            font-size: 0.55rem;
+            border-radius: 7px;
+        }
+        .dept-name {
+            font-size: 0.75rem;
+        }
+        .dept-meta {
+            font-size: 0.6rem;
+        }
+        .dept-actions .btn-analyze {
+            font-size: 0.6rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .section-head {
+            padding: 0.6rem 0.8rem;
+        }
+        .section-head h5 {
+            font-size: 0.8rem;
+        }
+        .count-badge {
+            font-size: 0.65rem;
+            padding: 0.15rem 0.5rem;
+        }
+        .emp-search-wrap {
+            padding: 0.5rem 0.8rem;
+        }
+        .emp-search-input {
+            font-size: 0.7rem;
+            padding: 0.4rem 0.6rem 0.4rem 1.8rem;
+        }
+        .emp-search-wrap i {
+            left: 1.4rem;
+            font-size: 0.7rem;
+        }
+        .emp-avatar {
+            width: 24px;
+            height: 24px;
+            font-size: 0.5rem;
+        }
+        .emp-name {
+            font-size: 0.7rem;
+        }
+        .emp-dept {
+            font-size: 0.55rem;
+        }
+        .emp-table td {
+            font-size: 0.7rem;
+            padding: 0.3rem 0;
+        }
+        .emp-table td::before {
+            font-size: 0.5rem;
+        }
+        .btn-head-outline,
+        .btn-head-primary,
+        .btn-sync-extension {
+            font-size: 0.6rem;
+            padding: 0.3rem 0.5rem;
+            border-radius: 6px;
+        }
+        .page-top .form-select {
+            font-size: 0.6rem;
+            min-width: 50px;
+            padding: 0.25rem 0.5rem;
+        }
+        .btn-view-tools {
+            font-size: 0.55rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 5px;
+        }
+        .btn-analyze {
+            font-size: 0.55rem;
+            padding: 0.2rem 0.4rem;
+            border-radius: 5px;
+        }
+        .code-chip {
+            font-size: 0.55rem;
+            padding: 0.15rem 0.3rem;
+            gap: 0.15rem;
+        }
+        .code-chip i {
+            font-size: 0.55rem;
+        }
+        .time-chip {
+            font-size: 0.55rem;
+            padding: 0.15rem 0.3rem;
+        }
+        .gate-features-mini {
+            padding: 0.75rem;
+        }
+        .gate-feature-item span {
+            font-size: 0.7rem;
+        }
+        .btn-request-access {
+            font-size: 0.75rem;
+            padding: 0.6rem 1.5rem;
+        }
+        .team-gate-card h2 {
+            font-size: 1.1rem;
+        }
+        .team-gate-card p {
+            font-size: 0.75rem;
+        }
+        .gate-badge {
+            font-size: 0.55rem;
+            padding: 0.3rem 0.7rem;
+        }
+        .modal-dialog {
+            margin: 0.5rem;
+        }
+        .modal-content {
+            border-radius: 16px !important;
+        }
+        .modal-body {
+            padding: 1rem !important;
+        }
+        .sidebar-header {
+            padding: 0.75rem 1rem;
+        }
+        .sidebar-title {
+            font-size: 0.85rem;
+        }
+        .sidebar-sub {
+            font-size: 0.65rem;
+        }
+        #telemetrySidebar {
+            width: 100%;
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 400px) {
+        .team-gate-card {
+            padding: 1rem 0.75rem;
+        }
+        .gate-features-mini {
+            padding: 0.5rem;
+            gap: 0.5rem;
+        }
+        .gate-feature-item {
+            gap: 0.5rem;
+        }
+        .gate-feature-item i {
+            font-size: 0.75rem;
+        }
+        .gate-feature-item span {
+            font-size: 0.65rem;
+        }
+        .btn-request-access {
+            font-size: 0.7rem;
+            padding: 0.5rem 1rem;
+        }
+        .emp-table td {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .emp-table td::before {
+            width: 100%;
+        }
+        .emp-table td .d-flex.align-items-center.gap-2 {
+            width: 100%;
+        }
+        .dept-actions {
+            width: 100%;
+            justify-content: flex-start;
+        }
+        .page-top .d-flex.gap-2 {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .page-top .form-select {
+            width: 100%;
+        }
+        .btn-head-outline,
+        .btn-head-primary,
+        .btn-sync-extension {
+            width: 100%;
+            justify-content: center;
+        }
     }
 </style>
 @endsection
@@ -577,7 +1027,7 @@
     </div>
     @endif
 
-    <div class="{{ !auth()->user()->can_access_team ? 'team-blur-container' : '' }}">
+    <div class="{{ !auth()->user()->can_access_team ? 'team-blur-container' : '' }}" style="width:100%;max-width:100%;overflow:hidden;">
 
 {{-- Page Top Row --}}
 <div class="page-top d-flex align-items-center justify-content-between flex-wrap gap-3">
@@ -585,30 +1035,30 @@
         <h1 class="page-title">Team Telemetry</h1>
         <p class="page-sub">Track which sites and tools your departments and employees use most.</p>
     </div>
-    <div class="d-flex gap-2 align-items-center">
-        <select class="form-select" onchange="window.location.href='?range='+this.value" style="width: auto; min-width: 140px; border-color: #e5e7eb; border-radius: 8px; font-weight: 500; font-size: 0.875rem;">
+    <div class="d-flex gap-2 align-items-center flex-wrap">
+        <select class="form-select" onchange="window.location.href='?range='+this.value" style="width: auto; min-width: 100px; border-color: #e5e7eb; border-radius: 8px; font-weight: 500; font-size: clamp(0.7rem, 1vw, 0.875rem);">
             <option value="today" {{ (isset($range) && $range == 'today') ? 'selected' : '' }}>Today</option>
             <option value="7days" {{ (isset($range) && $range == '7days') ? 'selected' : '' }}>Last 7 Days</option>
             <option value="30days" {{ (isset($range) && $range == '30days') ? 'selected' : '' }}>Last 30 Days</option>
             <option value="all" {{ (!isset($range) || $range == 'all') ? 'selected' : '' }}>All Time</option>
         </select>
         <button type="button" class="btn btn-sync-extension" id="extensionSyncNowBtn" title="Requests sync from the extension installed in this browser. Employee browsers must upload their own latest data.">
-            <i class="bi bi-arrow-repeat me-1"></i> Sync This Browser
+            <i class="bi bi-arrow-repeat me-1"></i> Sync
         </button>
         <button class="btn-head-outline btn" data-bs-toggle="modal" data-bs-target="#addDeptModal">
-            <i class="bi bi-diagram-3 me-1"></i> Add Department
+            <i class="bi bi-diagram-3 me-1"></i> Add Dept
         </button>
         <button class="btn-head-primary btn" data-bs-toggle="modal" data-bs-target="#addEmpModal">
-            <i class="bi bi-person-plus me-1"></i> Add Employee
+            <i class="bi bi-person-plus me-1"></i> Add Emp
         </button>
     </div>
 </div>
 
-<div>
+<div style="width:100%;max-width:100%;overflow:hidden;">
 
     @if(session('success'))
         <div class="d-flex align-items-center gap-2 mb-4 px-3 py-2 rounded-3"
-             style="background:#ecfdf5; color:#065f46; font-weight:600; font-size:0.875rem;border:1px solid #a7f3d0;">
+             style="background:#ecfdf5; color:#065f46; font-weight:600; font-size:clamp(0.7rem, 1vw, 0.875rem);border:1px solid #a7f3d0;flex-wrap:wrap;">
             <i class="bi bi-check-circle-fill"></i> {{ session('success') }}
         </div>
     @endif
@@ -658,9 +1108,9 @@
                 @forelse($departments as $dept)
                     @php $dc = $colors[$dept->id % count($colors)]; @endphp
                     <div class="dept-row">
-                        <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex align-items-center gap-3" style="flex:1;min-width:0;">
                             <div class="dept-dot {{ $dc }}">{{ mb_substr($dept->name, 0, 1) }}</div>
-                            <div>
+                            <div style="min-width:0;">
                                 <div class="dept-name">{{ $dept->name }}</div>
                                 <div class="dept-meta">{{ $dept->employees_count }} employees</div>
                             </div>
@@ -673,7 +1123,7 @@
                                 <i class="bi bi-bar-chart-line-fill"></i> Analyze
                             </button>
                             <form action="{{ route('team.departments.destroy', $dept) }}" method="POST"
-                                  onsubmit="return confirm('Delete this department?');">
+                                  onsubmit="return confirm('Delete this department?');" class="d-inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-del"><i class="bi bi-trash3"></i></button>
                             </form>
@@ -702,7 +1152,7 @@
                     <input type="text" id="empSearchInput" class="emp-search-input" placeholder="Search by name…">
                 </div>
 
-                <div style="overflow-x:auto;">
+                <div style="overflow-x:auto;width:100%;max-width:100%;">
                     <table class="emp-table">
                         <thead>
                             <tr>
@@ -711,7 +1161,7 @@
                                 <th>Connection Key</th>
                                 <th>Active Time</th>
                                 <th class="text-center">Activity</th>
-                                <th class="text-end">Telemetry Actions</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="empTableBody">
@@ -725,8 +1175,8 @@
                                 $isOnline = $lastSynced && $lastSynced->diffInMinutes(now()) < 5;
                             @endphp
                             <tr class="emp-row" data-name="{{ strtolower($emp->name) }}">
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
+                                <td data-label="Employee">
+                                    <div class="d-flex align-items-center gap-2" style="flex-wrap:wrap;">
                                         <div class="emp-avatar {{ $ec }}">{{ strtoupper($initials) }}</div>
                                         <div>
                                             <div class="emp-name">{{ $emp->name }}</div>
@@ -736,19 +1186,19 @@
                                         </div>
                                     </div>
                                 </td>
-                                <td>
+                                <td data-label="Status">
                                     @if($isOnline)
-                                        <span class="badge rounded-pill bg-success p-2 d-inline-flex align-items-center gap-1" style="font-size: 10px; font-weight: 800;">
+                                        <span class="badge rounded-pill bg-success p-2 d-inline-flex align-items-center gap-1" style="font-size: clamp(8px, 1vw, 10px); font-weight: 800;">
                                             <span style="width: 6px; height: 6px; background: #fff; border-radius: 50%; display: block; animation: pulse 1.5s infinite;"></span> ONLINE
                                         </span>
                                     @else
-                                        <span class="badge rounded-pill bg-light text-muted border p-2" style="font-size: 10px; font-weight: 800;">
+                                        <span class="badge rounded-pill bg-light text-muted border p-2" style="font-size: clamp(8px, 1vw, 10px); font-weight: 800;">
                                             OFFLINE
                                         </span>
                                     @endif
                                 </td>
-                                <td>
-                                    <div class="d-flex align-items-center gap-2">
+                                <td data-label="Connection Key">
+                                    <div class="d-flex align-items-center gap-2" style="flex-wrap:wrap;">
                                         <span class="code-chip"
                                               onclick="navigator.clipboard.writeText('{{ $emp->connection_code }}'); showToast('Code copied!');"
                                               title="Click to copy">
@@ -762,28 +1212,26 @@
                                             </button>
                                         </form>
                                     </div>
-                                    <div style="font-size: 10px; margin-top: 3px;">
-                                        @if($emp->connection_code_issued_at)
+                                    @if($emp->connection_code_issued_at)
+                                        <div style="font-size: clamp(8px, 0.8vw, 10px); margin-top: 3px;">
                                             <span class="{{ $emp->connection_code_issued_at->diffInDays(now()) > 30 ? 'text-warning fw-bold' : 'text-muted' }}">
                                                 Issued {{ $emp->connection_code_issued_at->diffForHumans() }}
                                             </span>
-                                        @else
-                                            <span class="text-muted italic">Legacy key</span>
-                                        @endif
-                                    </div>
+                                        </div>
+                                    @endif
                                 </td>
-                                <td>
+                                <td data-label="Active Time">
                                     <span class="time-chip">{{ $ms($empActiveMs[$emp->id] ?? 0) }}</span>
-                                    <div style="font-size: 10px; color: #9ca3af; margin-top: 2px;">{{ $lastSynced ? 'Last sync: '.$lastSynced->diffForHumans() : 'Never synced' }}</div>
+                                    <div style="font-size: clamp(8px, 0.8vw, 10px); color: #9ca3af; margin-top: 2px;">{{ $lastSynced ? 'Last sync: '.$lastSynced->diffForHumans() : 'Never synced' }}</div>
                                 </td>
-                                <td class="text-center">
-                                    <div class="progress" style="height: 6px; width: 60px; margin: 0 auto 4px; background: #f1f5f9;">
+                                <td data-label="Activity" class="text-center">
+                                    <div class="progress" style="height: 6px; width: clamp(40px, 6vw, 60px); margin: 0 auto 4px; background: #f1f5f9;">
                                       <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $activeRatio }}%"></div>
                                     </div>
-                                    <span style="font-size: 10px; font-weight: 800; color: #4b5563;">{{ $activeRatio }}%</span>
+                                    <span style="font-size: clamp(8px, 0.8vw, 10px); font-weight: 800; color: #4b5563;">{{ $activeRatio }}%</span>
                                 </td>
-                                <td class="text-end">
-                                    <div class="d-flex justify-content-end gap-2">
+                                <td data-label="Actions" class="text-end">
+                                    <div class="d-flex justify-content-end gap-2" style="flex-wrap:wrap;">
                                         <button class="btn btn-view-tools btn-view-emp-sites px-2 py-1"
                                                 data-id="{{ $emp->id }}"
                                                 data-name="{{ $emp->name }}"
@@ -809,7 +1257,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5">
+                                <td colspan="6">
                                     <div class="empty-state">
                                         <i class="bi bi-people"></i>
                                         <h6>No Employees Yet</h6>
@@ -823,7 +1271,7 @@
                 </div>
 
                 @if($employees->hasPages())
-                    <div class="p-3 border-top d-flex justify-content-center">
+                    <div class="p-3 border-top d-flex justify-content-center" style="flex-wrap:wrap;">
                         {{ $employees->appends(request()->except('employees_page'))->links() }}
                     </div>
                 @endif

@@ -214,6 +214,93 @@
     .roll-blur { position: relative; }
     .roll-blur::after { content: '🔒 Upgrade to Pro'; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; color: #4f46e5; background: rgba(255,255,255,0.6); backdrop-filter: blur(2px); z-index: 5; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; border-radius: 0; }
     .roll-blur:hover::after { opacity: 1; }
+
+    .workflow-connect-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+    }
+    .workflow-connect-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-height: 210px;
+        padding: 24px;
+        border: 2px solid #eef2f7;
+        border-radius: 18px;
+        background: #fff;
+        transition: all 0.3s ease;
+    }
+    .workflow-connect-card:hover {
+        border-color: #6366f1;
+        box-shadow: 0 12px 32px rgba(99,102,241,0.08);
+        transform: translateY(-3px);
+    }
+    .workflow-connect-card .card-icon {
+        width: 48px;
+        height: 48px;
+        display: grid;
+        place-items: center;
+        border-radius: 14px;
+        background: #eef2ff;
+        color: #6366f1;
+        font-size: 1.5rem;
+    }
+    .workflow-connect-card h5 {
+        margin: 0;
+        font-weight: 800;
+    }
+    .workflow-connect-card p {
+        flex: 1;
+        margin: 0;
+        color: #64748b;
+        font-size: 0.85rem;
+        line-height: 1.5;
+    }
+    .workflow-connect-card .btn {
+        white-space: normal;
+        text-align: center;
+    }
+    .coming-soon-badge {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: 0.64rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+    @media (max-width: 767px) {
+        .workflow-connect-grid {
+            grid-template-columns: none;
+            display: flex;
+            gap: 12px;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 8px;
+            margin-left: -4px;
+            margin-right: -4px;
+            padding-left: 4px;
+            padding-right: 4px;
+        }
+        .workflow-connect-grid::-webkit-scrollbar {
+            height: 4px;
+        }
+        .workflow-connect-grid::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
+            border-radius: 4px;
+        }
+        .workflow-connect-card {
+            min-height: auto;
+            flex: 0 0 260px;
+            scroll-snap-align: start;
+        }
+    }
 </style>
 @endsection
 
@@ -240,13 +327,32 @@
                 <p class="fs-5 opacity-75 mb-5 fw-500" style="max-width: 600px; line-height: 1.6;">
                     Analyze web content, extract insights, and connect your workflow directly to the Daleel AI ecosystem. Our custom-built extension brings the power of your AI Mentor to every tab you visit.
                 </p>
-                <div class="d-flex flex-wrap gap-3">
-                    <a href="#" class="install-btn-large">
-                        <i class="bi bi-download"></i> Download Extension Bundle
-                    </a>
-                    <a href="https://chromewebstore.google.com/detail/daleel-mentor/bpkbkfdbanbdlfmkmgcdkhlobfdifhpi" target="_blank" class="btn btn-outline-light border-2 rounded-4 px-4 fw-800 d-flex align-items-center" style="border-radius: 18px !important;">
-                        View on Web Store
-                    </a>
+                <div class="workflow-connect-grid mt-4">
+                    <article class="workflow-connect-card" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);">
+                        <div class="card-icon" style="background:rgba(99,102,241,0.2);color:#a5b4fc;"><i class="bi bi-browser-chrome"></i></div>
+                        <h5 style="color:#fff;">Chrome Extension</h5>
+                        <p style="color:rgba(255,255,255,0.7);">Get AI learning recommendations synced directly into your browser tab.</p>
+                        <a href="https://chromewebstore.google.com/detail/daleel-mentor/bpkbkfdbanbdlfmkmgcdkhlobfdifhpi" target="_blank" class="btn btn-primary rounded-4 fw-700" style="background:#fff;color:#020617;border:none;">
+                            <i class="bi bi-plus-lg"></i> Add to Chrome
+                        </a>
+                    </article>
+                    <article class="workflow-connect-card" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);">
+                        <div class="card-icon" style="background:rgba(99,102,241,0.2);color:#a5b4fc;"><i class="bi bi-laptop"></i></div>
+                        <h5 style="color:#fff;">Desktop App</h5>
+                        <p style="color:rgba(255,255,255,0.7);">Get real-time guidance directly across your desktop software.</p>
+                        <a href="{{ route('downloads.desktop-app') }}" target="_blank" class="btn btn-outline-primary rounded-4 fw-700" style="border-color:rgba(255,255,255,0.3);color:#fff;">
+                            <i class="bi bi-download"></i> Download App
+                        </a>
+                    </article>
+                    <article class="workflow-connect-card" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);">
+                        <span class="coming-soon-badge" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);">Coming Soon</span>
+                        <div class="card-icon" style="background:rgba(99,102,241,0.2);color:#a5b4fc;"><i class="bi bi-phone"></i></div>
+                        <h5 style="color:#fff;">Mobile App</h5>
+                        <p style="color:rgba(255,255,255,0.7);">Track your focus score and access quick learning paths on the go.</p>
+                        <button type="button" class="btn rounded-4 fw-700" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);border-color:rgba(255,255,255,0.1);" disabled>
+                            <i class="bi bi-bell"></i> Notify Me
+                        </button>
+                    </article>
                 </div>
             </div>
             <div class="col-lg-5 d-none d-lg-block text-center">

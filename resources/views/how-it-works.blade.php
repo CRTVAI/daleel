@@ -287,14 +287,65 @@
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1024px) {
   .hiw-grid { grid-template-columns: repeat(2, 1fr); }
-  .highlight-grid { grid-template-columns: 1fr; }
+  .highlight-grid { grid-template-columns: 1fr; gap: 48px; }
   .hiw-hero h1 { font-size: 40px; }
+  .section-title { font-size: 30px; margin-bottom: 40px; }
+}
+
+@media (max-width: 768px) {
+  .hiw-hero { padding: 60px 0 50px; }
+  .hiw-hero h1 { font-size: 34px; }
+  .hiw-hero p.lead { font-size: 17px; }
+  .hiw-hero .d-flex { flex-direction: column; align-items: flex-start; }
+  .hiw-hero .d-flex .btn { width: 100%; }
+  .steps-container { padding: 50px 0; }
+  .hiw-step-card { padding: 24px; }
+  .feature-highlight { padding: 60px 0; }
+  .faq-section { padding: 60px 0; }
+  .section-title { font-size: 26px; margin-bottom: 32px; }
+  .highlight-grid { gap: 40px; }
+  .visual-mockup { padding: 16px; }
 }
 
 @media (max-width: 640px) {
   .hiw-grid { grid-template-columns: 1fr; }
-  .hiw-hero { padding: 60px 0; }
-  .hiw-hero h1 { font-size: 32px; }
+  .hiw-hero { padding: 40px 0; }
+  .hiw-hero h1 { font-size: 28px; }
+  .hiw-hero p.lead { font-size: 15px; margin-bottom: 28px; }
+  .steps-container { padding: 40px 0; }
+  .section-title { font-size: 24px; margin-bottom: 24px; }
+  .hiw-step-card { padding: 20px; }
+  .feature-highlight { padding: 40px 0; }
+  .faq-section { padding: 40px 0; }
+  .faq-trigger { padding: 16px; font-size: 14px; }
+  .faq-content { padding: 0 16px 16px; font-size: 14px; }
+  .highlight-grid { gap: 32px; }
+  .visual-mockup { padding: 12px; }
+  .mockup-item { padding: 12px; }
+  .mockup-icon { width: 40px; height: 40px; font-size: 16px; }
+  .hero-tag { font-size: 12px; padding: 5px 12px; }
+  .hiw-hero .d-flex { gap: 12px !important; }
+  .hiw-hero .d-flex .btn { font-size: 15px; padding: 10px 20px; }
+}
+
+@media (max-width: 400px) {
+  .hiw-hero h1 { font-size: 24px; }
+  .hiw-hero p.lead { font-size: 14px; }
+  .step-num { width: 36px; height: 36px; font-size: 15px; margin-bottom: 16px; }
+  .hiw-step-card h3 { font-size: 17px; }
+  .hiw-step-card p { font-size: 13px; }
+}
+
+/* CTA section responsive override */
+@media (max-width: 768px) {
+  .how-works-page .rounded-5 { border-radius: 16px !important; }
+  .how-works-page .display-5 { font-size: 1.75rem; }
+  .how-works-page .p-5 { padding: 2rem !important; }
+}
+
+@media (max-width: 640px) {
+  .how-works-page .display-5 { font-size: 1.5rem; }
+  .how-works-page .p-5 { padding: 1.5rem !important; }
 }
 </style>
 

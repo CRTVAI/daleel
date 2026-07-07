@@ -240,12 +240,12 @@
     }
 
     function updateHeader(step) {
-        const titles = { 1: "Which tools do you want to learn?", 2: "What is your main focus?", 3: "What is your skill level?", 4: "Your Learning Roadmap" };
+        const titles = { 1: "Which tools do you want to learn?", 2: "What is your main focus?", 3: "Your Learning Roadmap" };
         document.getElementById('wizard-title').innerText = titles[step];
         
-        if(step < 4) {
-            document.getElementById('step-count').innerText = `Step ${step} of 3`;
-            document.getElementById('progress-bar').style.width = (step * 33) + "%";
+        if(step < 3) {
+            document.getElementById('step-count').innerText = `Step ${step} of 2`;
+            document.getElementById('progress-bar').style.width = (step * 50) + "%";
         } else {
             document.getElementById('step-count').innerHTML = '<span class="badge bg-success rounded-pill px-3 py-1">Roadmap Generated!</span>';
             document.getElementById('progress-bar').style.width = "100%";
@@ -283,13 +283,6 @@
         }
     }
 
-    // Restore the listener for the skill level step
-    document.addEventListener('change', (e) => {
-        if(e.target.classList.contains('level-radio')) {
-            document.getElementById('btn-gen').classList.remove('d-none');
-        }
-    });
-
     function filterTools() {
         const query = document.getElementById('tool-search').value.toLowerCase();
         const tools = document.querySelectorAll('.tool-item');
@@ -324,9 +317,7 @@
     async function generateRoadmap() {
         const tools = Array.from(document.querySelectorAll('.tool-checkbox:checked')).map(el => el.value);
         const focus = document.querySelector('input[name="focus"]:checked').value;
-        const level = document.querySelector('input[name="level"]:checked').value;
-        
-        goToStep(4);
+        goToStep(3);
         const res = document.getElementById('roadmap-result');
         res.innerHTML = '<div class="text-center py-5"><div class="spinner-border text-primary"></div><p class="mt-3">Building your personal curriculum...</p></div>';
 
@@ -337,7 +328,7 @@
             const resp = await fetch("{{ route('roadmap.api.generate') }}", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': '{{ csrf_token() }}' },
-                body: JSON.stringify({ goal, tools, focus, level }),
+                body: JSON.stringify({ goal, tools, focus }),
                 signal: controller.signal
             });
             clearTimeout(id);
@@ -368,8 +359,8 @@
 
 <style>
     .transition-all { transition: all 0.2s ease; }
-    .tool-card:hover, .level-card:hover { border-color: #4f46e5; background: #f8fafc; }
-    .tool-checkbox:checked + .tool-card, .level-radio:checked + .card, .focus-radio:checked + .card { border-color: #4f46e5; background: #eef2ff; box-shadow: 0 4px 12px rgba(79,70,229,0.1); }
+    .tool-card:hover { border-color: #4f46e5; background: #f8fafc; }
+    .tool-checkbox:checked + .tool-card, .focus-radio:checked + .card { border-color: #4f46e5; background: #eef2ff; box-shadow: 0 4px 12px rgba(79,70,229,0.1); }
     .tool-checkbox:checked + .tool-card .selection-overlay { opacity: 1; }
     .fw-600 { font-weight: 600; }
     .cursor-pointer { cursor: pointer; }
@@ -493,7 +484,7 @@
             @if($type === 'roadmap')
                 <div id="roadmap-wizard" class="bg-white rounded-4 shadow-sm p-4 p-lg-5 mb-5 border">
                     <div class="text-center mb-5">
-                        <div id="step-count" class="text-uppercase text-primary fw-bold mb-2" style="font-size: 0.75rem; letter-spacing: 1px;">Step 1 of 3</div>
+                        <div id="step-count" class="text-uppercase text-primary fw-bold mb-2" style="font-size: 0.75rem; letter-spacing: 1px;">Step 1 of 2</div>
                         <h2 id="wizard-title" class="fw-bold h2 mb-3">Which tools do you want to learn?</h2>
                         <p id="wizard-subtitle" class="text-muted">For your goal: <span class="text-dark fw-bold italic">"{{ $query }}"</span></p>
                         
@@ -581,31 +572,11 @@
                         </div>
                         <div class="text-center mt-5 d-flex justify-content-center gap-3">
                             <button type="button" onclick="goToStep(1)" class="btn btn-link text-muted">Back</button>
-                            <button type="button" id="btn-next-3" onclick="goToStep(3)" class="btn btn-dark rounded-pill px-5 py-3 d-none">Next Step</button>
+                            <button type="button" id="btn-next-3" onclick="generateRoadmap()" class="btn btn-primary rounded-pill px-5 py-3 fw-bold d-none shadow-sm" style="background: linear-gradient(135deg, #7c6fff 0%, #a78bfa 100%); border:none;">Generate My Roadmap</button>
                         </div>
                     </div>
 
                     <div id="step-3" class="wizard-step d-none opacity-0 transition-all">
-                        <div class="row g-4 justify-content-center text-center">
-                            @foreach(['Beginner' => 'I am starting out', 'Intermediate' => 'I have some skills', 'Advanced' => 'I want to master it'] as $l => $d)
-                                <div class="col-md-4">
-                                    <label class="w-100 h-100 cursor-pointer">
-                                        <input type="radio" name="level" value="{{ strtolower($l) }}" class="level-radio d-none">
-                                        <div class="card p-4 border-2 transition-all rounded-4">
-                                            <h6 class="fw-bold mb-1">{{ $l }}</h6>
-                                            <div class="small text-muted">{{ $d }}</div>
-                                        </div>
-                                    </label>
-                                </div>
-                            @endforeach
-                        </div>
-                        <div class="text-center mt-5 d-flex justify-content-center gap-3">
-                            <button type="button" onclick="goToStep(2)" class="btn btn-link text-muted">Back</button>
-                            <button type="button" id="btn-gen" onclick="generateRoadmap()" class="btn btn-primary rounded-pill px-5 py-3 fw-bold d-none shadow-sm" style="background: linear-gradient(135deg, #7c6fff 0%, #a78bfa 100%); border:none;">Generate My Roadmap</button>
-                        </div>
-                    </div>
-
-                    <div id="step-4" class="wizard-step d-none opacity-0 transition-all">
                         <div id="roadmap-result"></div>
                     </div>
                 </div>

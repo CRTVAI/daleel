@@ -5,6 +5,36 @@
 @section('content')
 <div class="dashboard-focus-modern pb-5">
     @if(isset($pendingData) && $pendingData)
+    
+    <style>
+        /* Roadmap-style "tool row" widget (reuses roadmap wizard visual) */
+        .after-signin-tools-widget-title{font-weight:800;color:#1f2937;margin:0 0 14px 0;font-size:18px;letter-spacing:-0.02em;}
+        .after-signin-tool-row{border:2px solid #e2e8f0;border-radius:18px;transition:all .2s ease;min-height:96px;height:96px;display:flex;align-items:center;justify-content:space-between;padding:14px 14px;gap:12px;cursor:pointer;background:#fff;overflow:hidden;}
+        .after-signin-tool-row:hover{transform:translateY(-2px);border-color:#6366f1;box-shadow:0 6px 18px rgba(99,102,241,0.06);}
+        .after-signin-tool-row.selected{border-color:#6366f1;background:#f5f3ff;}
+        .after-signin-tool-row .logo{width:40px;height:40px;border:1px solid #e2e8f0;border-radius:14px;display:flex;align-items:center;justify-content:center;background:#f8fafc;flex-shrink:0;}
+        .after-signin-tool-row .logo img{width:22px;height:22px;object-fit:contain;}
+        .after-signin-tool-row .name{font-size:.95rem;font-weight:800;color:#0f172a;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px;}
+        .after-signin-tool-row .hint{font-size:.72rem;font-weight:700;color:#64748b;}
+        .after-signin-check{width:24px;height:24px;border:2px solid #cbd5e1;border-radius:50%;display:grid;place-items:center;color:transparent;font-size:.8rem;font-weight:800;transition:all .2s;flex-shrink:0;}
+        .after-signin-tool-row.selected .after-signin-check{border-color:#6366f1;background:#6366f1;color:#fff;}
+    </style>
+
+    <script>
+        function toggleAfterSigninTool(toolName){
+            const el = document.getElementById('afterSigninTool-'+toolName);
+            if(!el) return;
+            const hidden = document.getElementById('afterSigninToolInput-'+toolName);
+            const isSelected = el.classList.contains('selected');
+            if(isSelected){
+                el.classList.remove('selected');
+                if(hidden) hidden.value = '0';
+            }else{
+                el.classList.add('selected');
+                if(hidden) hidden.value = '1';
+            }
+        }
+    </script>
         <div class="alert alert-info border-0 shadow-lg p-4 rounded-4 mb-4" style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left: 5px solid #2563eb !important;">
             <div class="d-flex align-items-center flex-wrap flex-md-nowrap gap-3">
                 <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center p-3" style="width: 50px; height: 50px; flex-shrink: 0;">
@@ -51,6 +81,10 @@
                             <span class="input-group-text bg-transparent border-0 ps-4">
                                 <i class="bi bi-search text-primary fs-5"></i>
                             </span>
+                            <button type="button" id="voiceSearchBtn" class="btn border-0 bg-transparent px-2" title="Search by voice"
+                                    style="color:#6366f1;font-size:18px;" onclick="startVoiceSearch()">
+                                <i class="bi bi-mic"></i>
+                            </button>
                             <input type="text" name="search" id="dashboard-search-alt" class="form-control border-0 bg-transparent py-3 ps-2" 
                                    placeholder="Search for tools, skills, or topics..." 
                                    style="font-size: 19px; font-weight: 600; color: #1e1b4b; outline: none !important; box-shadow: none !important;">
@@ -196,7 +230,7 @@
 
     @if($continueWatching->count() > 0)
     <!-- Continue Watching Row -->
-    <div class="mb-5 animate-slide-up delay-4 px-4 py-5 rounded-5" style="background: #eef2ff; border: 1px solid #f1f5f9;">
+    <div class="mb-5 animate-slide-up delay-4 px-4 py-5 rounded-5 continue-watching-section" style="background: #eef2ff; border: 1px solid #f1f5f9;">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h5 class="fw-800 mb-0 d-flex align-items-center gap-2">
                 <i class="bi bi-play-circle-fill text-primary"></i> Continue Watching
@@ -411,7 +445,7 @@
                     <a href="{{ route('course.view', $course) }}" class="text-decoration-none h-100 d-block">
                         <div class="card-focus overflow-hidden h-100 transition-all hover-lift">
                             <div class="position-relative" style="height: 160px;">
-                                <img src="{{ $course->thumbnail }}" class="w-100 h-100 object-fit-cover">
+                                <img src="{{ $course->thumbnail ?? 'https://img.freepik.com/free-vector/cheerful-woman-studying-internet-watching-webinar-computer-taking-online-course-vector-illustration-knowledge-education-distance-learning-concept_778687-3129.jpg?semt=ais_hybrid&w=740&q=80' }}" class="w-100 h-100 object-fit-cover">
                                 <div class="position-absolute top-0 start-0 m-3">
                                     <span class="badge bg-white text-primary rounded-pill px-3 py-2 fw-bold small shadow-sm">{{ $course->category }}</span>
                                 </div>
@@ -505,12 +539,12 @@
                         ];
                     @endphp
                     
-                    <div class="row g-3">
+                    <div class="row g-3 trending-categories-row">
                         @foreach($trendingCategories as $cat)
                         @php 
                             $style = $catStyles[$cat->category] ?? $catStyles['General'];
                         @endphp
-                        <div class="col-6">
+                        <div class="col-6 trending-cat-col">
                             <a href="{{ route('learn.explore', ['category' => $cat->category]) }}" class="cat-card-neo p-3 rounded-4 border border-light bg-white d-block text-decoration-none transition-all">
                                 <div class="d-flex flex-column gap-3">
                                     <div class="d-flex justify-content-between align-items-start">
@@ -825,7 +859,130 @@
     .hover-lift:hover { transform: translateY(-5px); }
     .transition-all { transition: all 0.3s ease; }
 
+    /* ==================== RESPONSIVE ==================== */
+    @media (max-width: 992px) {
+        .hero-focus-card .border-end { border-right: none !important; }
+        .hero-focus-card .p-md-5 { padding: 1.5rem !important; }
+        .hero-focus-card h1 { font-size: 28px !important; }
+        .stats-premium-bar { padding: 8px; border-radius: 24px; }
+        .stat-item-premium { padding: 14px 20px; min-width: 200px; gap: 14px; }
+        .stat-item-premium .icon-box { width: 48px; height: 48px; font-size: 20px; border-radius: 16px; }
+        .roadmap-card { min-height: auto !important; padding: 1.5rem !important; }
+        .dashboard-focus-modern .row.mb-5[style*="background"] { padding: 16px !important; }
+        .dashboard-focus-modern .p-4.p-lg-5 { padding: 1.25rem !important; }
+    }
 
+    @media (max-width: 768px) {
+        .hero-focus-card { border-radius: 16px !important; margin-bottom: 1.5rem !important; }
+        .hero-focus-card .p-md-5 { padding: 1.25rem !important; }
+        .hero-focus-card h1 { font-size: 24px !important; text-align: center !important; }
+        .hero-focus-card .text-start { text-align: center !important; }
+        .hero-focus-card .ps-lg-3 { padding-left: 0 !important; }
+        .hero-focus-card .input-group { flex-wrap: nowrap; }
+        .hero-focus-card .input-group input { font-size: 15px !important; padding: 12px 10px !important; }
+        .hero-focus-card .input-group button { width: 44px !important; height: 44px !important; }
+        .hero-focus-card .input-group button i { font-size: 1rem !important; }
+        .hero-actions { gap: 0.5rem !important; justify-content: center !important; }
+        .btn-hero-pill-mini { font-size: 11px !important; padding: 6px 14px !important; height: 34px !important; }
+
+        .roadmap-card { padding: 1.25rem !important; border-radius: 16px !important; text-align: center !important; }
+        .roadmap-card .gap-4 { gap: 1rem !important; justify-content: center !important; }
+        .roadmap-card .roadmap-icon-box { width: 60px !important; height: 60px !important; padding: 10px !important; }
+        .roadmap-card h4 { font-size: 17px !important; }
+        .roadmap-card .d-flex.justify-content-between { justify-content: center !important; gap: 8px; flex-wrap: wrap; }
+        .roadmap-card .d-flex.align-items-center.gap-3 { justify-content: center !important; }
+        .btn-roadmap-continue { font-size: 14px; padding: 12px !important; }
+
+        .stats-premium-bar { flex-direction: row; flex-wrap: nowrap; padding: 0; border-radius: 0; gap: 0; justify-content: center; background: transparent; border: none; box-shadow: none; }
+        .stat-item-premium { flex: none; min-width: 0; padding: 0 14px; gap: 8px; flex-direction: row; text-align: left; border-radius: 0; border: none; align-items: center; }
+        .stat-item-premium:not(:last-child)::after { display: none; }
+        .stat-item-premium + .stat-item-premium { border-left: 1px solid #e2e8f0; }
+        .stat-item-premium .icon-box { width: 28px; height: 28px; font-size: 12px; border-radius: 8px; margin: 0; }
+        .stat-item-premium > div { text-align: left; display: flex; align-items: baseline; gap: 4px; }
+        .stat-item-premium .d-flex.align-items-baseline { display: flex !important; flex-direction: row; gap: 3px; }
+        .stat-value-premium { font-size: 16px !important; }
+        .stat-label-premium { display: none; }
+        .stat-item-premium .text-muted.fw-800[style*="font-size: 11px"] { display: inline !important; font-size: 10px !important; }
+        .stat-item-premium .text-primary.fw-900 { display: none !important; }
+        .stat-item-premium .progress { display: none; }
+        .stat-item-premium .d-flex.align-items-center.gap-1.mt-1 { display: none; }
+        .stat-item-premium .small.fw-700.opacity-50 { font-size: 10px !important; }
+
+        .dashboard-focus-modern .px-4.py-5.rounded-5 { padding: 1rem !important; border-radius: 16px !important; }
+        .dashboard-focus-modern .mb-5[style*="background"] { padding: 12px !important; border-radius: 14px !important; }
+        .dashboard-focus-modern .p-4.p-lg-5 { padding: 1rem !important; }
+
+        .quotesSwiper .swiper-slide p { font-size: 14px !important; min-height: 60px !important; margin-bottom: 12px !important; }
+        .quotesSwiper .pb-5 { padding-bottom: 2rem !important; }
+        .quotesSwiper .swiper-slide .d-flex { gap: 6px !important; flex-wrap: wrap; }
+        .quotesSwiper .swiper-slide .bg-primary { font-size: 8px !important; padding: 3px 10px !important; letter-spacing: 0.03em; }
+        .quotesSwiper .swiper-slide .text-muted { font-size: 9px !important; }
+
+        [class*="Swiper"] .swiper-slide { width: 100% !important; margin-right: 0 !important; }
+        .card-focus.p-3 { padding: 14px !important; gap: 14px !important; }
+        .card-focus.p-3 .rounded-3[style*="width: 80px"] { width: 72px !important; height: 54px !important; }
+        .card-focus.p-3 h6 { font-size: 13px !important; }
+        .card-focus.p-3 .progress { height: 5px !important; }
+        .card-focus.p-3 .d-flex.justify-content-between span { font-size: 10px !important; }
+        .card-focus.p-3 .d-flex.justify-content-between a { font-size: 10px !important; }
+
+        .continue-watching-section .d-flex.gap-2 { display: none !important; }
+        .continue-watching-section .d-none.d-md-block { display: none !important; }
+
+        .dashboard-focus-modern h5.fw-800 { font-size: 15px !important; }
+        .dashboard-focus-modern .d-flex.justify-content-between.align-items-center.mb-4 { flex-wrap: wrap; gap: 8px; }
+        .dashboard-focus-modern .badge.d-none.d-md-inline-block { display: none !important; }
+
+        .tool-logo-container[style*="width: 80px"] { width: 56px !important; height: 56px !important; border-radius: 16px !important; }
+        .tool-logo-container img { width: 32px !important; height: 32px !important; }
+
+        .cat-card-neo.p-3 { padding: 12px !important; }
+        .cat-card-neo .cat-icon-box { width: 32px !important; height: 32px !important; font-size: 14px !important; }
+        .cat-card-neo h6 { font-size: 12px !important; }
+
+        .trending-categories-row { display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 4px; }
+        .trending-categories-row::-webkit-scrollbar { display: none; }
+        .trending-cat-col { flex: 0 0 80%; scroll-snap-align: start; padding: 0 !important; max-width: none; }
+
+        .short-card-focus { height: 180px !important; }
+
+        .search-wrapper .input-group { border-radius: 50px !important; }
+    }
+
+    @media (max-width: 480px) {
+        .hero-focus-card { border-radius: 12px !important; }
+        .hero-focus-card h1 { font-size: 20px !important; }
+        .hero-focus-card .input-group input { font-size: 13px !important; }
+        .hero-actions { flex-direction: column; width: 100%; }
+        .btn-hero-pill-mini { width: 100%; justify-content: center; font-size: 12px !important; padding: 8px 16px !important; height: 38px !important; }
+
+        .roadmap-card { padding: 1rem !important; border-radius: 12px !important; }
+        .roadmap-card .d-flex.align-items-center.gap-4 { flex-direction: column; text-align: center; }
+        .roadmap-card .roadmap-icon-box { width: 56px !important; height: 56px !important; }
+        .roadmap-card h4 { font-size: 15px !important; }
+        .roadmap-card p.text-muted { text-align: center; }
+
+        .stats-premium-bar { gap: 0; }
+        .stat-item-premium { padding: 0 10px; gap: 6px; }
+        .stat-item-premium .icon-box { width: 22px; height: 22px; font-size: 10px; border-radius: 6px; }
+        .stat-value-premium { font-size: 14px !important; }
+        .stat-item-premium .text-muted.fw-800[style*="font-size: 11px"] { font-size: 8px !important; }
+        .stat-item-premium .small.fw-700.opacity-50 { font-size: 8px !important; }
+
+        .dashboard-focus-modern .row.mb-5[style*="background"] .col-lg-6:first-child { margin-bottom: 1rem; }
+        .dashboard-focus-modern .p-4 { padding: 12px !important; }
+
+        [class*="Swiper"] .swiper-slide { width: 100% !important; margin-right: 0 !important; }
+
+        .dashboard-focus-modern h5.fw-800 { font-size: 14px !important; }
+        .dashboard-focus-modern .d-flex.gap-2 .btn[style*="width: 32px"] { width: 28px !important; height: 28px !important; }
+        .dashboard-focus-modern .d-flex.gap-2 .btn i { font-size: 10px !important; }
+
+        .short-card-focus { height: 140px !important; border-radius: 12px !important; }
+
+        .cat-card-neo .row.g-3 { --bs-gutter-y: 0.5rem; }
+        .cat-card-neo .col-6 { padding-right: 6px; padding-left: 6px; }
+    }
 </style>
 @endsection
 

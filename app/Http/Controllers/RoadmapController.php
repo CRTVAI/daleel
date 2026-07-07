@@ -33,9 +33,10 @@ class RoadmapController extends Controller
 
         // 1. Build phases
         $phases = $roadmap->curriculum['phases'] ?? $roadmap->curriculum;
+        $phases = $this->healRoadmapCurriculum($roadmap, $phases);
 
         $allVideoIds = collect($phases)->filter(fn($p) => is_array($p))
-            ->pluck('videos')->flatten(1)->pluck('id')->unique()->values();
+            ->pluck('videos')->flatten(1)->pluck('id')->filter()->unique()->values();
 
         // 2. Load ALL progress records in ONE query, keyed by content_id
         $progressMap = $user->videoProgress()
@@ -46,14 +47,27 @@ class RoadmapController extends Controller
         $roadmapData = collect($phases)->map(function($phase) use ($progressMap) {
             if (!is_array($phase)) return null;
             $tool     = Tool::where('name', $phase['tool_name'] ?? null)->first();
-            $videoIds = collect($phase['videos'])->pluck('id')->toArray();
+            $videoIds = collect($phase['videos'])->pluck('id')->filter()->values();
             $contents = Content::whereIn('id', $videoIds)->get()
+                ->sortBy(fn($content) => $videoIds->search($content->id))
+                ->values()
                 ->map(function($content) use ($progressMap) {
                     $p = $progressMap->get($content->id);
+                    $duration = max((int) ($content->resolved_duration_seconds ?? 0), (int) ($p?->duration_seconds ?? 0));
+                    $watched = min((int) ($p?->watched_seconds ?? 0), $duration > 0 ? $duration : (int) ($p?->watched_seconds ?? 0));
+                    $completion = $duration > 0 ? min(100, round(($watched / $duration) * 100, 2)) : (float) ($p?->completion_percent ?? 0);
+                    $isCompleted = ($p?->completed ?? false) || $completion >= 90;
+                    if ($isCompleted && $duration > 0) {
+                        $watched = $duration;
+                        $completion = 100;
+                    }
+
                     $content->progress_record = $p;
-                    $content->watched_seconds = $p?->watched_seconds ?? 0;
-                    $content->completion_pct  = $p ? round($p->completion_percent) : 0;
-                    $content->is_completed    = $p?->completed ?? false;
+                    $content->duration_seconds = $duration;
+                    $content->watched_seconds = $watched;
+                    $content->remaining_seconds = max(0, $duration - $watched);
+                    $content->completion_pct  = round($completion);
+                    $content->is_completed    = $isCompleted;
                     $content->last_watched_at = $p?->last_watched_at;
                     return $content;
                 });
@@ -61,45 +75,86 @@ class RoadmapController extends Controller
             $totalCount     = $contents->count();
             if ($totalCount === 0) return null;
             $completedCount = $contents->where('is_completed', true)->count();
+            $durationTotal  = $contents->sum('duration_seconds');
+            $watchedTotal   = $contents->sum('watched_seconds');
+            $phasePercent   = $durationTotal > 0
+                ? round(($watchedTotal / $durationTotal) * 100)
+                : round($contents->avg('completion_pct') ?? 0);
 
             return [
                 'tool'      => $tool,
                 'contents'  => $contents,
                 'total'     => $totalCount,
                 'completed' => $completedCount,
-                'percent'   => round(($completedCount / $totalCount) * 100),
+                'percent'   => min(100, $phasePercent),
+                'duration_seconds' => $durationTotal,
+                'watched_seconds' => $watchedTotal,
+                'remaining_seconds' => max(0, $durationTotal - $watchedTotal),
             ];
         })->filter()->values();
 
         // 4. Stats
         $totalLessons          = $allVideoIds->count();
-        $lessonsCompleted      = $progressMap->where('completed', true)->count();
-        $overallProgress       = $totalLessons > 0 ? round(($lessonsCompleted / $totalLessons) * 100) : 0;
-        $totalWatchedSeconds   = $progressMap->sum('watched_seconds');
-        $totalDurationSeconds  = Content::whereIn('id', $allVideoIds)->sum('duration_seconds');
+        $allContents           = $roadmapData->flatMap(fn($phase) => $phase['contents'])->unique('id')->values();
+        $lessonsCompleted      = $allContents->where('is_completed', true)->count();
+        $totalWatchedSeconds   = $allContents->sum('watched_seconds');
+        $totalDurationSeconds  = $allContents->sum('duration_seconds');
         $remainingSeconds      = max(0, $totalDurationSeconds - $totalWatchedSeconds);
+        $overallProgress       = $totalDurationSeconds > 0 ? min(100, round(($totalWatchedSeconds / $totalDurationSeconds) * 100)) : 0;
 
-        // 5. Current active lesson: Find the first incomplete video in the roadmap sequence
+        $hasKnownDurations      = $totalDurationSeconds > 0;
+        $formattedTotalDuration = $hasKnownDurations ? $this->formatDuration($totalDurationSeconds) : 'Duration pending';
+        $formattedWatchedTime   = $this->formatDuration($totalWatchedSeconds);
+        $formattedRemainingTime = $hasKnownDurations ? $this->formatDuration($remainingSeconds) : 'Pending';
+
+        // 5. Sidebar lesson = the LAST WATCHED lesson (most recent last_watched_at)
+        //    CTA lesson    = the NEXT lesson to watch (first incomplete in sequence)
         $currentLesson = null;
         $currentProgressRecord = null;
+        $nextIncompleteLesson = null;
 
+        // Find the last-watched lesson across all phases (by last_watched_at timestamp)
+        $lastWatchedContent = null;
+        $lastWatchedAt = null;
+        foreach ($roadmapData as $phase) {
+            foreach ($phase['contents'] as $content) {
+                $watchedAt = $content->last_watched_at;
+                if ($watchedAt && ($lastWatchedAt === null || $watchedAt > $lastWatchedAt)) {
+                    $lastWatchedAt = $watchedAt;
+                    $lastWatchedContent = $content;
+                }
+            }
+        }
+
+        // Find the first incomplete lesson for the CTA "Continue" button
         foreach ($roadmapData as $phase) {
             foreach ($phase['contents'] as $content) {
                 if (!$content->is_completed) {
-                    $currentLesson = $content;
-                    $currentProgressRecord = $progressMap->get($content->id);
+                    $nextIncompleteLesson = $content;
                     break 2;
                 }
             }
         }
 
-        // Fallback: If all lessons are completed, default to the very first lesson
-        if (!$currentLesson) {
+        // Sidebar shows last-watched lesson; fallback to first incomplete if nothing watched
+        if ($lastWatchedContent) {
+            $currentLesson = $lastWatchedContent;
+            $currentProgressRecord = $progressMap->get($currentLesson->id);
+        } elseif ($nextIncompleteLesson) {
+            $currentLesson = $nextIncompleteLesson;
+            $currentProgressRecord = $progressMap->get($currentLesson->id);
+        } else {
+            // All done — show first lesson
             $firstPhase = $roadmapData->first();
             $currentLesson = $firstPhase ? $firstPhase['contents']->first() : null;
             if ($currentLesson) {
                 $currentProgressRecord = $progressMap->get($currentLesson->id);
             }
+        }
+
+        // CTA target: first incomplete, fallback to last-watched
+        if (!$nextIncompleteLesson) {
+            $nextIncompleteLesson = $currentLesson;
         }
 
         $currentTool = null;
@@ -114,8 +169,85 @@ class RoadmapController extends Controller
             'roadmapData', 'overallProgress', 'lessonsCompleted', 'totalLessons',
             'currentLesson', 'currentTool', 'currentProgressRecord',
             'totalWatchedSeconds', 'totalDurationSeconds', 'remainingSeconds', 'progressMap',
-            'roadmap'
+            'roadmap', 'formattedTotalDuration', 'formattedWatchedTime', 'formattedRemainingTime',
+            'hasKnownDurations', 'nextIncompleteLesson'
         ));
+    }
+
+    private function formatDuration(int $seconds): string
+    {
+        $seconds = max(0, $seconds);
+        $hours = intdiv($seconds, 3600);
+        $minutes = intdiv($seconds % 3600, 60);
+
+        if ($hours > 0) {
+            return "{$hours}h {$minutes}m";
+        }
+
+        return "{$minutes}m";
+    }
+
+    private function healRoadmapCurriculum(UserRoadmap $roadmap, array $phases): array
+    {
+        $changed = false;
+
+        $healedPhases = collect($phases)->map(function($phase) use (&$changed) {
+            if (!is_array($phase)) {
+                return $phase;
+            }
+
+            $videos = collect($phase['videos'] ?? [])->filter(fn($video) => is_array($video))->values();
+            if ($videos->isEmpty()) {
+                return $phase;
+            }
+
+            $videoIds = $videos->pluck('id')->filter()->values();
+            $existingCount = Content::whereIn('id', $videoIds)->count();
+            if ($existingCount === $videoIds->count()) {
+                return $phase;
+            }
+
+            $toolName = $phase['tool_name'] ?? null;
+            if (!$toolName) {
+                return $phase;
+            }
+
+            $replacementCount = max($videoIds->count(), 5);
+            $replacementVideos = Content::whereJsonContains('connected_tools', $toolName)
+                ->where('type', 'video')
+                ->active()
+                ->latest('id')
+                ->get()
+                ->unique('title')
+                ->take($replacementCount)
+                ->values();
+
+            if ($replacementVideos->isEmpty()) {
+                return $phase;
+            }
+
+            $phase['videos'] = $replacementVideos->map(fn($content) => [
+                'id' => $content->id,
+                'title' => $content->title,
+                'thumbnail_url' => $content->thumbnail_url,
+            ])->values()->all();
+
+            $changed = true;
+
+            return $phase;
+        })->values()->all();
+
+        if ($changed) {
+            $curriculum = $roadmap->curriculum;
+            if (is_array($curriculum) && array_key_exists('phases', $curriculum)) {
+                $curriculum['phases'] = $healedPhases;
+                $roadmap->update(['curriculum' => $curriculum]);
+            } else {
+                $roadmap->update(['curriculum' => $healedPhases]);
+            }
+        }
+
+        return $healedPhases;
     }
 
     public function wizard(Request $request)
@@ -200,7 +332,7 @@ class RoadmapController extends Controller
         $goal = $request->input('goal');
         $tools = $request->input('tools', []);
         $focus = $request->input('focus');
-        $level = $request->input('level');
+        $level = $this->normalizeLevel($user->experience_level);
 
         // 1. Clean the title with AI
         $title = $this->cleanTitleWithAi($goal);
@@ -260,6 +392,17 @@ class RoadmapController extends Controller
             Log::error('Roadmap Title Cleaning Failed: ' . $e->getMessage());
             return ucfirst($goal);
         }
+    }
+
+    private function normalizeLevel(?string $level): string
+    {
+        $level = strtolower(trim((string) $level));
+
+        return match ($level) {
+            'intermediate' => 'intermediate',
+            'advanced' => 'advanced',
+            default => 'beginner',
+        };
     }
 
     // =========================================================================
@@ -338,35 +481,19 @@ PROMPT;
         $phases = [];
         $tools = Tool::whereIn('id', $toolIds)->get();
 
-        // Fallback skill level order: try selected level first, then others
-        $fallbackLevels = array_filter(['beginner', 'intermediate', 'advanced'], fn($l) => $l !== strtolower($level));
-        $levelOrder = array_merge([strtolower($level)], $fallbackLevels);
-
         foreach ($tools as $tool) {
-            $videos = collect();
-            $matchedLevel = $level;
+            // Fetch ALL active videos for this tool — no skill_level filter
+            $videos = Content::whereJsonContains('connected_tools', $tool->name)
+                ->active()
+                ->get();
 
-            // Try each skill level until we find videos
-            foreach ($levelOrder as $tryLevel) {
-                $found = Content::whereJsonContains('connected_tools', $tool->name)
-                    ->where('skill_level', $tryLevel)
-                    ->active()
-                    ->get();
-
-                if ($found->count() > 0) {
-                    $videos = $found;
-                    $matchedLevel = $tryLevel;
-                    break;
-                }
-            }
-
-            // Skip this tool entirely if no videos found at any level
+            // Skip this tool entirely if no videos found
             if ($videos->count() === 0) {
                 continue;
             }
 
-            // Filter the list of videos to match the user's specific focus
-            $filteredVideos = $this->filterVideosByFocusAndLevel($videos, $focus, $tool->name, $matchedLevel);
+            // Let AI pick the best-matching videos for the user's focus and level
+            $filteredVideos = $this->filterVideosByFocusAndLevel($videos, $focus, $tool->name, $level);
 
             // Map to ensure we have the thumbnail_url accessor value for the frontend
             $videoData = $filteredVideos->map(function($v) {
@@ -381,7 +508,6 @@ PROMPT;
                 'name' => "Mastering {$tool->name}",
                 'tool_name' => $tool->name,
                 'videos' => $videoData,
-                'skill_level_used' => $matchedLevel,
             ];
         }
 
@@ -446,7 +572,7 @@ PROMPT;
             $toolIds[] = $tool->id;
 
             // Re-generate curriculum for all aggregated tools
-            $level = $roadmap->level ?: 'Beginner';
+            $level = $this->normalizeLevel($roadmap->level);
             $focus = $roadmap->focus ?: 'General Productivity';
             $curriculumData = $this->buildFinalCurriculum($roadmap->title, $toolIds, $focus, $level);
 
@@ -582,7 +708,7 @@ PROMPT;
         if (!$autoRoadmap) {
             // Auto-create initial roadmap using detected tools
             $toolIds = $detectedTools->pluck('id')->toArray();
-            $level = $user->experience_level ?: 'Beginner';
+            $level = $this->normalizeLevel($user->experience_level);
             $focus = $user->learning_goal ?: 'General Productivity';
 
             $curriculumData = $this->buildFinalCurriculum("Auto-Generated Career path", $toolIds, $focus, $level);
@@ -642,7 +768,7 @@ PROMPT;
             ->get();
 
         $toolIds = $selectedTools->pluck('id')->toArray();
-        $level = $user->experience_level ?: 'Beginner';
+        $level = $this->normalizeLevel($user->experience_level);
         $focus = $user->learning_goal ?: 'General Productivity';
 
         // Build final curriculum

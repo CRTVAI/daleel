@@ -183,13 +183,28 @@ class LearningController extends Controller
         ]);
 
         $user = Auth::user();
+        $content = Content::findOrFail($request->content_id);
+        $existing = UserVideoProgress::where('user_id', $user->id)
+            ->where('content_id', $content->id)
+            ->first();
+
         $watched  = (int) $request->watched_seconds;
-        $duration = (int) $request->duration_seconds;
-        $percent  = min(100, round(($watched / $duration) * 100, 2));
-        $completed = $percent >= 90; // ≥90% counts as completed
+        $duration = max((int) $request->duration_seconds, (int) ($content->resolved_duration_seconds ?? 0), (int) ($existing?->duration_seconds ?? 0));
+        $watched = max($watched, (int) ($existing?->watched_seconds ?? 0));
+        if ($duration > 0) {
+            $watched = min($watched, $duration);
+        }
+
+        $percent = $duration > 0 ? min(100, round(($watched / $duration) * 100, 2)) : 0;
+        $percent = max($percent, (float) ($existing?->completion_percent ?? 0));
+        $completed = ($existing?->completed ?? false) || $percent >= 90;
+        if ($completed && $duration > 0) {
+            $watched = $duration;
+            $percent = 100;
+        }
 
         UserVideoProgress::updateOrCreate(
-            ['user_id' => $user->id, 'content_id' => $request->content_id],
+            ['user_id' => $user->id, 'content_id' => $content->id],
             [
                 'watched_seconds'  => $watched,
                 'duration_seconds' => $duration,

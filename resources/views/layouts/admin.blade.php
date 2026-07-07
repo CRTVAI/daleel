@@ -288,6 +288,9 @@
                  <li class="menu-item {{ request()->routeIs('admin.tools.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.tools.index') }}"><i class="bi bi-cpu-fill"></i> Connected Tools</a>
                 </li>
+                <li class="menu-item {{ request()->routeIs('admin.blogs.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.blogs.index') }}"><i class="bi bi-file-earmark-diff-fill"></i> Blogs Manager</a>
+                </li>
                 <li class="menu-item {{ request()->routeIs('admin.profile-options.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.profile-options.index') }}"><i class="bi bi-list-check"></i> Profile Options</a>
                 </li>

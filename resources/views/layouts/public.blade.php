@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>@yield('title', 'Daleel AI')</title>
+  <meta name="description" content="@yield('meta_description', $seo['meta_description'] ?? 'Browse our dynamic learning paths, video lessons, corporate training portals, and guides.')">
+  <meta name="keywords" content="@yield('meta_keywords', $seo['meta_keywords'] ?? 'AI, learning roadmaps, tutorials, courses')">
+  <link rel="canonical" href="@yield('canonical', $seo['canonical'] ?? request()->url())">
+  
+  <meta property="og:title" content="@yield('title', 'Daleel AI')">
+  <meta property="og:description" content="@yield('meta_description', $seo['meta_description'] ?? 'Browse our dynamic learning paths, video lessons, corporate training portals, and guides.')">
+  <meta property="og:image" content="@yield('og_image', $seo['og_image'] ?? asset('images/default-blog.jpg'))">
+  <meta name="twitter:card" content="summary_large_image">
+
   <link rel="icon" type="image/png" href="{{ asset('images/dashboard/fav.png') }}">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -19,13 +28,15 @@
       <nav class="nav-links" id="siteNavLinks" aria-label="Public pages">
         <a href="{{ url('how-it-works') }}" class="fw-700">How It Works</a>
         <a href="{{ url('videos') }}" class="fw-700">Lessons</a>
+        <a href="{{ route('public.blog') }}" class="fw-700">Blog</a>
         <a href="{{ url('enterprise') }}" class="fw-700">Contact Us</a>
         <a href="{{ url('pricing') }}" class="fw-700">Pricing</a>
+        <div class="nav-actions">
+          <a class="btn secondary px-4" href="{{ route('login') }}" style="height: 42px; font-size: 0.85rem;">Login</a>
+          <a class="btn primary px-4" href="{{ route('register') }}" style="height: 42px; font-size: 0.85rem;">Get Started</a>
+        </div>
       </nav>
-      <div class="nav-actions">
-        <a class="btn secondary px-4" href="{{ route('login') }}" style="height: 42px; font-size: 0.85rem;">Login</a>
-        <a class="btn primary px-4" href="{{ route('register') }}" style="height: 42px; font-size: 0.85rem;">Get Started</a>
-      </div>
+      <div class="nav-overlay" id="siteNavOverlay"></div>
       <button class="menu-toggle" id="siteMenuToggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="siteNavLinks">
         <span></span><span></span><span></span>
       </button>
@@ -40,13 +51,8 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <a class="brand" href="/"><x-application-logo style="height: 36px; width: auto;" /></a>
+          <a class="brand" href="/"><img src="{{ asset('images/dashboard/logo-white.png') }}"></a>
           <p>AI lessons matched to daily tasks, repeated work, and real workplace goals.</p>
-          <form class="newsletter">
-            <input aria-label="Email for AI tips" placeholder="Get AI workflow tips">
-            <button class="btn primary" type="submit">Join</button>
-            <div class="form-message" id="newsletterMsg">Thanks! You're subscribed.</div>
-          </form>
         </div>
         <div>
           <h3>Product</h3>
@@ -88,13 +94,23 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    // Initialize standard nav logic since we are not using SPA for this page
     const toggle = document.getElementById("siteMenuToggle");
-    if (toggle) {
-        toggle.addEventListener("click", () => {
-          document.body.classList.toggle("nav-open");
-        });
+    const overlay = document.getElementById("siteNavOverlay");
+    function toggleNav() {
+      const isOpen = document.body.classList.toggle("nav-open");
+      toggle.setAttribute("aria-expanded", isOpen);
     }
+    if (toggle) {
+      toggle.addEventListener("click", toggleNav);
+    }
+    if (overlay) {
+      overlay.addEventListener("click", toggleNav);
+    }
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && document.body.classList.contains("nav-open")) {
+        toggleNav();
+      }
+    });
   </script>
   @yield('scripts')
 </body>

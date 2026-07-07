@@ -147,6 +147,24 @@ button {
   gap: 12px;
 }
 
+.nav-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 998;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+  pointer-events: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.nav-open .nav-overlay {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
 /* Mobile Menu Toggle */
 .menu-toggle {
   display: none;
@@ -169,6 +187,12 @@ button {
 }
 
 @media (max-width: 1024px) {
+  .site-nav {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: rgba(255, 255, 255, 0.95);
+  }
+
   .menu-toggle {
     display: flex;
   }
@@ -176,19 +200,61 @@ button {
   .nav-links {
     position: fixed;
     top: 0;
-    right: -100%;
-    width: 80%;
-    height: 100vh;
+    right: 0;
+    max-width: 360px;
+    width: 85%;
+    height: 100dvh;
     background: white;
     flex-direction: column;
-    padding: 100px 40px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+    align-items: stretch;
+    padding: 100px 32px 32px;
+    transform: translateX(100%);
+    transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -10px 0 40px rgba(0,0,0,0.1);
     z-index: 999;
+    overflow-y: auto;
+    gap: 8px;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .nav-links a {
+    padding: 12px 16px;
+    font-size: 1.05rem;
+    border-radius: 12px;
+    color: var(--text);
+  }
+
+  .nav-links a:hover {
+    background: var(--surface);
+    color: var(--primary);
+  }
+
+  .nav-links .nav-actions {
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 16px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+  }
+
+  .nav-links .nav-actions .btn {
+    width: 100%;
+    height: 48px;
+    font-size: 1rem !important;
+    justify-content: center;
   }
 
   body.nav-open .nav-links {
-    right: 0;
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  body.nav-open .menu-toggle {
+    position: fixed;
+    top: 18px;
+    right: 20px;
   }
 
   body.nav-open .menu-toggle span:first-child {

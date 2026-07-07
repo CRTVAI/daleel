@@ -78,22 +78,27 @@
 
     .quick-tags {
         display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        gap: 0.5rem;
+        align-items: center;
         margin-top: 1.2rem;
         z-index: 10;
         position: relative;
+        overflow: hidden;
     }
 
-    .quick-tag-label {
-        font-size: 0.8rem;
-        color: rgba(255, 255, 255, 0.6);
-        align-self: center;
-        font-weight: 700;
-        margin-right: 0.25rem;
-        text-transform: uppercase;
-        letter-spacing: 0.05em;
+    .quick-tags-track {
+        display: flex;
+        gap: 0.5rem;
+        animation: qt-scroll 40s linear infinite;
+        width: max-content;
+    }
+
+    .quick-tags-track:hover {
+        animation-play-state: paused;
+    }
+
+    @keyframes qt-scroll {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
     }
 
     .quick-tag-btn {
@@ -105,7 +110,9 @@
         font-size: 0.78rem;
         font-weight: 700;
         text-decoration: none;
+        white-space: nowrap;
         transition: all 0.2s;
+        flex-shrink: 0;
     }
 
     .quick-tag-btn:hover {
@@ -313,7 +320,7 @@
         <form method="GET" action="{{ route('videos.public') }}" class="search-container-premium">
             <i class="bi bi-search search-icon-premium"></i>
             <input type="text" name="search" value="{{ request('search') }}" 
-                   class="search-input-premium" placeholder="Search prompts, tools, or roles...">
+                   class="search-input-premium" placeholder="Search prompts, tools, or roles..." autocomplete="off">
             @if(request('search'))
                 <a href="{{ route('videos.public') }}" class="position-absolute end-0 top-50 translate-middle-y me-3 text-muted">
                     <i class="bi bi-x-circle-fill"></i>
@@ -322,12 +329,14 @@
         </form>
 
         <div class="quick-tags">
-            <span class="quick-tag-label">🔌 Connected Browser Tools:</span>
-            <a href="{{ route('videos.public', ['search' => 'chatgpt']) }}" class="quick-tag-btn">🤖 ChatGPT</a>
-            <a href="{{ route('videos.public', ['search' => 'notion']) }}" class="quick-tag-btn">📝 Notion</a>
-            <a href="{{ route('videos.public', ['search' => 'slack']) }}" class="quick-tag-btn">💬 Slack</a>
-            <a href="{{ route('videos.public', ['search' => 'gmail']) }}" class="quick-tag-btn">📧 Gmail</a>
-            <a href="{{ route('videos.public', ['search' => 'figma']) }}" class="quick-tag-btn">🎨 Figma</a>
+            <div class="quick-tags-track">
+                @foreach($connectedTools as $tool)
+                <a href="{{ route('videos.public', ['search' => urlencode($tool->name)]) }}" class="quick-tag-btn">{{ $tool->name }}</a>
+                @endforeach
+                @foreach($connectedTools as $tool)
+                <a href="{{ route('videos.public', ['search' => urlencode($tool->name)]) }}" class="quick-tag-btn">{{ $tool->name }}</a>
+                @endforeach
+            </div>
         </div>
     </div>
 </div>
@@ -338,8 +347,8 @@
         <a href="{{ route('videos.public', ['search' => request('search')]) }}" 
            class="topic-pill {{ !request('category') ? 'active' : '' }}">All Subjects</a>
         @foreach($categories as $cat)
-            <a href="{{ route('videos.public', ['category' => $cat, 'search' => request('search')]) }}" 
-               class="topic-pill {{ request('category') == $cat ? 'active' : '' }}">{{ $cat }}</a>
+            <a href="{{ route('videos.public', ['category_id' => $cat->id, 'search' => request('search')]) }}" 
+               class="topic-pill {{ request('category_id') == $cat->id ? 'active' : '' }}">{{ $cat->name }}</a>
         @endforeach
     </div>
 
