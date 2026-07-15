@@ -8,6 +8,7 @@ class Content extends Model
 {
     protected $fillable = [
         'title',
+        'author_name',
         'slug',
         'type',
         'video_url',

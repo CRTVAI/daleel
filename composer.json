@@ -8,6 +8,8 @@
     "require": {
         "php": "^8.2",
         "aws/aws-sdk-php": "^3.385",
+        "barryvdh/laravel-dompdf": "*",
+        "dompdf/dompdf": "^3.1",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/socialite": "^5.27",

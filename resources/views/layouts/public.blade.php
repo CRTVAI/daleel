@@ -32,8 +32,12 @@
         <a href="{{ url('enterprise') }}" class="fw-700">Contact Us</a>
         <a href="{{ url('pricing') }}" class="fw-700">Pricing</a>
         <div class="nav-actions">
-          <a class="btn secondary px-4" href="{{ route('login') }}" style="height: 42px; font-size: 0.85rem;">Login</a>
-          <a class="btn primary px-4" href="{{ route('register') }}" style="height: 42px; font-size: 0.85rem;">Get Started</a>
+          @auth
+            <a class="btn primary px-4" href="{{ route('dashboard') }}" style="height: 42px; font-size: 0.85rem;">Dashboard</a>
+          @else
+            <a class="btn secondary px-4" href="{{ route('login') }}" style="height: 42px; font-size: 0.85rem;">Login</a>
+            <a class="btn primary px-4" href="{{ route('register') }}" style="height: 42px; font-size: 0.85rem;">Get Started</a>
+          @endauth
         </div>
       </nav>
       <div class="nav-overlay" id="siteNavOverlay"></div>
@@ -43,7 +47,7 @@
     </div>
   </header>
 
-  <main style="min-height: calc(100vh - 400px);">
+  <main style="min-height: calc(100vh - 400px); overflow-x: hidden;">
     @yield('content')
   </main>
 
@@ -58,36 +62,29 @@
           <h3>Product</h3>
           <a href="{{ url('how-it-works') }}">How It Works</a>
           <a href="{{ url('videos') }}">Video Lessons</a>
-          <a href="{{ url('learning-paths') }}">Learning Paths</a>
-          <a href="{{ url('chrome-extension') }}">Chrome Extension</a>
+          <a href="{{ auth()->check() ? route('dashboard') : route('login') }}">Chrome Extension</a>
         </div>
         <div>
           <h3>Enterprise</h3>
           <a href="{{ url('enterprise') }}">Team Training</a>
-          <a href="{{ url('enterprise#analytics') }}">Analytics</a>
           <a href="{{ url('success-stories') }}">Success Stories</a>
-          <a href="{{ url('contact') }}">Book Demo</a>
+          <a href="{{ url('enterprise') }}">Book Demo</a>
         </div>
         <div>
           <h3>Resources</h3>
           <a href="{{ url('blog') }}">Blog</a>
-          <a href="{{ url('tools-directory') }}">AI Tools Directory</a>
           <a href="{{ url('help-center') }}">Help Center</a>
           <a href="{{ url('ai-mentor') }}">AI Mentor</a>
         </div>
         <div>
           <h3>Company</h3>
           <a href="{{ url('about') }}">About</a>
-          <a href="{{ url('pricing') }}">Pricing</a>
-          <a href="{{ url('contact') }}">hello@Daleel.ai</a>
-          <a href="{{ url('terms') }}">Terms</a>
+          <a href="{{ url('terms') }}">Terms & Conditions</a>
           <a href="{{ url('privacy') }}">Privacy Policy</a>
-          <a href="{{ url('cookies') }}">Cookie Policy</a>
         </div>
       </div>
       <div class="footer-bottom">
         <span>Copyright 2026 Daleel AI by Creative AI. All rights reserved.</span>
-        <span>LinkedIn | X | YouTube</span>
       </div>
     </div>
   </footer>
@@ -95,20 +92,31 @@
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     const toggle = document.getElementById("siteMenuToggle");
-    const overlay = document.getElementById("siteNavOverlay");
-    function toggleNav() {
-      const isOpen = document.body.classList.toggle("nav-open");
-      toggle.setAttribute("aria-expanded", isOpen);
+    const navLinks = document.getElementById("siteNavLinks");
+
+    if (toggle && navLinks) {
+      toggle.addEventListener("click", function () {
+        const isOpen = navLinks.classList.toggle("open");
+        toggle.classList.toggle("open", isOpen);
+        toggle.setAttribute("aria-expanded", isOpen);
+      });
+
+      // Close menu when a link is clicked
+      navLinks.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function () {
+          navLinks.classList.remove("open");
+          toggle.classList.remove("open");
+          toggle.setAttribute("aria-expanded", "false");
+        });
+      });
     }
-    if (toggle) {
-      toggle.addEventListener("click", toggleNav);
-    }
-    if (overlay) {
-      overlay.addEventListener("click", toggleNav);
-    }
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && document.body.classList.contains("nav-open")) {
-        toggleNav();
+
+    // Close on Escape key
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && navLinks && navLinks.classList.contains("open")) {
+        navLinks.classList.remove("open");
+        toggle.classList.remove("open");
+        toggle.setAttribute("aria-expanded", "false");
       }
     });
   </script>

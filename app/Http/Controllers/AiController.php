@@ -74,11 +74,19 @@ class AiController extends Controller
                 if ($apiKey) {
                     try {
                         $lessonContext = $availableLessons->map(fn($l) => "ID: {$l->id} | Title: {$l->title} | Description: " . \Illuminate\Support\Str::limit($l->description ?? '', 100))->implode("\n");
+                        $systemPrompt = \App\Models\AiPrompt::getPrompt('ai_mentor_system', [
+                            'search_context' => $searchContext
+                        ]);
+                        $userPrompt = \App\Models\AiPrompt::getPrompt('ai_mentor_user', [
+                            'query' => $query,
+                            'lesson_context' => $lessonContext
+                        ]);
+
                         $response = \Illuminate\Support\Facades\Http::withToken($apiKey)->timeout(12)->post('https://api.openai.com/v1/chat/completions', [
                             'model' => 'gpt-4o-mini',
                             'messages' => [
-                                ['role' => 'system', 'content' => "You are an AI Mentor. The user is in this context: '{$searchContext}'. Based on the query, pick the most relevant IDs. Return JSON: {\"ids\": []}."],
-                                ['role' => 'user', 'content' => "User Question: {$query}\n\nCandidate Lessons:\n{$lessonContext}"]
+                                ['role' => 'system', 'content' => $systemPrompt],
+                                ['role' => 'user', 'content' => $userPrompt]
                             ],
                             'response_format' => ['type' => 'json_object'],
                         ]);

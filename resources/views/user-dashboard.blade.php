@@ -66,112 +66,173 @@
     <!-- Premium Hero Section (Two-Column Layout) -->
     <div class="hero-focus-card animate-slide-up rounded-5 overflow-hidden mb-5 border-0" 
          style="background: #ffffff; box-shadow: 0 40px 80px -20px rgba(0,0,0,0.03);">
-        <div class="row g-0 align-items-center">
+        <div class="row g-0 align-items-stretch">
             <!-- Left Side: Search & Action Buttons -->
-            <div class="col-lg-6 p-4 p-md-5 text-start border-end border-light">
+            <div class="col-lg-6 p-4 p-md-5 text-start d-flex flex-column justify-content-center hero-left-col">
                 <div class="ps-lg-3">
-                    <h1 class="mb-4" style="font-weight: 700; font-size: clamp(32px, 5vw, 48px); color: #0f172a; letter-spacing: -0.06em; line-height: 1.05;">
-                        What do you want to <br> 
-                        <span id="hero-typing-text" style="color: #4338ca; border-right: 4px solid #4338ca; padding-right: 8px;">learn?</span>
+                    {{-- Label badge --}}
+                    <div class="mb-3">
+                        <span class="hero-label-badge">AI-POWERED LEARNING</span>
+                    </div>
+
+                    {{-- Heading --}}
+                    <h1 class="hero-heading mb-1">
+                        What do you want to
+                    </h1>
+                    <h1 class="hero-heading-accent mb-4">
+                        <span id="hero-typing-text">learn?</span><span class="hero-cursor">|</span>
                     </h1>
 
-                    <form action="{{ route('search.advanced') }}" method="GET" class="search-wrapper mb-5" style="max-width: 100%;">
-                        <div class="input-group bg-white rounded-pill p-2 border border-primary border-opacity-25 transition-all" 
-                             style="box-shadow: 0 25px 50px -12px rgba(67, 56, 202, 0.15), 0 0 15px rgba(67, 56, 202, 0.05) !important; border: 2px solid #eef2ff !important;">
-                            <span class="input-group-text bg-transparent border-0 ps-4">
-                                <i class="bi bi-search text-primary fs-5"></i>
-                            </span>
-                            <button type="button" id="voiceSearchBtn" class="btn border-0 bg-transparent px-2" title="Search by voice"
-                                    style="color:#6366f1;font-size:18px;" onclick="startVoiceSearch()">
+                    {{-- Search Bar --}}
+                    <form action="{{ route('search.advanced') }}" method="GET" class="search-wrapper mb-4">
+                        <div class="search-inner">
+                            <span class="search-icon"><i class="bi bi-search"></i></span>
+                            <input type="text" name="search" id="dashboard-search-alt"
+                                   class="search-input"
+                                   placeholder="Search tools, skills or topics..." />
+                            <button type="button" id="voiceSearchBtn" class="search-voice-btn" title="Voice search" onclick="startVoiceSearch()">
                                 <i class="bi bi-mic"></i>
                             </button>
-                            <input type="text" name="search" id="dashboard-search-alt" class="form-control border-0 bg-transparent py-3 ps-2" 
-                                   placeholder="Search for tools, skills, or topics..." 
-                                   style="font-size: 19px; font-weight: 600; color: #1e1b4b; outline: none !important; box-shadow: none !important;">
-                            <button type="submit" class="btn rounded-pill px-4 ms-2 d-flex align-items-center justify-content-center transition-all btn-search-premium shadow-sm" 
-                                    style="width: 54px; height: 54px; background: #4338ca; border: none; color: #fff; box-shadow: 0 10px 15px -3px rgba(67, 56, 202, 0.3) !important;">
-                                <i class="bi bi-arrow-right fs-4"></i>
+                            <button type="submit" class="search-submit-btn">
+                                <i class="bi bi-arrow-right"></i>
                             </button>
                         </div>
                     </form>
 
+                    {{-- Action Buttons --}}
                     <div class="hero-actions d-flex flex-wrap gap-2 gap-md-3">
-                        <a href="{{ route('learn.explore') }}" class="btn-hero-pill-mini btn-hero-browse">
-                            <i class="bi bi-grid-fill"></i> Browse Tools
+                        <a href="{{ route('learn.explore') }}" class="btn-hero-pill btn-hero-browse">
+                            <i class="bi bi-grid-3x3-gap-fill"></i> Browse Tools
                         </a>
-                        <div role="button" data-bs-toggle="modal" data-bs-target="#newRoadmapModal" class="btn-hero-pill-mini btn-hero-create">
-                            <i class="bi bi-plus-circle-fill"></i> Create New Path
-                        </div>  
-                        <a href="{{ route('ai.mentor') }}" class="btn-hero-pill-mini btn-hero-mentor">
+                        <div role="button" data-bs-toggle="modal" data-bs-target="#newRoadmapModal" class="btn-hero-pill btn-hero-create">
+                            <i class="bi bi-plus-circle-fill"></i> New Path
+                        </div>
+                        <a href="{{ route('ai.mentor') }}" class="btn-hero-pill btn-hero-mentor">
                             <i class="bi bi-stars"></i> AI Mentor
                         </a>
                     </div>
                 </div>
             </div>
 
-            <!-- Right Side: Roadmap Card (Premium Design from Image) -->
+            <!-- Right Side: Journey Card (Lovable Redesign) -->
             <div class="col-lg-6 p-4 p-md-5">
-                <div class="roadmap-card bg-white rounded-5 shadow-sm p-4 p-md-5 border border-light transition-hover h-100" 
-                     style="min-height: 400px; box-shadow: 0 15px 40px rgba(0,0,0,0.03) !important;">
+                <div class="journey-card h-100 position-relative overflow-hidden" style="border-radius: 28px; background: #fff; box-shadow: 0 20px 60px -15px rgba(0,0,0,0.04); border: 1px solid #f1f5f9;">
                     
-                    <div class="d-flex justify-content-between align-items-center mb-4 pb-2">
-                        <div class="d-flex align-items-center gap-3">
-                            <div class="bg-primary-subtle text-primary rounded-3 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
-                                <i class="bi bi-map-fill fs-5"></i>
-                            </div>
-                            <span class="fw-800 text-dark" style="font-size: 19px; letter-spacing: -0.02em;">
-                                {{ $currentRoadmap ? 'Current Journey' : 'Next Milestone' }}
-                            </span>
-                        </div>
-                        @if($currentRoadmap)
-                            <a href="{{ route('roadmap') }}" class="btn btn-link text-primary fw-800 text-decoration-none small">
-                                All Paths <i class="bi bi-arrow-right"></i>
-                            </a>
-                        @endif
-                    </div>
-
                     @if($currentRoadmap)
                         @php
                             $firstToolId = $currentRoadmap->tools[0] ?? null;
                             $firstTool = $firstToolId ? \App\Models\Tool::find($firstToolId) : null;
+                            $phaseCount = is_array($currentRoadmap->curriculum) ? (isset($currentRoadmap->curriculum['phases']) ? count($currentRoadmap->curriculum['phases']) : count($currentRoadmap->curriculum)) : 0;
+                            $progress = $currentRoadmap->progress ?? 0;
                         @endphp
 
-                        <div class="d-flex align-items-center gap-4 mb-4 mt-2">
-                            <div class="roadmap-icon-box bg-white rounded-4 d-flex align-items-center justify-content-center overflow-hidden shadow-sm p-3" style="width: 86px; height: 86px; border: 1px solid #f1f5f9;">
-                                 <img src="{{ $firstTool ? asset($firstTool->logo) : asset('images/logo-placeholder.png') }}" class="w-100 h-100 object-fit-contain">
-                            </div>
-                            <div>
-                                <h4 class="fw-900 text-dark mb-1 line-clamp-1" style="font-size: 22px; letter-spacing: -0.01em;">{{ $currentRoadmap->title }}</h4>
-                                <p class="text-muted fw-700 small mb-0">Mastering {{ count($currentRoadmap->tools) }} critical tools</p>
-                            </div>
-                        </div>
+                        {{-- Decorative glow --}}
+                        <div class="position-absolute" style="top: -80px; right: -80px; width: 240px; height: 240px; background: radial-gradient(circle, rgba(99,102,241,0.08) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+                        <div class="position-absolute" style="bottom: -60px; left: -60px; width: 180px; height: 180px; background: radial-gradient(circle, rgba(16,185,129,0.06) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
 
-                        <div class="mb-5">
-                            <div class="d-flex align-items-center justify-content-between mb-2">
-                                <span class="small fw-800 text-muted uppercase" style="font-size: 10px; letter-spacing: 0.5px;">OVERALL MASTERY</span>
-                                <span class="fw-900 text-primary" style="font-size: 14px;">{{ $currentRoadmap->progress }}%</span>
+                        <div class="p-3 p-md-4 position-relative">
+                            {{-- Header --}}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="d-flex align-items-center justify-content-center rounded-2" style="width: 30px; height: 30px; background: linear-gradient(135deg, #eef2ff, #e0e7ff); color: #4338ca;">
+                                        <i class="bi bi-map-fill" style="font-size: 13px;"></i>
+                                    </div>
+                                    <span class="fw-800" style="font-size: 15px; color: #0f172a;">Current Journey</span>
+                                </div>
+                                <a href="{{ route('roadmap') }}" class="btn btn-sm fw-800 text-decoration-none px-3" style="background: #f8fafc; color: #4338ca; border: 1px solid #eef2ff; font-size: 10px; border-radius: 20px; white-space: nowrap; line-height: 1;">
+                                    All Paths <i class="bi bi-arrow-right ms-1" style="font-size: 9px;"></i>
+                                </a>
                             </div>
-                            <div class="progress rounded-pill" style="height: 10px; background: #f1f5f9; border: 1px solid #f1f5f9;">
-                                <div class="progress-bar bg-primary shadow-sm rounded-pill" style="width: {{ $currentRoadmap->progress }}%;"></div>
-                            </div>
-                        </div>
 
-                        <a href="{{ route('roadmap.show', $currentRoadmap->id) }}" 
-                           class="btn-roadmap-continue text-decoration-none w-100 rounded-pill py-3 fw-900 d-flex align-items-center justify-content-center gap-3 transition-hover shadow-lg">
-                            Resume Journey <i class="bi bi-chevron-right fs-5"></i>
-                        </a>
-                    @else
-                        <div class="text-center py-4">
-                            <div class="mb-4">
-                                <div class="pulse-icon bg-light text-primary rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px;">
-                                    <i class="bi bi-stars fs-1"></i>
+                            {{-- Tool spotlight --}}
+                            <div class="d-flex align-items-center gap-3 mb-3 p-2 rounded-3" style="background: linear-gradient(135deg, #faf5ff 0%, #f0f4ff 100%); border: 1px solid rgba(99,102,241,0.08);">
+                                <div class="rounded-3 d-flex align-items-center justify-content-center overflow-hidden flex-shrink-0" style="width: 48px; height: 48px; background: #fff; border: 1px solid #e2e8f0; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                                    <img src="{{ $firstTool ? asset($firstTool->logo) : asset('images/logo-placeholder.png') }}" class="w-100 h-100 object-fit-contain p-1">
+                                </div>
+                                <div style="min-width: 0;">
+                                    <h4 class="fw-900 mb-0" style="font-size: 15px; color: #0f172a; line-height: 1.2;">{{ $currentRoadmap->title }}</h4>
+                                    <div class="d-flex align-items-center gap-2 flex-wrap mt-1">
+                                        <span class="badge rounded-pill fw-700" style="font-size: 9px; background: rgba(99,102,241,0.1); color: #4338ca;">{{ $firstTool ? $firstTool->name : 'Custom' }}</span>
+                                        <span style="font-size: 10px; font-weight: 600; color: #94a3b8;">{{ $phaseCount }} phases</span>
+                                    </div>
                                 </div>
                             </div>
-                            <h5 class="fw-900 text-dark mb-2">No active roadmap</h5>
-                            <p class="text-muted small mb-4 px-4">Let AI build you a personalized path to learn any tool or career goal.</p>
-                            <a href="{{ route('learn.explore') }}" class="btn btn-primary rounded-pill px-5 py-3 fw-800 shadow-sm border-0" style="background: var(--primary);">
-                                Generate My Path
+
+                            {{-- Ring + stats row --}}
+                            <div class="d-flex align-items-stretch gap-3 mb-3">
+                                <div class="position-relative flex-shrink-0 d-flex align-items-center">
+                                    <svg width="52" height="52" viewBox="0 0 52 52">
+                                        <circle cx="26" cy="26" r="22" fill="none" stroke="#f1f5f9" stroke-width="4"/>
+                                        <circle cx="26" cy="26" r="22" fill="none" stroke="url(#progressGrad)" stroke-width="4" stroke-linecap="round" stroke-dasharray="{{ 2 * 3.14159 * 22 }}" stroke-dashoffset="{{ 2 * 3.14159 * 22 * (1 - $progress / 100) }}" transform="rotate(-90, 26, 26)" style="transition: stroke-dashoffset 1s ease;"/>
+                                        <defs>
+                                            <linearGradient id="progressGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" stop-color="#4338ca"/>
+                                                <stop offset="100%" stop-color="#6366f1"/>
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                    <div class="position-absolute top-50 start-50 translate-middle text-center">
+                                        <span class="fw-900" style="font-size: 12px; color: #0f172a;">{{ $progress }}%</span>
+                                    </div>
+                                </div>
+                                <div class="d-flex" style="flex: 1; gap: 1px; background: #f1f5f9; border-radius: 10px; overflow: hidden;">
+                                    <div class="d-flex flex-column align-items-center justify-content-center py-2" style="flex: 1; background: #fff;">
+                                        <span class="fw-900" style="font-size: 16px; color: #0f172a;">{{ $phaseCount }}</span>
+                                        <span style="font-size: 9px; font-weight: 700; color: #94a3b8;">phases</span>
+                                    </div>
+                                    <div class="d-flex flex-column align-items-center justify-content-center py-2" style="flex: 1; background: #fff;">
+                                        <span class="fw-900" style="font-size: 16px; color: #0f172a;">{{ count($currentRoadmap->tools) }}</span>
+                                        <span style="font-size: 9px; font-weight: 700; color: #94a3b8;">tools</span>
+                                    </div>
+                                    <div class="d-flex flex-column align-items-center justify-content-center py-2" style="flex: 1; background: #fff;">
+                                        <span class="fw-900" style="font-size: 16px; color: {{ $progress >= 100 ? '#10b981' : ($progress >= 50 ? '#f59e0b' : '#94a3b8') }};">
+                                            @if($progress >= 100) <i class="bi bi-check-circle-fill"></i>
+                                            @elseif($progress >= 50) <i class="bi bi-arrow-up-circle-fill"></i>
+                                            @else <i class="bi bi-play-fill"></i>
+                                            @endif
+                                        </span>
+                                        <span style="font-size: 9px; font-weight: 700; color: #94a3b8;">
+                                            @if($progress >= 100) done
+                                            @elseif($progress >= 50) active
+                                            @else new @endif
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- CTA --}}
+                            <a href="{{ route('roadmap.show', $currentRoadmap->id) }}" 
+                               class="btn text-decoration-none w-100 py-2 fw-800 d-flex align-items-center justify-content-center gap-2 rounded-pill transition-all shadow-sm border-0"
+                               style="background: linear-gradient(135deg, #4338ca, #6366f1); color: #fff; box-shadow: 0 6px 16px -3px rgba(67,56,202,0.25); font-size: 13px;">
+                                <i class="bi bi-play-fill"></i> Continue Learning
                             </a>
+                        </div>
+                    @else
+                        {{-- Decorative glow --}}
+                        <div class="position-absolute" style="top: -60px; right: -60px; width: 200px; height: 200px; background: radial-gradient(circle, rgba(99,102,241,0.06) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+                        <div class="position-absolute" style="bottom: -40px; left: -40px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(16,185,129,0.05) 0%, transparent 70%); border-radius: 50%; pointer-events: none;"></div>
+
+                        <div class="p-4 p-md-5 text-center position-relative d-flex flex-column align-items-center justify-content-center" style="min-height: 420px;">
+                            {{-- Floating stars --}}
+                            <div class="position-relative mb-4">
+                                <div class="d-flex align-items-center justify-content-center mx-auto" style="width: 96px; height: 96px; border-radius: 32px; background: linear-gradient(135deg, #eef2ff, #f5f3ff); box-shadow: 0 12px 32px -8px rgba(99,102,241,0.12);">
+                                    <i class="bi bi-stars" style="font-size: 36px; color: #4338ca; animation: gentleFloat 3s ease-in-out infinite;"></i>
+                                </div>
+                                <span class="position-absolute" style="top: -8px; right: 10px; font-size: 20px; animation: gentleFloat 3s ease-in-out infinite 0.5s;">✨</span>
+                                <span class="position-absolute" style="bottom: 4px; left: 6px; font-size: 14px; animation: gentleFloat 3s ease-in-out infinite 1s;">⭐</span>
+                            </div>
+
+                            <h4 class="fw-900 mb-2" style="font-size: 22px; color: #0f172a; letter-spacing: -0.02em;">Ready to begin?</h4>
+                            <p class="mb-4 px-3" style="font-size: 14px; font-weight: 600; color: #64748b; line-height: 1.6; max-width: 320px;">Let AI craft a personalized learning path tailored to your goals and favorite tools.</p>
+
+                            <a href="{{ route('learn.explore') }}" class="btn rounded-pill px-5 py-3 fw-800 d-inline-flex align-items-center gap-2 transition-all shadow-sm border-0" style="background: linear-gradient(135deg, #4338ca, #6366f1); color: #fff; box-shadow: 0 8px 24px -4px rgba(67,56,202,0.25); font-size: 15px;">
+                                <i class="bi bi-magic fs-5"></i> Generate My Path
+                            </a>
+
+                            <div class="mt-4 d-flex align-items-center gap-3">
+                                <span class="d-inline-block rounded-pill px-3 py-1 fw-700" style="font-size: 10px; background: #f1f5f9; color: #94a3b8;">No commitment</span>
+                                <span class="d-inline-block rounded-pill px-3 py-1 fw-700" style="font-size: 10px; background: #f1f5f9; color: #94a3b8;">Free to start</span>
+                            </div>
                         </div>
                     @endif
                 </div>
@@ -485,8 +546,8 @@
                                 Daily Insights
                             </h5>
                         </div>
-                        <div class="flex-grow-1 overflow-hidden">
-                            <div class="swiper quotesSwiper pb-5">
+                        <div class="flex-grow-1">
+                            <div class="swiper quotesSwiper pb-4">
                                 <div class="swiper-wrapper">
                                     @php
                                         $quotes = [
@@ -498,7 +559,7 @@
                                     
                                     @foreach($quotes as $quote)
                                     <div class="swiper-slide">
-                                        <p class="fw-800 text-dark mb-3" style="line-height: 1.5; font-size: 15px; min-height: 80px;">"{{ $quote['text'] }}"</p>
+                                        <p class="fw-800 text-dark mb-3" style="line-height: 1.5; font-size: 15px;">"{{ $quote['text'] }}"</p>
                                         <div class="d-flex align-items-center gap-3 mt-2">
                                             <div class="bg-primary text-white rounded-pill px-3 py-1 fw-800" style="font-size: 9px; letter-spacing: 0.05em;">{{ strtoupper($quote['author']) }}</div>
                                             <span class="text-muted fw-bold small" style="font-size: 10px;">{{ $quote['title'] }}</span>
@@ -599,51 +660,178 @@
         box-shadow: 0 40px 80px -20px rgba(0,0,0,0.03);
     }
 
-    .btn-hero-pill-mini {
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
-        padding: 12px 20px;
+    /* Left hero column refined background + divider */
+    .hero-left-bg {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(160deg, #f8faff 0%, #ffffff 60%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .hero-focus-card .col-lg-6:first-child::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 10%;
+        height: 80%;
+        width: 1px;
+        background: linear-gradient(to bottom, transparent 0%, #e2e8f0 30%, #e2e8f0 70%, transparent 100%);
+        pointer-events: none;
+    }
+
+    /* ── Hero Label Badge ── */
+    .hero-label-badge {
+        display: inline-block;
+        background: #eef2ff;
+        color: #4338ca;
+        font-size: 10px;
         font-weight: 800;
-        font-size: 13px;
-        text-decoration: none;
+        letter-spacing: 0.08em;
+        padding: 5px 14px;
+        border-radius: 6px;
+        text-transform: uppercase;
+    }
+
+    /* ── Hero Heading ── */
+    .hero-heading {
+        font-size: clamp(26px, 3.6vw, 40px);
+        font-weight: 800;
+        color: #64748b;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+        margin: 0;
+    }
+    .hero-heading-accent {
+        font-size: clamp(28px, 4vw, 46px);
+        font-weight: 900;
+        color: #0f172a;
+        letter-spacing: -0.035em;
+        line-height: 1.1;
+        margin: 0;
+        min-height: 1.1em; /* FIX 3: Maintain height when typing text is empty */
+    }
+    .hero-heading-accent span {
+        color: #4338ca;
+        display: inline-block;
+        min-height: 1.1em; /* FIX 3: Maintain height for typing text span */
+    }
+    .hero-cursor {
+        color: #4338ca;
+        animation: blink-cursor 0.8s step-end infinite;
+        margin-left: 2px;
+    }
+    @keyframes blink-cursor {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0; }
+    }
+
+    /* ── Search Bar ── */
+    .search-wrapper { max-width: 100%; }
+    .search-inner {
         display: flex;
         align-items: center;
-        gap: 10px;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 6px 6px 6px 16px;
+        box-shadow: 0 4px 24px -8px rgba(67, 56, 202, 0.12);
+        transition: border-color 0.2s, box-shadow 0.2s;
     }
-    
-    .btn-hero-browse { background: #f0f9ff; color: #0369a1; border-color: #e0f2fe; }
-    .btn-hero-browse:hover { background: #e0f2fe; border-color: #bae6fd; transform: translateY(-2px); }
-    
-    .btn-hero-activity { background: #f0fdf4; color: #166534; border-color: #dcfce7; }
-    .btn-hero-activity:hover { background: #dcfce7; border-color: #bbf7d0; transform: translateY(-2px); }
-    
-    .btn-hero-mentor { background: #f5f3ff; color: #5b21b6; border-color: #ede9fe; }
-    .btn-hero-mentor:hover { background: #ede9fe; border-color: #ddd6fe; transform: translateY(-2px); }
-
-    .btn-roadmap-continue {
-        background: linear-gradient(to right, #4338ca, #6366f1);
-        color: #ffffff;
+    .search-inner:focus-within {
+        border-color: #a5b4fc;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 4px 24px -8px rgba(67, 56, 202, 0.14);
+    }
+    .search-icon {
+        color: #94a3b8;
+        font-size: 16px;
+        flex-shrink: 0;
+        margin-right: 10px;
+    }
+    .search-input {
+        flex: 1;
         border: none;
-        box-shadow: 0 10px 20px -5px rgba(67, 56, 202, 0.3);
+        outline: none;
+        background: transparent;
+        font-size: 15px;
+        font-weight: 600;
+        color: #1e1b4b;
+        padding: 8px 0;
+        box-shadow: none !important;
     }
-    .btn-roadmap-continue:hover {
-        background: linear-gradient(to right, #3730a3, #4f46e5);
-        color: #ffffff;
-        transform: translateY(-2px);
-        box-shadow: 0 15px 30px -5px rgba(67, 56, 202, 0.4);
+    .search-input::placeholder { color: #94a3b8; font-weight: 500; }
+    .search-voice-btn {
+        background: transparent;
+        border: none;
+        color: #94a3b8;
+        font-size: 16px;
+        padding: 6px 8px;
+        cursor: pointer;
+        transition: color 0.2s;
+        flex-shrink: 0;
+    }
+    .search-voice-btn:hover { color: #4338ca; }
+    .search-submit-btn {
+        background: #0f172a;
+        border: none;
+        color: #fff;
+        border-radius: 10px;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+        transition: background 0.2s, transform 0.15s;
+        cursor: pointer;
+    }
+    .search-submit-btn:hover { background: #4338ca; transform: scale(1.05); }
+
+    /* ── Hero Action Pills — Unified, professional, search-bar-aligned ── */
+    .btn-hero-pill {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 11px 20px;
+        border-radius: 14px;
+        font-weight: 700;
+        font-size: 14px;
+        text-decoration: none;
+        border: 1.5px solid #e2e8f0;
+        background: #ffffff;
+        color: #1e293b;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        transition: border-color 0.2s, box-shadow 0.2s, background 0.2s, transform 0.15s;
+        cursor: pointer;
+        white-space: nowrap;
+        user-select: none;
+        flex: 1;
+        min-width: 0;
+    }
+    .btn-hero-pill:hover {
+        border-color: #a5b4fc;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1), 0 4px 12px rgba(0,0,0,0.04);
+        background: #f8faff;
+        transform: translateY(-1px);
+    }
+    .btn-hero-pill i {
+        font-size: 16px;
+        color: #64748b;
+        transition: color 0.2s;
+    }
+    .btn-hero-pill:hover i {
+        color: #4338ca;
     }
 
-    /* Roadmap Card Focus */
-    .roadmap-card {
-        background: linear-gradient(135deg, #ffffff 0%, #f5f7ff 100%);
-        border: 1px solid #eef2ff !important;
-        transition: all 0.4s ease;
+    .hero-actions {
+        display: flex;
+        gap: 8px;
     }
-    .roadmap-card:hover {
-        transform: translateY(-4px);
-        border-color: var(--focus-primary) !important;
-        box-shadow: 0 20px 40px -15px rgba(67, 56, 202, 0.1);
+
+    /* Journey Card */
+    .journey-card {
+        background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
     }
 
     /* New Stats Bar */
@@ -859,129 +1047,573 @@
     .hover-lift:hover { transform: translateY(-5px); }
     .transition-all { transition: all 0.3s ease; }
 
-    /* ==================== RESPONSIVE ==================== */
-    @media (max-width: 992px) {
-        .hero-focus-card .border-end { border-right: none !important; }
-        .hero-focus-card .p-md-5 { padding: 1.5rem !important; }
-        .hero-focus-card h1 { font-size: 28px !important; }
-        .stats-premium-bar { padding: 8px; border-radius: 24px; }
-        .stat-item-premium { padding: 14px 20px; min-width: 200px; gap: 14px; }
-        .stat-item-premium .icon-box { width: 48px; height: 48px; font-size: 20px; border-radius: 16px; }
-        .roadmap-card { min-height: auto !important; padding: 1.5rem !important; }
-        .dashboard-focus-modern .row.mb-5[style*="background"] { padding: 16px !important; }
-        .dashboard-focus-modern .p-4.p-lg-5 { padding: 1.25rem !important; }
-    }
-
+    /* ==================== ULTRA PREMIUM MOBILE OPTIMIZATION ==================== */
     @media (max-width: 768px) {
-        .hero-focus-card { border-radius: 16px !important; margin-bottom: 1.5rem !important; }
-        .hero-focus-card .p-md-5 { padding: 1.25rem !important; }
-        .hero-focus-card h1 { font-size: 24px !important; text-align: center !important; }
-        .hero-focus-card .text-start { text-align: center !important; }
-        .hero-focus-card .ps-lg-3 { padding-left: 0 !important; }
-        .hero-focus-card .input-group { flex-wrap: nowrap; }
-        .hero-focus-card .input-group input { font-size: 15px !important; padding: 12px 10px !important; }
-        .hero-focus-card .input-group button { width: 44px !important; height: 44px !important; }
-        .hero-focus-card .input-group button i { font-size: 1rem !important; }
-        .hero-actions { gap: 0.5rem !important; justify-content: center !important; }
-        .btn-hero-pill-mini { font-size: 11px !important; padding: 6px 14px !important; height: 34px !important; }
+        /* Global mobile container reset */
+        .dashboard-focus-modern {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+        
+        .dashboard-focus-modern > .alert,
+        .dashboard-focus-modern > .hero-focus-card,
+        .dashboard-focus-modern > .stats-premium-bar,
+        .dashboard-focus-modern > .continue-watching-section,
+        .dashboard-focus-modern > div[class*="mb-5"] {
+            margin-left: 16px !important;
+            margin-right: 16px !important;
+        }
 
-        .roadmap-card { padding: 1.25rem !important; border-radius: 16px !important; text-align: center !important; }
-        .roadmap-card .gap-4 { gap: 1rem !important; justify-content: center !important; }
-        .roadmap-card .roadmap-icon-box { width: 60px !important; height: 60px !important; padding: 10px !important; }
-        .roadmap-card h4 { font-size: 17px !important; }
-        .roadmap-card .d-flex.justify-content-between { justify-content: center !important; gap: 8px; flex-wrap: wrap; }
-        .roadmap-card .d-flex.align-items-center.gap-3 { justify-content: center !important; }
-        .btn-roadmap-continue { font-size: 14px; padding: 12px !important; }
+        /* ========== HERO CARD - MOBILE ========== */
+        .hero-focus-card {
+            margin: 0 0 24px 0 !important;
+            border-radius: 24px !important;
+            box-shadow: 0 2px 24px rgba(0,0,0,0.04) !important;
+        }
+        .hero-focus-card .col-lg-6:first-child::after {
+            display: none !important;
+        }
+        .hero-focus-card .col-lg-6:first-child {
+            padding: 24px 20px 0 !important;
+        }
+        .hero-focus-card h1 {
+            font-size: 24px !important;
+            text-align: center !important;
+            margin-bottom: 16px !important;
+            line-height: 1.2 !important;
+            letter-spacing: -0.04em !important;
+        }
+        .hero-focus-card h1 br {
+            display: none;
+        }
+        #hero-typing-text {
+            display: inline;
+        }
+        .hero-cursor { display: none !important; }
 
-        .stats-premium-bar { flex-direction: row; flex-wrap: nowrap; padding: 0; border-radius: 0; gap: 0; justify-content: center; background: transparent; border: none; box-shadow: none; }
-        .stat-item-premium { flex: none; min-width: 0; padding: 0 14px; gap: 8px; flex-direction: row; text-align: left; border-radius: 0; border: none; align-items: center; }
-        .stat-item-premium:not(:last-child)::after { display: none; }
-        .stat-item-premium + .stat-item-premium { border-left: 1px solid #e2e8f0; }
-        .stat-item-premium .icon-box { width: 28px; height: 28px; font-size: 12px; border-radius: 8px; margin: 0; }
-        .stat-item-premium > div { text-align: left; display: flex; align-items: baseline; gap: 4px; }
-        .stat-item-premium .d-flex.align-items-baseline { display: flex !important; flex-direction: row; gap: 3px; }
-        .stat-value-premium { font-size: 16px !important; }
-        .stat-label-premium { display: none; }
-        .stat-item-premium .text-muted.fw-800[style*="font-size: 11px"] { display: inline !important; font-size: 10px !important; }
-        .stat-item-premium .text-primary.fw-900 { display: none !important; }
-        .stat-item-premium .progress { display: none; }
-        .stat-item-premium .d-flex.align-items-center.gap-1.mt-1 { display: none; }
-        .stat-item-premium .small.fw-700.opacity-50 { font-size: 10px !important; }
+        /* Search - Compact */
+        .search-wrapper { margin-bottom: 14px !important; }
+        .search-inner {
+            border-radius: 12px !important;
+            padding: 5px 5px 5px 14px !important;
+        }
+        .search-input {
+            font-size: 14px !important;
+            padding: 6px 0 !important;
+        }
+        .search-submit-btn {
+            width: 38px !important;
+            height: 38px !important;
+            border-radius: 9px !important;
+            font-size: 16px !important;
+        }
+        .search-voice-btn { font-size: 14px !important; padding: 4px 6px !important; }
 
-        .dashboard-focus-modern .px-4.py-5.rounded-5 { padding: 1rem !important; border-radius: 16px !important; }
-        .dashboard-focus-modern .mb-5[style*="background"] { padding: 12px !important; border-radius: 14px !important; }
-        .dashboard-focus-modern .p-4.p-lg-5 { padding: 1rem !important; }
+        /* Action Buttons - mobile compact pills */
+        .hero-actions {
+            flex-wrap: nowrap !important;
+            gap: 6px !important;
+        }
+        .btn-hero-pill {
+            font-size: 12px !important;
+            padding: 10px 12px !important;
+            border-radius: 12px !important;
+            gap: 5px !important;
+            flex: 1 1 0 !important;
+            justify-content: center !important;
+        }
+        .btn-hero-pill i {
+            font-size: 14px !important;
+        }
 
-        .quotesSwiper .swiper-slide p { font-size: 14px !important; min-height: 60px !important; margin-bottom: 12px !important; }
-        .quotesSwiper .pb-5 { padding-bottom: 2rem !important; }
-        .quotesSwiper .swiper-slide .d-flex { gap: 6px !important; flex-wrap: wrap; }
-        .quotesSwiper .swiper-slide .bg-primary { font-size: 8px !important; padding: 3px 10px !important; letter-spacing: 0.03em; }
-        .quotesSwiper .swiper-slide .text-muted { font-size: 9px !important; }
+        /* Journey Card */
+        .hero-focus-card .col-lg-6:last-child {
+            padding: 16px 20px 20px !important;
+        }
+        .journey-card {
+            border-radius: 20px !important;
+        }
+        .journey-card .p-md-4 {
+            padding: 16px !important;
+        }
+        .journey-card .d-flex.justify-content-between.align-items-center.mb-2 {
+            margin-bottom: 12px !important;
+        }
+        .journey-card .d-flex.align-items-center.gap-3.mb-3 {
+            gap: 10px !important;
+            margin-bottom: 12px !important;
+            padding: 10px !important;
+            border-radius: 12px !important;
+        }
+        .journey-card .d-flex.align-items-center.gap-3.mb-3 .rounded-3 {
+            width: 40px !important;
+            height: 40px !important;
+            border-radius: 10px !important;
+        }
+        .journey-card h4 {
+            font-size: 14px !important;
+        }
+        .journey-card .d-flex.align-items-stretch.gap-3.mb-3 {
+            gap: 10px !important;
+            margin-bottom: 12px !important;
+        }
+        .journey-card svg[width="52"] {
+            width: 42px !important;
+            height: 42px !important;
+        }
+        .journey-card .fw-900[style*="font-size: 16px"] {
+            font-size: 13px !important;
+        }
+        .journey-card .btn.rounded-pill {
+            font-size: 12px !important;
+            padding: 10px !important;
+        }
 
-        [class*="Swiper"] .swiper-slide { width: 100% !important; margin-right: 0 !important; }
-        .card-focus.p-3 { padding: 14px !important; gap: 14px !important; }
-        .card-focus.p-3 .rounded-3[style*="width: 80px"] { width: 72px !important; height: 54px !important; }
-        .card-focus.p-3 h6 { font-size: 13px !important; }
-        .card-focus.p-3 .progress { height: 5px !important; }
-        .card-focus.p-3 .d-flex.justify-content-between span { font-size: 10px !important; }
-        .card-focus.p-3 .d-flex.justify-content-between a { font-size: 10px !important; }
+        /* Empty Journey State */
+        .journey-card .p-md-5[style*="min-height: 420px"] {
+            min-height: auto !important;
+            padding: 32px 20px !important;
+        }
+        .journey-card .d-flex.align-items-center.justify-content-center.mx-auto {
+            width: 72px !important;
+            height: 72px !important;
+            border-radius: 24px !important;
+        }
+        .journey-card .d-flex.align-items-center.justify-content-center.mx-auto i {
+            font-size: 28px !important;
+        }
+        .journey-card h4.fw-900 {
+            font-size: 18px !important;
+        }
+        .journey-card p.mb-4.px-3 {
+            font-size: 13px !important;
+            max-width: 100% !important;
+        }
 
-        .continue-watching-section .d-flex.gap-2 { display: none !important; }
-        .continue-watching-section .d-none.d-md-block { display: none !important; }
+        /* ========== STATS BAR - MOBILE GRID (FIX 4: Icons on top, grid layout) ========== */
+        .stats-premium-bar {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 8px !important;
+            overflow-x: visible !important;
+            padding: 12px !important;
+            border-radius: 20px !important;
+        }
+        .stat-item-premium {
+            flex: none !important;
+            min-width: auto !important;
+            max-width: none !important;
+            padding: 12px 8px !important;
+            gap: 0 !important;
+            flex-direction: column !important;
+            align-items: center !important;
+            text-align: center !important;
+            border-right: none !important;
+            scroll-snap-align: none !important;
+        }
+        .stat-item-premium::after {
+            display: none !important;
+        }
+        .stat-item-premium .icon-box {
+            width: 44px !important;
+            height: 44px !important;
+            border-radius: 14px !important;
+            font-size: 20px !important;
+            margin-bottom: 8px !important;
+        }
+        .stat-label-premium {
+            font-size: 7px !important;
+            letter-spacing: 0.08em !important;
+            margin-bottom: 2px !important;
+        }
+        .stat-value-premium {
+            font-size: 20px !important;
+        }
+        .stat-item-premium .text-muted.fw-800 {
+            font-size: 8px !important;
+            display: block !important;
+        }
+        .stat-item-premium .text-primary.fw-900 {
+            font-size: 7px !important;
+        }
+        .stat-item-premium .progress {
+            width: 60px !important;
+            margin: 4px auto 0 !important;
+        }
+        .stat-item-premium .d-flex.align-items-baseline.gap-2 {
+            flex-direction: column !important;
+            align-items: center !important;
+            gap: 2px !important;
+        }
+        .stat-item-premium .pulsing-dot-success {
+            display: none !important;
+        }
 
-        .dashboard-focus-modern h5.fw-800 { font-size: 15px !important; }
-        .dashboard-focus-modern .d-flex.justify-content-between.align-items-center.mb-4 { flex-wrap: wrap; gap: 8px; }
-        .dashboard-focus-modern .badge.d-none.d-md-inline-block { display: none !important; }
+        /* ========== SECTION HEADERS - MOBILE ========== */
+        .dashboard-focus-modern h5.fw-800 {
+            font-size: 15px !important;
+        }
+        .dashboard-focus-modern .d-flex.justify-content-between.align-items-center.mb-4 {
+            margin-bottom: 12px !important;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
 
-        .tool-logo-container[style*="width: 80px"] { width: 56px !important; height: 56px !important; border-radius: 16px !important; }
-        .tool-logo-container img { width: 32px !important; height: 32px !important; }
+        /* ========== CONTINUE WATCHING - MOBILE ========== */
+        .continue-watching-section {
+            padding: 20px 16px !important;
+            border-radius: 20px !important;
+            margin-left: 16px !important;
+            margin-right: 16px !important;
+        }
+        .continue-watching-section .d-none.d-md-block {
+            display: none !important;
+        }
+        .continueWatchingSwiper .swiper-slide {
+            width: 85% !important;
+        }
+        .continueWatchingSwiper .card-focus.p-3 {
+            padding: 12px !important;
+            gap: 12px !important;
+            border-radius: 16px !important;
+        }
+        .continueWatchingSwiper .card-focus .rounded-3 {
+            width: 64px !important;
+            height: 48px !important;
+            border-radius: 10px !important;
+        }
+        .continueWatchingSwiper h6 {
+            font-size: 12px !important;
+        }
+        .continueWatchingSwiper .progress {
+            height: 4px !important;
+            margin-bottom: 4px !important;
+        }
+        .continueWatchingSwiper .text-muted.fw-800,
+        .continueWatchingSwiper .text-primary.fw-800 {
+            font-size: 9px !important;
+        }
 
-        .cat-card-neo.p-3 { padding: 12px !important; }
-        .cat-card-neo .cat-icon-box { width: 32px !important; height: 32px !important; font-size: 14px !important; }
-        .cat-card-neo h6 { font-size: 12px !important; }
+        /* ========== RECOMMENDED VIDEOS - MOBILE ========== */
+        .recommendedVideosSwiper .swiper-slide {
+            width: 72% !important;
+        }
+        .recommendedVideosSwiper .card-focus {
+            border-radius: 18px !important;
+        }
+        .recommendedVideosSwiper .position-relative[style*="height: 150px"] {
+            height: 130px !important;
+        }
+        .recommendedVideosSwiper .p-3.bg-white {
+            padding: 12px !important;
+        }
+        .recommendedVideosSwiper h6 {
+            font-size: 12px !important;
+            height: 34px !important;
+        }
+        .recommendedVideosSwiper .badge.bg-white {
+            font-size: 8px !important;
+            padding: 4px 10px !important;
+            margin: 8px !important;
+        }
 
-        .trending-categories-row { display: flex; flex-wrap: nowrap; overflow-x: auto; -webkit-overflow-scrolling: touch; scroll-snap-type: x mandatory; gap: 12px; padding-bottom: 4px; }
-        .trending-categories-row::-webkit-scrollbar { display: none; }
-        .trending-cat-col { flex: 0 0 80%; scroll-snap-align: start; padding: 0 !important; max-width: none; }
+        /* ========== CONNECTED TOOLS - MOBILE 2x2 GRID ========== */
+        .tracksSwiper .swiper-wrapper {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px !important;
+            transform: none !important;
+        }
+        .tracksSwiper .swiper-slide {
+            width: 100% !important;
+            margin-right: 0 !important;
+        }
+        .tracksSwiper .card-focus.p-4 {
+            padding: 16px 12px !important;
+            border-radius: 18px !important;
+        }
+        .tracksSwiper .tool-logo-container {
+            width: 56px !important;
+            height: 56px !important;
+            border-radius: 16px !important;
+            margin-bottom: 10px !important;
+        }
+        .tracksSwiper .tool-logo {
+            width: 32px !important;
+            height: 32px !important;
+        }
+        .tracksSwiper h6 {
+            font-size: 13px !important;
+        }
+        .tracksSwiper p {
+            font-size: 10px !important;
+        }
+        .swiper-prev-tracks,
+        .swiper-next-tracks {
+            display: none !important;
+        }
 
-        .short-card-focus { height: 180px !important; }
+        /* ========== SHORTS - MOBILE 2x2 GRID ========== */
+        .shortsSwiper .swiper-wrapper {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px !important;
+            transform: none !important;
+        }
+        .shortsSwiper .swiper-slide {
+            width: 100% !important;
+            margin-right: 0 !important;
+        }
+        .short-card-focus {
+            height: 180px !important;
+            border-radius: 16px !important;
+        }
+        .short-overlay-focus {
+            padding: 12px !important;
+        }
+        .short-overlay-focus h6 {
+            font-size: 10px !important;
+        }
+        .btn-short-play {
+            width: 28px !important;
+            height: 28px !important;
+            font-size: 14px !important;
+        }
+        .swiper-prev-shorts,
+        .swiper-next-shorts {
+            display: none !important;
+        }
 
-        .search-wrapper .input-group { border-radius: 50px !important; }
+        /* ========== COURSES - MOBILE: Show 4 + View More Button (FIX 2) ========== */
+        .coursesSwiper .swiper-wrapper {
+            display: grid !important;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px !important;
+            transform: none !important;
+        }
+        .coursesSwiper .swiper-slide {
+            width: 100% !important;
+            margin-right: 0 !important;
+        }
+        /* Hide courses beyond the 4th on mobile */
+        .coursesSwiper .swiper-slide:nth-child(n+5) {
+            display: none !important;
+        }
+        .coursesSwiper .swiper-slide.expanded-mobile {
+            display: block !important;
+        }
+        .coursesSwiper .card-focus {
+            border-radius: 18px !important;
+        }
+        .coursesSwiper .position-relative[style*="height: 160px"] {
+            height: 120px !important;
+        }
+        .coursesSwiper .p-4 {
+            padding: 12px !important;
+        }
+        .coursesSwiper h6 {
+            font-size: 12px !important;
+            margin-bottom: 6px !important;
+        }
+        .coursesSwiper .text-muted.small {
+            font-size: 10px !important;
+        }
+        .swiper-prev-courses,
+        .swiper-next-courses {
+            display: none !important;
+        }
+        /* View More Button for Courses */
+        .courses-view-more-btn {
+            display: none !important;
+        }
+        @media (max-width: 768px) {
+            .courses-view-more-btn {
+                display: flex !important;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                width: 100%;
+                margin-top: 12px;
+                padding: 12px;
+                background: #f1f5f9;
+                border: 1.5px dashed #cbd5e1;
+                border-radius: 14px;
+                color: #4338ca;
+                font-weight: 800;
+                font-size: 13px;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .courses-view-more-btn:hover {
+                background: #eef2ff;
+                border-color: #4338ca;
+            }
+        }
+
+        /* ========== CAREER & TRENDING - MOBILE (FIX 1: No slider for quotes) ========== */
+        .dashboard-focus-modern .row.mb-5[style*="background"] {
+            padding: 12px !important;
+            border-radius: 20px !important;
+            margin-left: 16px !important;
+            margin-right: 16px !important;
+        }
+        .dashboard-focus-modern .row.mb-5[style*="background"] .col-lg-6 {
+            padding: 0 !important;
+        }
+        .dashboard-focus-modern .row.mb-5[style*="background"] .col-lg-6:first-child {
+            margin-bottom: 12px !important;
+        }
+        .dashboard-focus-modern .row.mb-5[style*="background"] .col-lg-6:first-child .card-focus {
+            min-height: auto !important;
+            height: auto !important;
+        }
+        .dashboard-focus-modern .row.mb-5[style*="background"] .col-md-7 {
+            min-height: 180px !important;
+            padding: 16px !important;
+        }
+        
+        /* REMOVE SLIDER for Quotes - show static stacked content */
+        .quotesSwiper .swiper-wrapper {
+            display: block !important;
+            transform: none !important;
+        }
+        .quotesSwiper .swiper-slide {
+            display: block !important;
+            width: 100% !important;
+            margin-bottom: 16px !important;
+        }
+        .quotesSwiper .swiper-slide:not(:first-child) {
+            display: none !important; /* Show only first quote on mobile */
+        }
+        .quotes-pagination {
+            display: none !important; /* Hide pagination dots */
+        }
+        .quotesSwiper .swiper-slide p {
+            font-size: 13px !important;
+            line-height: 1.5 !important;
+            margin-bottom: 10px !important;
+        }
+        .quotesSwiper .swiper-slide .bg-primary {
+            font-size: 7px !important;
+            padding: 3px 8px !important;
+        }
+        .quotesSwiper .swiper-slide .text-muted {
+            font-size: 8px !important;
+        }
+
+        /* Trending Categories - Horizontal scroll cards */
+        .trending-categories-row {
+            display: flex !important;
+            flex-wrap: nowrap !important;
+            overflow-x: auto !important;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory;
+            gap: 10px !important;
+            padding-bottom: 4px;
+        }
+        .trending-categories-row::-webkit-scrollbar {
+            display: none;
+        }
+        .trending-cat-col {
+            flex: 0 0 75% !important;
+            max-width: 75% !important;
+            scroll-snap-align: start;
+            padding: 0 !important;
+        }
+        .cat-card-neo.p-3 {
+            padding: 14px !important;
+            border-radius: 16px !important;
+        }
+        .cat-card-neo .cat-icon-box {
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 10px !important;
+            font-size: 16px !important;
+        }
+        .cat-card-neo h6 {
+            font-size: 13px !important;
+        }
+
+        /* ========== NAVIGATION BUTTONS - HIDE ON MOBILE ========== */
+        .swiper-prev-watching,
+        .swiper-next-watching,
+        .swiper-prev-recom-videos,
+        .swiper-next-recom-videos {
+            width: 28px !important;
+            height: 28px !important;
+        }
+        .swiper-prev-watching i,
+        .swiper-next-watching i,
+        .swiper-prev-recom-videos i,
+        .swiper-next-recom-videos i {
+            font-size: 10px !important;
+        }
+
+        /* Badge adjustments */
+        .d-none.d-md-inline-block {
+            display: none !important;
+        }
     }
 
-    @media (max-width: 480px) {
-        .hero-focus-card { border-radius: 12px !important; }
-        .hero-focus-card h1 { font-size: 20px !important; }
-        .hero-focus-card .input-group input { font-size: 13px !important; }
-        .hero-actions { flex-direction: column; width: 100%; }
-        .btn-hero-pill-mini { width: 100%; justify-content: center; font-size: 12px !important; padding: 8px 16px !important; height: 38px !important; }
+    /* ========== EXTRA SMALL DEVICES (iPhone SE, etc.) ========== */
+    @media (max-width: 380px) {
+        .stats-premium-bar {
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 6px !important;
+            padding: 10px 6px !important;
+        }
+        .stat-item-premium {
+            padding: 8px 4px !important;
+        }
+        .stat-item-premium .icon-box {
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 16px !important;
+        }
+        .stat-value-premium {
+            font-size: 16px !important;
+        }
+        .hero-actions {
+            flex-wrap: wrap !important;
+        }
+        .btn-hero-pill {
+            font-size: 11px !important;
+            padding: 8px 10px !important;
+        }
+        .tracksSwiper .swiper-wrapper,
+        .shortsSwiper .swiper-wrapper,
+        .coursesSwiper .swiper-wrapper {
+            gap: 8px !important;
+        }
+        .continueWatchingSwiper .swiper-slide {
+            width: 88% !important;
+        }
+        .recommendedVideosSwiper .swiper-slide {
+            width: 80% !important;
+        }
+    }
 
-        .roadmap-card { padding: 1rem !important; border-radius: 12px !important; }
-        .roadmap-card .d-flex.align-items-center.gap-4 { flex-direction: column; text-align: center; }
-        .roadmap-card .roadmap-icon-box { width: 56px !important; height: 56px !important; }
-        .roadmap-card h4 { font-size: 15px !important; }
-        .roadmap-card p.text-muted { text-align: center; }
+    #voiceSearchBtn.listening {
+        color: #dc2626 !important;
+    }
+    @keyframes pulse {
+        0% { transform: scale(1); }
+        50% { transform: scale(1.15); }
+        100% { transform: scale(1); }
+    }
+    @keyframes gentleFloat {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-8px); }
+    }
 
-        .stats-premium-bar { gap: 0; }
-        .stat-item-premium { padding: 0 10px; gap: 6px; }
-        .stat-item-premium .icon-box { width: 22px; height: 22px; font-size: 10px; border-radius: 6px; }
-        .stat-value-premium { font-size: 14px !important; }
-        .stat-item-premium .text-muted.fw-800[style*="font-size: 11px"] { font-size: 8px !important; }
-        .stat-item-premium .small.fw-700.opacity-50 { font-size: 8px !important; }
-
-        .dashboard-focus-modern .row.mb-5[style*="background"] .col-lg-6:first-child { margin-bottom: 1rem; }
-        .dashboard-focus-modern .p-4 { padding: 12px !important; }
-
-        [class*="Swiper"] .swiper-slide { width: 100% !important; margin-right: 0 !important; }
-
-        .dashboard-focus-modern h5.fw-800 { font-size: 14px !important; }
-        .dashboard-focus-modern .d-flex.gap-2 .btn[style*="width: 32px"] { width: 28px !important; height: 28px !important; }
-        .dashboard-focus-modern .d-flex.gap-2 .btn i { font-size: 10px !important; }
-
-        .short-card-focus { height: 140px !important; border-radius: 12px !important; }
-
-        .cat-card-neo .row.g-3 { --bs-gutter-y: 0.5rem; }
-        .cat-card-neo .col-6 { padding-right: 6px; padding-left: 6px; }
+    /* Journey card refinements */
+    .journey-card {
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .journey-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 30px 70px -20px rgba(67, 56, 202, 0.08) !important;
+        border-color: rgba(99, 102, 241, 0.12) !important;
     }
 </style>
 @endsection
@@ -991,7 +1623,6 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-
 
         // Tracks Swiper
         new Swiper('.tracksSwiper', {
@@ -1056,8 +1687,9 @@
         // Quotes Swiper
         new Swiper('.quotesSwiper', {
             slidesPerView: 1,
-            spaceBetween: 50,
+            spaceBetween: 0,
             loop: true,
+            autoHeight: true,
             autoplay: {
                 delay: 6000,
                 disableOnInteraction: false,
@@ -1066,34 +1698,6 @@
                 el: '.quotes-pagination',
                 clickable: true,
             },
-        });
-
-        // Main Recommended Swiper
-        new Swiper('.mainRecommendedSwiper', {
-            slidesPerView: 1,
-            spaceBetween: 24,
-            navigation: {
-                nextEl: '.swiper-next-main-recom',
-                prevEl: '.swiper-prev-main-recom',
-            },
-            breakpoints: {
-                640: { slidesPerView: 2 },
-                1024: { slidesPerView: 4 }
-            }
-        });
-
-        // Recommended Videos Swiper (Behavioral)
-        new Swiper('.recommendedVideosSwiper', {
-            slidesPerView: 1,
-            spaceBetween: 24,
-            navigation: {
-                nextEl: '.swiper-next-recom-videos',
-                prevEl: '.swiper-prev-recom-videos',
-            },
-            breakpoints: {
-                640: { slidesPerView: 2 },
-                1024: { slidesPerView: 4 }
-            }
         });
 
         // Courses Swiper
@@ -1109,46 +1713,154 @@
                 1024: { slidesPerView: 4, spaceBetween: 24 },
             },
         });
-    // Dynamic search titles replacement
-    const searchInputAlt = document.getElementById('dashboard-search-alt');
-    const heroTypingText = document.getElementById('hero-typing-text');
 
-    // Animator for Hero Title
-    if (heroTypingText) {
-        const heroStrings = [
-            "use Copilot in Outlook?", 
-            "create a report from Excel?", 
-            "use ChatGPT for emails?",
-            "learn new AI skills?"
-        ];
-        let heroIdx = 0;
-        let heroCharIdx = 0;
-        let heroIsDeleting = false;
-
-        function typeHeroTitle() {
-            const fullStr = heroStrings[heroIdx];
-            heroTypingText.textContent = fullStr.substring(0, heroCharIdx);
+        // FIX 2: Courses View More functionality for mobile
+        const coursesWrapper = document.querySelector('.coursesSwiper .swiper-wrapper');
+        if (coursesWrapper && window.innerWidth <= 768) {
+            // Create "View More" button
+            const viewMoreBtn = document.createElement('div');
+            viewMoreBtn.className = 'courses-view-more-btn';
+            viewMoreBtn.innerHTML = '<i class="bi bi-plus-circle"></i> View More Courses';
             
-            if (heroIsDeleting) {
-                heroCharIdx--;
-            } else {
-                heroCharIdx++;
-            }
-
-            if (!heroIsDeleting && heroCharIdx > fullStr.length) {
-                heroIsDeleting = true;
-                setTimeout(typeHeroTitle, 2500); // Hold on the full string
-            } else if (heroIsDeleting && heroCharIdx < 0) {
-                heroIsDeleting = false;
-                heroIdx = (heroIdx + 1) % heroStrings.length;
-                setTimeout(typeHeroTitle, 500);
-            } else {
-                setTimeout(typeHeroTitle, heroIsDeleting ? 40 : 70);
+            // Insert after swiper
+            const coursesSwiperEl = document.querySelector('.coursesSwiper');
+            if (coursesSwiperEl) {
+                coursesSwiperEl.parentNode.insertBefore(viewMoreBtn, coursesSwiperEl.nextSibling);
+                
+                let isExpanded = false;
+                viewMoreBtn.addEventListener('click', function() {
+                    isExpanded = !isExpanded;
+                    const hiddenSlides = coursesWrapper.querySelectorAll('.swiper-slide:nth-child(n+5)');
+                    
+                    if (isExpanded) {
+                        hiddenSlides.forEach(slide => slide.classList.add('expanded-mobile'));
+                        viewMoreBtn.innerHTML = '<i class="bi bi-dash-circle"></i> Show Less';
+                    } else {
+                        hiddenSlides.forEach(slide => slide.classList.remove('expanded-mobile'));
+                        viewMoreBtn.innerHTML = '<i class="bi bi-plus-circle"></i> View More Courses';
+                    }
+                });
             }
         }
-        typeHeroTitle();
-    }
-});
+
+        // Dynamic search titles replacement
+        const searchInputAlt = document.getElementById('dashboard-search-alt');
+        const heroTypingText = document.getElementById('hero-typing-text');
+
+        // Animator for Hero Title
+        if (heroTypingText) {
+            const heroStrings = [
+                "use Copilot in Outlook?", 
+                "create a report from Excel?", 
+                "use ChatGPT for emails?",
+                "learn new AI skills?"
+            ];
+            let heroIdx = 0;
+            let heroCharIdx = 0;
+            let heroIsDeleting = false;
+
+            function typeHeroTitle() {
+                const fullStr = heroStrings[heroIdx];
+                heroTypingText.textContent = fullStr.substring(0, heroCharIdx);
+                
+                if (heroIsDeleting) {
+                    heroCharIdx--;
+                } else {
+                    heroCharIdx++;
+                }
+
+                if (!heroIsDeleting && heroCharIdx > fullStr.length) {
+                    heroIsDeleting = true;
+                    setTimeout(typeHeroTitle, 2500); // Hold on the full string
+                } else if (heroIsDeleting && heroCharIdx < 0) {
+                    heroIsDeleting = false;
+                    heroIdx = (heroIdx + 1) % heroStrings.length;
+                    setTimeout(typeHeroTitle, 500);
+                } else {
+                    setTimeout(typeHeroTitle, heroIsDeleting ? 40 : 70);
+                }
+            }
+            typeHeroTitle();
+        }
+
+        // Voice Search
+        let voiceRecognition = null;
+
+        window.startVoiceSearch = function() {
+            const btn = document.getElementById('voiceSearchBtn');
+            const input = document.getElementById('dashboard-search-alt');
+
+            // Toggle off if already listening
+            if (btn.classList.contains('listening')) {
+                if (voiceRecognition) {
+                    voiceRecognition.stop();
+                }
+                return;
+            }
+
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                alert('Voice search requires Chrome, Edge, or Safari. Please try a different browser.');
+                return;
+            }
+            voiceRecognition = new SpeechRecognition();
+            voiceRecognition.lang = 'en-US';
+            voiceRecognition.interimResults = true;
+            voiceRecognition.continuous = true;
+            voiceRecognition.maxAlternatives = 1;
+
+            btn.classList.add('listening');
+            btn.innerHTML = '<i class="bi bi-mic-fill" style="color:#dc2626;"></i>';
+            btn.style.animation = 'pulse 1s infinite';
+            input.placeholder = 'Listening... Speak now';
+
+            voiceRecognition.onresult = function(e) {
+                let transcript = '';
+                for (let i = e.resultIndex; i < e.results.length; i++) {
+                    transcript += e.results[i][0].transcript;
+                }
+                input.value = transcript;
+                input.placeholder = transcript;
+            };
+
+            voiceRecognition.onerror = function(e) {
+                console.error('Speech error:', e.error);
+                btn.classList.remove('listening');
+                btn.innerHTML = '<i class="bi bi-mic"></i>';
+                btn.style.animation = '';
+                input.placeholder = 'Search for tools, skills, or topics...';
+                if (e.error === 'not-allowed') {
+                    alert('Microphone access was denied. Please allow microphone access and try again.');
+                } else if (e.error === 'no-speech') {
+                    alert('No speech detected. Try speaking louder or check your microphone.');
+                } else {
+                    alert('Voice search error: ' + e.error + '. Try Chrome or disable Brave Shields for this site.');
+                }
+            };
+
+            voiceRecognition.onend = function() {
+                const transcript = input.value.trim();
+                btn.classList.remove('listening');
+                btn.innerHTML = '<i class="bi bi-mic"></i>';
+                btn.style.animation = '';
+                input.placeholder = 'Search for tools, skills, or topics...';
+                if (transcript) {
+                    input.form.submit();
+                }
+            };
+
+            try {
+                voiceRecognition.start();
+            } catch (e) {
+                console.error('Speech start error:', e);
+                btn.classList.remove('listening');
+                btn.innerHTML = '<i class="bi bi-mic"></i>';
+                btn.style.animation = '';
+                input.placeholder = 'Search for tools, skills, or topics...';
+                alert('Voice search failed to start. Try disabling Brave Shields (lion icon in address bar) or use Chrome.');
+            }
+        };
+    });
 </script>
 
 {{-- Create Roadmap Modal --}}
@@ -1183,10 +1895,6 @@
                         </button>
                     </div>
                 </form>
-                
-                <div class="text-center mt-4">
-                    <span class="badge bg-light text-muted rounded-pill px-3 py-2 fw-700" style="font-size: 10px; letter-spacing: 1px; text-transform: uppercase;">Powered by GPT-4o Mini</span>
-                </div>
             </div>
             <button type="button" class="btn-close position-absolute top-0 end-0 m-4 shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
@@ -1194,18 +1902,6 @@
 </div>
 
 <style>
-    .btn-hero-create {
-        background: #f8fafc;
-        color: #4338ca !important;
-        border: 1px solid #e2e8f0;
-        cursor: pointer;
-        padding: 5px 20px !important;
-        height: 42px !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-    }
-    .btn-hero-create:hover { background: #eef2ff; border-color: #4338ca; transform: translateY(-2px); }
     .blueprint-icon-wrapper {
         width: 70px; height: 70px; background: #ffffff; border-radius: 20px;
         display: flex; align-items: center; justify-content: center; position: relative;

@@ -152,7 +152,7 @@
         flex-shrink: 0;
     }
 
-    /* ── Departments List ── */
+    /* ── Groups List ── */
     .dept-row {
         padding: clamp(0.75rem, 1.2vw, 1rem) clamp(1rem, 2vw, 1.4rem);
         border-bottom: 1px solid #f9fafb;
@@ -208,13 +208,14 @@
     }
     .btn-del:hover { color: #ef4444; background: #fef2f2; }
 
-    /* ── Employee Table ── */
+    /* ── Student Table ── */
     .emp-search-wrap {
-        padding: clamp(0.6rem, 1.2vw, 0.85rem) clamp(1rem, 2vw, 1.4rem);
-        border-bottom: 1px solid #f3f4f6;
+        padding: clamp(0.8rem, 1.4vw, 1rem) clamp(1rem, 2vw, 1.4rem);
+        border-bottom: 1px solid #eef2f7;
         position: relative;
         width: 100%;
         max-width: 100%;
+        background: #fff;
     }
     .emp-search-wrap i {
         position: absolute;
@@ -227,12 +228,12 @@
     .emp-search-input {
         width: 100%;
         max-width: 100%;
-        background: #f9fafb;
-        border: 1px solid #e9ecef;
-        border-radius: 8px;
-        padding: 0.5rem 0.9rem 0.5rem clamp(1.8rem, 3vw, 2.2rem);
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.65rem 0.9rem 0.65rem clamp(1.8rem, 3vw, 2.2rem);
         font-size: clamp(0.75rem, 1vw, 0.85rem);
-        font-weight: 500;
+        font-weight: 600;
         color: #111827;
         outline: none;
         transition: border-color 0.15s, box-shadow 0.15s;
@@ -245,56 +246,105 @@
 
     .emp-table {
         width: 100%;
-        border-collapse: collapse;
+        border-collapse: separate;
+        border-spacing: 0;
         min-width: 600px;
+        background: #fff;
     }
     .emp-table th {
-        background: #f9fafb;
-        color: #6b7280;
+        background: #f8fafc;
+        color: #64748b;
         font-size: clamp(0.6rem, 0.8vw, 0.7rem);
-        font-weight: 700;
+        font-weight: 800;
         text-transform: uppercase;
         letter-spacing: 0.06em;
-        padding: clamp(0.5rem, 1vw, 0.75rem) clamp(0.5rem, 1vw, 1rem);
-        border-bottom: 1px solid #f3f4f6;
+        padding: clamp(0.7rem, 1vw, 0.85rem) clamp(0.75rem, 1.3vw, 1.1rem);
+        border-bottom: 1px solid #e5e7eb;
         white-space: nowrap;
         text-align: left;
     }
     .emp-table td {
-        padding: clamp(0.5rem, 1vw, 0.85rem) clamp(0.5rem, 1vw, 1rem);
-        border-bottom: 1px solid #f9fafb;
+        padding: clamp(0.75rem, 1.2vw, 1rem) clamp(0.75rem, 1.3vw, 1.1rem);
+        border-bottom: 1px solid #f1f5f9;
         vertical-align: middle;
         font-size: clamp(0.75rem, 1vw, 0.875rem);
         color: #374151;
     }
     .emp-table tbody tr:last-child td { border-bottom: none; }
-    .emp-table tbody tr:hover td { background: #fafafa; }
+    .emp-table tbody tr { transition: background 0.15s ease, box-shadow 0.15s ease; }
+    .emp-table tbody tr:hover td { background: #fbfdff; }
 
     /* Avatar initials circle */
     .emp-avatar {
-        width: clamp(28px, 3.5vw, 34px);
-        height: clamp(28px, 3.5vw, 34px);
-        border-radius: 50%;
-        font-weight: 700;
+        width: clamp(36px, 4vw, 42px);
+        height: clamp(36px, 4vw, 42px);
+        border-radius: 12px;
+        font-weight: 800;
         font-size: clamp(0.6rem, 0.9vw, 0.75rem);
         color: #fff;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
     }
     .emp-name {
-        font-weight: 700;
+        font-weight: 800;
         color: #111827;
-        font-size: clamp(0.75rem, 1vw, 0.875rem);
+        font-size: clamp(0.8rem, 1vw, 0.92rem);
         word-break: break-word;
     }
     .emp-dept {
-        font-size: clamp(0.6rem, 0.8vw, 0.72rem);
-        color: #9ca3af;
-        margin-top: 1px;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        background: #f1f5f9;
+        color: #64748b;
+        border-radius: 999px;
+        padding: 0.15rem 0.5rem;
+        font-size: clamp(0.58rem, 0.8vw, 0.68rem);
+        font-weight: 800;
+        margin-top: 4px;
         word-break: break-word;
     }
+    .emp-email {
+        color: #64748b;
+        font-size: clamp(0.64rem, 0.85vw, 0.75rem);
+        font-weight: 600;
+        margin-top: 2px;
+        word-break: break-word;
+    }
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        border-radius: 999px;
+        padding: 0.42rem 0.7rem;
+        font-size: clamp(0.62rem, 0.85vw, 0.72rem);
+        font-weight: 900;
+        letter-spacing: 0.04em;
+    }
+    .status-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    .status-online {
+        background: #ecfdf5;
+        color: #047857;
+        border: 1px solid #a7f3d0;
+    }
+    .status-online .status-dot {
+        background: #10b981;
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.14);
+    }
+    .status-offline {
+        background: #f8fafc;
+        color: #64748b;
+        border: 1px solid #e2e8f0;
+    }
+    .status-offline .status-dot { background: #94a3b8; }
 
     .code-chip {
         background: #f3f4f6;
@@ -317,12 +367,13 @@
     .code-chip i { font-size: 0.7rem; color: #9ca3af; flex-shrink: 0; }
 
     .time-chip {
-        background: #f3f4f6;
-        border-radius: 6px;
-        padding: 0.25rem 0.6rem;
+        background: #eef2ff;
+        border: 1px solid #e0e7ff;
+        border-radius: 999px;
+        padding: 0.35rem 0.7rem;
         font-size: clamp(0.65rem, 0.9vw, 0.78rem);
-        font-weight: 700;
-        color: #374151;
+        font-weight: 900;
+        color: #4338ca;
         display: inline-block;
     }
 
@@ -339,6 +390,40 @@
     }
     .btn-view-tools:hover { background: #4338ca; color: #fff; }
     .btn-view-tools i { font-size: 0.7rem; }
+    .student-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 0.45rem;
+        flex-wrap: wrap;
+    }
+    .student-action-btn {
+        border-radius: 9px;
+        border: 1px solid #e5e7eb;
+        font-size: clamp(0.65rem, 0.8vw, 0.74rem);
+        font-weight: 800;
+        padding: 0.42rem 0.68rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.32rem;
+        white-space: nowrap;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+    .student-action-btn:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+    }
+    .btn-send-key {
+        background: #eff6ff;
+        color: #1d4ed8;
+        border-color: #bfdbfe;
+    }
+    .btn-send-key:hover { background: #dbeafe; color: #1e40af; }
+    .btn-help {
+        background: #f5f3ff;
+        color: #7c3aed;
+        border-color: #ddd6fe;
+    }
+    .btn-help:hover { background: #ede9fe; color: #6d28d9; }
 
     /* ── Sidebar (Offcanvas) ── */
     #telemetrySidebar {
@@ -434,7 +519,7 @@
         max-width: 100%;
     }
 
-    /* ── Colors for dept/employee avatar dots ── */
+    /* ── Colors for group/student avatar dots ── */
     .c1 { background: #4f46e5; }
     .c2 { background: #0ea5e9; }
     .c3 { background: #10b981; }
@@ -679,8 +764,6 @@
         .emp-table {
             min-width: 100%;
             display: block;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
         }
         .emp-table thead,
         .emp-table tbody,
@@ -691,20 +774,21 @@
             display: none;
         }
         .emp-table tr {
-            margin-bottom: 0.75rem;
-            border: 1px solid #e9ecef;
-            border-radius: 12px;
-            padding: 0.75rem;
+            margin-bottom: 1.25rem;
+            border: 1px solid #eef2f6;
+            border-radius: 16px;
+            padding: 1.25rem;
             background: #fff;
+            box-shadow: 0 4px 18px rgba(100, 116, 139, 0.06);
         }
         .emp-table td {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0.4rem 0;
+            padding: 0.65rem 0;
             border: none;
-            border-bottom: 1px solid #f3f4f6;
-            flex-wrap: wrap;
+            border-bottom: 1px dashed #f1f5f9;
+            width: 100%;
             gap: 0.5rem;
         }
         .emp-table td:last-child {
@@ -713,22 +797,50 @@
         .emp-table td::before {
             content: attr(data-label);
             font-weight: 700;
-            font-size: 0.6rem;
+            font-size: 0.62rem;
             text-transform: uppercase;
             color: #9ca3af;
             letter-spacing: 0.06em;
             flex-shrink: 0;
         }
+        /* Top header: Student Info Row */
+        .emp-table td[data-label="Student"] {
+            border-bottom: 1px solid #eef2f6;
+            padding-bottom: 0.9rem;
+            margin-bottom: 0.35rem;
+            justify-content: flex-start;
+        }
+        .emp-table td[data-label="Student"]::before {
+            display: none !important;
+        }
+        .emp-table td[data-label="Student"] > div {
+            width: 100%;
+        }
+        /* Actions button footer row */
+        .emp-table td[data-label="Actions"] {
+            border-bottom: none;
+            padding-top: 0.9rem;
+            margin-top: 0.35rem;
+            border-top: 1px solid #eef2f6;
+            justify-content: flex-start;
+        }
+        .emp-table td[data-label="Actions"]::before {
+            display: none !important;
+        }
+        .emp-table td[data-label="Actions"] > div {
+            width: 100%;
+            display: flex;
+            justify-content: flex-start !important;
+            gap: 8px;
+        }
+        .emp-table td[data-label="Actions"] form {
+            margin-left: auto; /* Push delete to the right */
+        }
         .emp-table td .d-flex.align-items-center.gap-2 {
             flex-wrap: wrap;
         }
-        .emp-table td .text-end,
-        .emp-table td .d-flex.justify-content-end {
-            justify-content: flex-start !important;
-            text-align: left !important;
-        }
         .emp-table td .progress {
-            width: 40px !important;
+            width: 60px !important;
         }
         #telemetrySidebar {
             width: 100%;
@@ -996,16 +1108,16 @@
         <div class="team-gate-card">
             <div class="gate-badge"><i class="bi bi-shield-lock-fill"></i> Premium Feature</div>
             <h2>Team Telemetry & Analytics</h2>
-            <p>Monitor how your entire team uses AI tools in real time. Get department-level insights, track productivity, identify top tools, and make smarter decisions with live telemetry data from every employee's browser.</p>
+            <p>Monitor how your entire team uses AI tools in real time. Get group-level insights, track productivity, identify top tools, and make smarter decisions with live telemetry data from every student's browser.</p>
 
             <div class="gate-features-mini">
                 <div class="gate-feature-item">
                     <i class="bi bi-check-circle-fill"></i>
-                    <span><strong>Employee Tracking:</strong> Track active time, tool usage, and productivity metrics for every employee.</span>
+                    <span><strong>Student Tracking:</strong> Track active time, tool usage, and productivity metrics for every student.</span>
                 </div>
                 <div class="gate-feature-item">
                     <i class="bi bi-check-circle-fill"></i>
-                    <span><strong>Department Analytics:</strong> Group employees by department and see aggregated tool usage side by side.</span>
+                    <span><strong>Group Analytics:</strong> Group students and see aggregated tool usage side by side.</span>
                 </div>
                 <div class="gate-feature-item">
                     <i class="bi bi-check-circle-fill"></i>
@@ -1033,7 +1145,7 @@
 <div class="page-top d-flex align-items-center justify-content-between flex-wrap gap-3">
     <div>
         <h1 class="page-title">Team Telemetry</h1>
-        <p class="page-sub">Track which sites and tools your departments and employees use most.</p>
+        <p class="page-sub">Track which sites and tools your groups and students use most.</p>
     </div>
     <div class="d-flex gap-2 align-items-center flex-wrap">
         <select class="form-select" onchange="window.location.href='?range='+this.value" style="width: auto; min-width: 100px; border-color: #e5e7eb; border-radius: 8px; font-weight: 500; font-size: clamp(0.7rem, 1vw, 0.875rem);">
@@ -1042,14 +1154,20 @@
             <option value="30days" {{ (isset($range) && $range == '30days') ? 'selected' : '' }}>Last 30 Days</option>
             <option value="all" {{ (!isset($range) || $range == 'all') ? 'selected' : '' }}>All Time</option>
         </select>
-        <button type="button" class="btn btn-sync-extension" id="extensionSyncNowBtn" title="Requests sync from the extension installed in this browser. Employee browsers must upload their own latest data.">
+        <button type="button" class="btn btn-sync-extension" id="extensionSyncNowBtn" title="Requests sync from the extension installed in this browser. Student browsers must upload their own latest data.">
             <i class="bi bi-arrow-repeat me-1"></i> Sync
         </button>
+        <a href="{{ route('team.inspector-report', ['range' => $range ?? 'today']) }}" class="btn btn-head-outline" style="background:#f0fdf4;border-color:#86efac;color:#15803d;" title="Download a full Training Intelligence Report">
+            <i class="bi bi-file-earmark-bar-graph-fill me-1" style="color:#16a34a;"></i> Inspector Report
+        </a>
+        <a href="{{ route('team.reports') }}" class="btn btn-head-outline">
+            <i class="bi bi-bar-chart-line me-1"></i> Usage Reports
+        </a>
         <button class="btn-head-outline btn" data-bs-toggle="modal" data-bs-target="#addDeptModal">
-            <i class="bi bi-diagram-3 me-1"></i> Add Dept
+            <i class="bi bi-diagram-3 me-1"></i> Add Group
         </button>
         <button class="btn-head-primary btn" data-bs-toggle="modal" data-bs-target="#addEmpModal">
-            <i class="bi bi-person-plus me-1"></i> Add Emp
+            <i class="bi bi-person-plus me-1"></i> Add Student
         </button>
     </div>
 </div>
@@ -1063,6 +1181,28 @@
         </div>
     @endif
 
+    @if(session('warning'))
+        <div class="d-flex align-items-center gap-2 mb-4 px-3 py-2 rounded-3"
+             style="background:#fffbeb; color:#92400e; font-weight:600; font-size:clamp(0.7rem, 1vw, 0.875rem);border:1px solid #fde68a;flex-wrap:wrap;">
+            <i class="bi bi-exclamation-triangle-fill"></i> {{ session('warning') }}
+        </div>
+    @endif
+
+    @if($errors->any())
+        <div class="mb-4 px-3 py-3 rounded-3"
+             style="background:#fef2f2; color:#991b1b; font-weight:600; font-size:clamp(0.7rem, 1vw, 0.875rem);border:1px solid #fecaca;">
+            <div class="d-flex align-items-center gap-2 mb-2">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>Please fix the student form details below.</span>
+            </div>
+            <ul class="mb-0 ps-3">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     {{-- KPI Strip --}}
     <div class="kpi-strip">
 
@@ -1070,14 +1210,14 @@
             <div class="kpi-icon" style="background:#dcfce7; color:#16a34a;"><i class="bi bi-diagram-3-fill"></i></div>
             <div>
                 <div class="kpi-value">{{ $departments->count() }}</div>
-                <div class="kpi-label">Departments</div>
+                <div class="kpi-label">Groups</div>
             </div>
         </div>
         <div class="kpi-item">
             <div class="kpi-icon" style="background:#e0f2fe; color:#0284c7;"><i class="bi bi-people-fill"></i></div>
             <div>
                 <div class="kpi-value">{{ $employees->total() }}</div>
-                <div class="kpi-label">Employees</div>
+                <div class="kpi-label">Students</div>
             </div>
         </div>
     </div>
@@ -1101,8 +1241,11 @@
         <div class="col-lg-4">
             <div class="section-card">
                 <div class="section-head">
-                    <h5><i class="bi bi-diagram-3 me-2 text-success"></i>Departments</h5>
+                    <h5><i class="bi bi-diagram-3 me-2 text-success"></i>Groups</h5>
                     <span class="count-badge">{{ $departments->count() }}</span>
+                    <button class="btn btn-sm btn-outline-success ms-auto rounded-circle p-0 d-flex align-items-center justify-content-center" style="width:28px;height:28px;min-width:28px;" data-bs-toggle="modal" data-bs-target="#addDeptModal" title="Add Group">
+                        <i class="bi bi-plus-lg" style="font-size:.8rem;"></i>
+                    </button>
                 </div>
 
                 @forelse($departments as $dept)
@@ -1112,7 +1255,7 @@
                             <div class="dept-dot {{ $dc }}">{{ mb_substr($dept->name, 0, 1) }}</div>
                             <div style="min-width:0;">
                                 <div class="dept-name">{{ $dept->name }}</div>
-                                <div class="dept-meta">{{ $dept->employees_count }} employees</div>
+                                <div class="dept-meta">{{ $dept->employees_count }} students</div>
                             </div>
                         </div>
                         <div class="dept-actions">
@@ -1123,7 +1266,7 @@
                                 <i class="bi bi-bar-chart-line-fill"></i> Analyze
                             </button>
                             <form action="{{ route('team.departments.destroy', $dept) }}" method="POST"
-                                  onsubmit="return confirm('Delete this department?');" class="d-inline">
+                                  onsubmit="return confirm('Delete this group?');" class="d-inline">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="btn btn-del"><i class="bi bi-trash3"></i></button>
                             </form>
@@ -1132,8 +1275,8 @@
                 @empty
                     <div class="empty-state">
                         <i class="bi bi-diagram-3"></i>
-                        <h6>No Departments Yet</h6>
-                        <p>Add departments to group your employees.</p>
+                        <h6>No Groups Yet</h6>
+                        <p>Add groups to organize your students.</p>
                     </div>
                 @endforelse
             </div>
@@ -1143,8 +1286,11 @@
         <div class="col-lg-8">
             <div class="section-card">
                 <div class="section-head">
-                    <h5><i class="bi bi-people me-2 text-primary"></i>Employees</h5>
+                    <h5><i class="bi bi-people me-2 text-primary"></i>Students</h5>
                     <span class="count-badge">{{ $employees->total() }}</span>
+                    <button class="btn btn-sm btn-outline-primary ms-auto rounded-circle p-0 d-flex align-items-center justify-content-center" style="width:28px;height:28px;min-width:28px;" data-bs-toggle="modal" data-bs-target="#addEmpModal" title="Add Student">
+                        <i class="bi bi-plus-lg" style="font-size:.8rem;"></i>
+                    </button>
                 </div>
 
                 <div class="emp-search-wrap">
@@ -1156,11 +1302,9 @@
                     <table class="emp-table">
                         <thead>
                             <tr>
-                                <th>Employee / Dept</th>
+                                <th>Student / Group</th>
                                 <th>Status</th>
-                                <th>Connection Key</th>
                                 <th>Active Time</th>
-                                <th class="text-center">Activity</th>
                                 <th class="text-end">Actions</th>
                             </tr>
                         </thead>
@@ -1175,72 +1319,55 @@
                                 $isOnline = $lastSynced && $lastSynced->diffInMinutes(now()) < 5;
                             @endphp
                             <tr class="emp-row" data-name="{{ strtolower($emp->name) }}">
-                                <td data-label="Employee">
-                                    <div class="d-flex align-items-center gap-2" style="flex-wrap:wrap;">
+                                <td data-label="Student">
+                                    <div class="d-flex align-items-center gap-3" style="flex-wrap:wrap;">
                                         <div class="emp-avatar {{ $ec }}">{{ strtoupper($initials) }}</div>
                                         <div>
                                             <div class="emp-name">{{ $emp->name }}</div>
+                                            <div class="emp-email">{{ $emp->email }}</div>
                                             <div class="emp-dept">
-                                                {{ $emp->department?->name ?? 'No Department' }}
+                                                <i class="bi bi-collection-fill"></i>
+                                                {{ $emp->department?->name ?? 'No Group' }}
                                             </div>
                                         </div>
                                     </div>
                                 </td>
                                 <td data-label="Status">
                                     @if($isOnline)
-                                        <span class="badge rounded-pill bg-success p-2 d-inline-flex align-items-center gap-1" style="font-size: clamp(8px, 1vw, 10px); font-weight: 800;">
-                                            <span style="width: 6px; height: 6px; background: #fff; border-radius: 50%; display: block; animation: pulse 1.5s infinite;"></span> ONLINE
+                                        <span class="status-pill status-online">
+                                            <span class="status-dot"></span> ONLINE
                                         </span>
                                     @else
-                                        <span class="badge rounded-pill bg-light text-muted border p-2" style="font-size: clamp(8px, 1vw, 10px); font-weight: 800;">
-                                            OFFLINE
+                                        <span class="status-pill status-offline">
+                                            <span class="status-dot"></span> OFFLINE
                                         </span>
-                                    @endif
-                                </td>
-                                <td data-label="Connection Key">
-                                    <div class="d-flex align-items-center gap-2" style="flex-wrap:wrap;">
-                                        <span class="code-chip"
-                                              onclick="navigator.clipboard.writeText('{{ $emp->connection_code }}'); showToast('Code copied!');"
-                                              title="Click to copy">
-                                            {{ $emp->connection_code }}
-                                            <i class="bi bi-clipboard"></i>
-                                        </span>
-                                        <form action="{{ route('team.employees.regenerate-code', $emp) }}" method="POST" class="d-inline">
-                                            @csrf
-                                            <button type="submit" class="btn btn-sm btn-light p-1" title="Regenerate Key" onclick="return confirm('Regenerate key? The current extension will need to be re-linked.');">
-                                                <i class="bi bi-arrow-clockwise text-muted" style="font-size: 0.75rem;"></i>
-                                            </button>
-                                        </form>
-                                    </div>
-                                    @if($emp->connection_code_issued_at)
-                                        <div style="font-size: clamp(8px, 0.8vw, 10px); margin-top: 3px;">
-                                            <span class="{{ $emp->connection_code_issued_at->diffInDays(now()) > 30 ? 'text-warning fw-bold' : 'text-muted' }}">
-                                                Issued {{ $emp->connection_code_issued_at->diffForHumans() }}
-                                            </span>
-                                        </div>
                                     @endif
                                 </td>
                                 <td data-label="Active Time">
-                                    <span class="time-chip">{{ $ms($empActiveMs[$emp->id] ?? 0) }}</span>
-                                    <div style="font-size: clamp(8px, 0.8vw, 10px); color: #9ca3af; margin-top: 2px;">{{ $lastSynced ? 'Last sync: '.$lastSynced->diffForHumans() : 'Never synced' }}</div>
-                                </td>
-                                <td data-label="Activity" class="text-center">
-                                    <div class="progress" style="height: 6px; width: clamp(40px, 6vw, 60px); margin: 0 auto 4px; background: #f1f5f9;">
-                                      <div class="progress-bar bg-primary" role="progressbar" style="width: {{ $activeRatio }}%"></div>
+                                    <div class="d-flex flex-column align-items-start align-items-md-start">
+                                        <span class="time-chip">{{ $ms($empActiveMs[$emp->id] ?? 0) }}</span>
+                                        <div style="font-size: clamp(8.5px, 0.8vw, 11px); color: #9ca3af; margin-top: 2px;">{{ $lastSynced ? 'Last sync: '.$lastSynced->diffForHumans() : 'Never synced' }}</div>
                                     </div>
-                                    <span style="font-size: clamp(8px, 0.8vw, 10px); font-weight: 800; color: #4b5563;">{{ $activeRatio }}%</span>
                                 </td>
                                 <td data-label="Actions" class="text-end">
-                                    <div class="d-flex justify-content-end gap-2" style="flex-wrap:wrap;">
-                                        <button class="btn btn-view-tools btn-view-emp-sites px-2 py-1"
+                                    <div class="student-actions">
+                                        <form action="{{ route('team.employees.regenerate-code', $emp) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit"
+                                                    class="student-action-btn btn-send-key"
+                                                    title="Generate and email a new connection key"
+                                                    onclick="return confirm('Generate a new key and email it to {{ $emp->email }}? The current extension will need to be re-linked.');">
+                                                <i class="bi bi-envelope-arrow-up-fill"></i> Send Key
+                                            </button>
+                                        </form>
+                                        <button class="student-action-btn btn-view-tools btn-view-emp-sites"
                                                 data-id="{{ $emp->id }}"
                                                 data-name="{{ $emp->name }}"
                                                 data-url="{{ route('team.employees.top-sites', ['employee' => $emp, 'range' => $range ?? 'today']) }}"
                                                 title="View Tools">
                                             <i class="bi bi-bar-chart-line-fill"></i> Sites
                                         </button>
-                                        <button class="btn btn-analyze btn-view-help px-2 py-1"
-                                                style="background: #f5f3ff; color: #7c3aed; border: 1px solid #ddd6fe;"
+                                        <button class="student-action-btn btn-help btn-view-help"
                                                 data-id="{{ $emp->id }}"
                                                 data-name="{{ $emp->name }}"
                                                 data-url="{{ route('team.employees.help-requests', $emp) }}"
@@ -1248,7 +1375,7 @@
                                             <i class="bi bi-chat-dots-fill"></i> Help
                                         </button>
                                         <form action="{{ route('team.employees.destroy', $emp) }}" method="POST"
-                                              onsubmit="return confirm('Remove this employee?');" class="d-inline">
+                                              onsubmit="return confirm('Remove this student?');" class="d-inline">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="btn btn-del"><i class="bi bi-trash3"></i></button>
                                         </form>
@@ -1257,11 +1384,11 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="6">
+                                <td colspan="5">
                                     <div class="empty-state">
                                         <i class="bi bi-people"></i>
-                                        <h6>No Employees Yet</h6>
-                                        <p>Add employees to start tracking their tool usage.</p>
+                                        <h6>No Students Yet</h6>
+                                        <p>Add students to start tracking their tool usage.</p>
                                     </div>
                                 </td>
                             </tr>
@@ -1287,13 +1414,13 @@
             <form action="{{ route('team.departments.store') }}" method="POST">
                 @csrf
                 <div class="modal-header border-0 pb-0 px-4 pt-4">
-                    <h5 class="fw-800 text-dark mb-0">New Department</h5>
+                    <h5 class="fw-800 text-dark mb-0">New Group</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body px-4 py-3">
-                    <label class="form-label fw-600 text-muted small mb-1">Department Name</label>
+                    <label class="form-label fw-600 text-muted small mb-1">Group Name</label>
                     <input type="text" name="name" class="form-control rounded-3"
-                           placeholder="e.g. Engineering, Marketing" required>
+                           placeholder="e.g. Batch A, Morning Group" required>
                 </div>
                 <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
                     <button type="button" class="btn btn-light fw-600 rounded-3" data-bs-dismiss="modal">Cancel</button>
@@ -1310,28 +1437,33 @@
             <form action="{{ route('team.employees.store') }}" method="POST">
                 @csrf
                 <div class="modal-header border-0 pb-0 px-4 pt-4">
-                    <h5 class="fw-800 text-dark mb-0">Add Employee</h5>
+                    <h5 class="fw-800 text-dark mb-0">Add Student</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body px-4 py-3">
                     <div class="mb-3">
                         <label class="form-label fw-600 text-muted small mb-1">Full Name</label>
                         <input type="text" name="name" class="form-control rounded-3"
-                               placeholder="e.g. John Doe" required>
+                               value="{{ old('name') }}" placeholder="e.g. John Doe" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-600 text-muted small mb-1">Email Address</label>
+                        <input type="email" name="email" class="form-control rounded-3"
+                               value="{{ old('email') }}" placeholder="e.g. student@example.com" required>
                     </div>
                     <div>
-                        <label class="form-label fw-600 text-muted small mb-1">Department (Optional)</label>
+                        <label class="form-label fw-600 text-muted small mb-1">Group (Optional)</label>
                         <select name="department_id" class="form-select rounded-3">
                             <option value="">— None —</option>
                             @foreach($departments as $dept)
-                                <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                <option value="{{ $dept->id }}" @selected(old('department_id') == $dept->id)>{{ $dept->name }}</option>
                             @endforeach
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer border-0 px-4 pb-4 pt-0 gap-2">
                     <button type="button" class="btn btn-light fw-600 rounded-3" data-bs-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary fw-700 rounded-3 px-4">Add & Generate Key</button>
+                    <button type="submit" class="btn btn-primary fw-700 rounded-3 px-4">Add & Send Invite</button>
                 </div>
             </form>
         </div>
@@ -1478,12 +1610,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     document.querySelectorAll('.btn-view-emp-sites').forEach(b =>
         b.addEventListener('click', function () {
-            loadSites(this.dataset.url, this.dataset.name, 'Employee Telemetry');
+            loadSites(this.dataset.url, this.dataset.name, 'Student Telemetry');
         })
     );
     document.querySelectorAll('.btn-view-dept-sites').forEach(b =>
         b.addEventListener('click', function () {
-            loadSites(this.dataset.url, this.dataset.name + ' Dept.', 'Department Telemetry');
+            loadSites(this.dataset.url, this.dataset.name + ' Group', 'Group Telemetry');
         })
     );
     document.querySelectorAll('.btn-view-overall-sites').forEach(b =>
@@ -1493,9 +1625,10 @@ document.addEventListener('DOMContentLoaded', function () {
     );
     document.querySelectorAll('.btn-view-help').forEach(b =>
         b.addEventListener('click', function () {
-            loadSites(this.dataset.url, this.dataset.name, 'Employee Help Requests');
+            loadSites(this.dataset.url, this.dataset.name, 'Student Help Requests');
         })
     );
 });
 </script>
+
 @endsection

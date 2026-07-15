@@ -295,10 +295,10 @@
             <a href="{{ route('dashboard') }}" class="nav-link-neo {{ Route::is('dashboard') ? 'active' : '' }}">Home</a>
             <a href="{{ route('learn.explore') }}" class="nav-link-neo {{ Route::is('learn.explore') ? 'active' : '' }}">Library</a>
             <a href="{{ route('bookmarks') }}" class="nav-link-neo {{ Route::is('bookmarks') ? 'active' : '' }}">Bookmarks</a>
-            <a href="{{ route('roadmap') }}" class="nav-link-neo {{ Request::is('roadmap*') ? 'active' : '' }}">Roadmaps</a>
+            <a href="{{ route('roadmap') }}" class="nav-link-neo {{ Request::is('roadmap*') ? 'active' : '' }}">Progress</a>
             <a href="{{ route('extension.install') }}" class="nav-link-neo {{ Route::is('extension.install') ? 'active' : '' }}">AI Extension</a>
             <a href="{{ route('team.index') }}" class="nav-link-neo {{ Route::is('team.index') ? 'active' : '' }}">
-                My Team
+                Instructor
                 @if(!auth()->user()->can_access_team)
                     <span class="badge bg-danger ms-1" style="font-size: 8px; vertical-align: middle;">PRO</span>
                 @endif
@@ -347,11 +347,11 @@
             <a href="{{ route('ai.mentor') }}" class="btn-get-started d-none d-lg-block">
                 <i class="bi bi-stars me-2"></i> Ask AI Mentor
             </a>
-
+<!-- 
             <div class="icon-btn-neo position-relative">
                 <i class="bi bi-bell-fill"></i>
                 <span class="position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle" style="width: 10px; height: 10px;"></span>
-            </div>
+            </div> -->
 
             <div class="dropdown">
                 <div class="d-flex align-items-center gap-2" style="cursor:pointer;" data-bs-toggle="dropdown">
@@ -360,7 +360,6 @@
                 <ul class="dropdown-menu dropdown-menu-end border-0 shadow-2xl mt-3 rounded-4 p-2" style="min-width: 200px;">
                     <li><div class="dropdown-header fw-800 text-dark opacity-50 pb-2">PERSONAL</div></li>
                     <li><a class="dropdown-item rounded-3 fw-700 small py-2" href="{{ route('profile.edit') }}"><i class="bi bi-person-fill me-2"></i>My Profile</a></li>
-                    <li><a class="dropdown-item rounded-3 fw-700 small py-2" href="#"><i class="bi bi-gear-fill me-2"></i>Settings</a></li>
                     <li><hr class="dropdown-divider opacity-50"></li>
                     <li>
                         <form action="{{ route('logout') }}" method="POST">

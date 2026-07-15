@@ -835,9 +835,6 @@
                             @if($content->srt_file_ar)
                                 <button type="button" class="btn btn-outline-dark px-3" data-lang="ar" onclick="setSubtitleLang('ar')">Arabic (العربية)</button>
                             @endif
-                            @if($content->srt_file_en && $content->srt_file_ar)
-                                <button type="button" class="btn btn-outline-dark px-3" data-lang="both" onclick="setSubtitleLang('both')">Dual (En + Ar)</button>
-                            @endif
                         </div>
                     </div>
                 </div>
@@ -868,63 +865,7 @@
                     @endif
                     
                     <!-- Tabbed container for Info vs Transcripts -->
-                    <div class="transcript-tab-container mt-4 mb-2">
-                        <div class="transcript-tabs">
-                            <button type="button" class="transcript-tab-btn active" onclick="switchWatchTab('overview')">
-                                <i class="bi bi-info-circle me-1"></i> Lesson Info
-                            </button>
-                            @if($content->srt_file_en || $content->srt_file_ar)
-                            <button type="button" class="transcript-tab-btn" id="btn-transcript-tab" onclick="switchWatchTab('transcript')">
-                                <i class="bi bi-file-text me-1"></i> Live Translation & Transcript
-                            </button>
-                            @endif
-                        </div>
-                        
-                        <!-- Overview Panel -->
-                        <div class="transcript-panel active" id="panel-overview">
-                            <div class="row g-4">
-                                <div class="col-md-4">
-                                    <div class="lesson-meta-item">
-                                        <span class="meta-label"><i class="bi bi-briefcase"></i> Use Case</span>
-                                        <span class="meta-value text-muted" style="font-size: 13px;">Automating recurring professional workflows using specialized AI interactions and real-time behavioral mapping.</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="lesson-meta-item">
-                                        <span class="meta-label"><i class="bi bi-person-badge"></i> Role Relevance</span>
-                                        <span class="meta-value text-muted" style="font-size: 13px;">Essential for professionals looking to minimize cognitive load during tool-switching and repetitive digital tasks.</span>
-                                    </div>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="lesson-meta-item">
-                                        <span class="meta-label"><i class="bi bi-journal-check"></i> Lesson Outcome</span>
-                                        <span class="meta-value text-muted" style="font-size: 13px;">Competency in deploying modern AI strategies to save at least 15-20% of daily digital operation time.</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Transcript Panel -->
-                        @if($content->srt_file_en || $content->srt_file_ar)
-                        <div class="transcript-panel" id="panel-transcript">
-                            <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-                                <div class="text-muted small">
-                                    <i class="bi bi-info-circle me-1"></i> Click on any line below to jump directly to that part of the video!
-                                </div>
-                                <div class="position-relative">
-                                    <input type="text" id="transcript-search" class="form-control form-control-sm pe-4 rounded-pill" placeholder="Search transcript..." onkeyup="filterTranscript()">
-                                    <i class="bi bi-search position-absolute text-muted" style="right:12px;top:50%;transform:translateY(-50%);font-size:11px;"></i>
-                                </div>
-                            </div>
-                            <div class="transcript-scroll-area" id="transcript-lines-list">
-                                <div class="text-center py-4 text-muted">
-                                    <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
-                                    <div>Loading synced translation...</div>
-                                </div>
-                            </div>
-                        </div>
-                        @endif
-                    </div>
+
                 </div>
             </div>
 
@@ -998,13 +939,39 @@
                         </div>
                         <div class="card-body p-0" style="max-height: 600px; overflow-y: auto;">
                             @foreach($course->contents as $lesson)
+                                @php
+                                    $lessonPct = $lesson->completion_pct ?? 0;
+                                    $lessonDone = $lesson->is_completed ?? false;
+                                @endphp
                                 <a href="{{ route('learn.watch', [$lesson, 'course_id' => $course->id]) }}" class="rec-card-mini border-0 rounded-0 m-0 border-bottom {{ $lesson->id == $content->id ? 'bg-light' : '' }}" style="padding: 15px;">
-                                    <div class="d-flex align-items-center gap-3">
-                                        <div class="lesson-num-circle @if($lesson->id == $content->id) bg-primary text-white @endif">{{ $loop->iteration }}</div>
-                                        <div>
-                                            <h4 class="small fw-bold mb-0 {{ $lesson->id == $content->id ? 'text-primary' : '' }}">{{ $lesson->title }}</h4>
-                                            @if($lesson->duration_label)<span class="text-muted" style="font-size: 10px;">{{ $lesson->duration_label }}</span>@endif
+                                    <div class="d-flex align-items-center gap-3 w-100">
+                                        <div class="lesson-num-circle flex-shrink-0 {{ $lesson->id == $content->id ? 'bg-primary text-white' : ($lessonDone ? 'bg-success text-white' : '') }}">
+                                            @if($lessonDone && $lesson->id != $content->id)
+                                                <i class="bi bi-check2" style="font-size:12px;"></i>
+                                            @else
+                                                {{ $loop->iteration }}
+                                            @endif
                                         </div>
+                                        <div style="min-width:0;flex:1;">
+                                            <h4 class="small fw-bold mb-0 {{ $lesson->id == $content->id ? 'text-primary' : 'text-dark' }}">{{ $lesson->title }}</h4>
+                                            <div class="d-flex align-items-center gap-2 mt-1">
+                                                @if($lessonPct > 0 && !$lessonDone)
+                                                    <div style="flex:1;height:3px;background:#e2e8f0;border-radius:4px;overflow:hidden;">
+                                                        <div style="width:{{ $lessonPct }}%;height:100%;background:linear-gradient(90deg,#4f46e5,#818cf8);border-radius:4px;"></div>
+                                                    </div>
+                                                    <span class="text-primary fw-bold" style="font-size:10px;white-space:nowrap;">{{ $lessonPct }}%</span>
+                                                @elseif($lessonDone)
+                                                    <span class="text-success fw-bold" style="font-size:10px;">Completed</span>
+                                                @elseif($lesson->duration_label)
+                                                    <span class="text-muted" style="font-size: 10px;">{{ $lesson->duration_label }}</span>
+                                                @endif
+                                            </div>
+                                        </div>
+                                        @if($lesson->id == $content->id)
+                                            <i class="bi bi-play-circle-fill text-primary ms-auto flex-shrink-0"></i>
+                                        @elseif($lessonDone)
+                                            <i class="bi bi-check-circle-fill text-success ms-auto flex-shrink-0" style="font-size:14px;"></i>
+                                        @endif
                                     </div>
                                 </a>
                             @endforeach
@@ -1134,7 +1101,11 @@
             <div class="watch-progress-bar mb-4">
                 <div class="d-flex justify-content-between align-items-center mb-2">
                     <span class="small fw-bold text-muted">Your progress</span>
-                    <span class="small fw-bold" id="progress-label">{{ $progress ? round($progress->completion_percent) : 0 }}%</span>
+                    <div class="d-flex align-items-center gap-2">
+
+                        <span class="text-muted {{ !$progress || $progress->watched_seconds <= 1 ? 'd-none' : '' }}" id="reset-divider" style="font-size: 11px;">|</span>
+                        <span class="small fw-bold" id="progress-label">{{ $progress ? round($progress->completion_percent) : 0 }}%</span>
+                    </div>
                 </div>
                 <div class="progress rounded-pill" style="height: 6px; background: #f1f3f5;">
                     <div class="progress-bar bg-dark rounded-pill" id="progress-bar" style="width: {{ $progress ? $progress->completion_percent : 0 }}%;"></div>
@@ -1188,9 +1159,6 @@
                         @if($content->srt_file_ar)
                             <button type="button" class="btn btn-outline-dark px-3" data-lang="ar" onclick="setSubtitleLang('ar')">Arabic (العربية)</button>
                         @endif
-                        @if($content->srt_file_en && $content->srt_file_ar)
-                            <button type="button" class="btn btn-outline-dark px-3" data-lang="both" onclick="setSubtitleLang('both')">Dual (En + Ar)</button>
-                        @endif
                     </div>
                 </div>
             </div>
@@ -1216,63 +1184,6 @@
                 <p class="text-muted mb-0">{{ $content->description }}</p>
 
                 <!-- Tabbed container for Info vs Transcripts -->
-                <div class="transcript-tab-container mt-4 mb-2">
-                    <div class="transcript-tabs">
-                        <button type="button" class="transcript-tab-btn active" onclick="switchWatchTab('overview')">
-                            <i class="bi bi-info-circle me-1"></i> Lesson Info
-                        </button>
-                        @if($content->srt_file_en || $content->srt_file_ar)
-                        <button type="button" class="transcript-tab-btn" id="btn-transcript-tab" onclick="switchWatchTab('transcript')">
-                            <i class="bi bi-file-text me-1"></i> Live Translation & Transcript
-                        </button>
-                        @endif
-                    </div>
-                    
-                    <!-- Overview Panel -->
-                    <div class="transcript-panel active" id="panel-overview">
-                        <div class="row g-4">
-                            <div class="col-md-4">
-                                <div class="lesson-meta-item">
-                                    <span class="meta-label"><i class="bi bi-briefcase"></i> Use Case</span>
-                                    <span class="meta-value">Automating recurring professional workflows using specialized AI interactions and real-time behavioral mapping.</span>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="lesson-meta-item">
-                                    <span class="meta-label"><i class="bi bi-person-badge"></i> Role Relevance</span>
-                                    <span class="meta-value">Essential for professionals looking to minimize cognitive load during tool-switching and repetitive digital tasks.</span>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="lesson-meta-item">
-                                    <span class="meta-label"><i class="bi bi-journal-check"></i> Lesson Outcome</span>
-                                    <span class="meta-value">Competency in deploying modern AI strategies to save at least 15-20% of daily digital operation time.</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Transcript Panel -->
-                    @if($content->srt_file_en || $content->srt_file_ar)
-                    <div class="transcript-panel" id="panel-transcript">
-                        <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-                            <div class="text-muted small">
-                                <i class="bi bi-info-circle me-1"></i> Click on any line below to jump directly to that part of the video!
-                            </div>
-                            <div class="position-relative">
-                                <input type="text" id="transcript-search" class="form-control form-control-sm pe-4 rounded-pill" placeholder="Search transcript..." onkeyup="filterTranscript()">
-                                <i class="bi bi-search position-absolute text-muted" style="right:12px;top:50%;transform:translateY(-50%);font-size:11px;"></i>
-                            </div>
-                        </div>
-                        <div class="transcript-scroll-area" id="transcript-lines-list">
-                            <div class="text-center py-4 text-muted">
-                                <div class="spinner-border spinner-border-sm text-primary mb-2" role="status"></div>
-                                <div>Loading synced translation...</div>
-                            </div>
-                        </div>
-                    </div>
-                    @endif
-                </div>
 
                 <a href="#" class="btn-report-outdated" onclick="event.preventDefault(); reportOutdated({{ $content->id }})">
                     <i class="bi bi-flag"></i> Report this content as outdated
@@ -1361,9 +1272,38 @@
                         </div>
                         <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
                             @foreach($course->contents as $lesson)
+                                @php
+                                    $lessonPct = $lesson->completion_pct ?? 0;
+                                    $lessonDone = $lesson->is_completed ?? false;
+                                @endphp
                                 <a href="{{ route('learn.watch', [$lesson, 'course_id' => $course->id]) }}" class="curriculum-item d-flex align-items-center gap-3 py-3 px-4 text-decoration-none {{ $lesson->id == $content->id ? 'active' : '' }}">
-                                    <div class="lesson-num-circle {{ $lesson->id == $content->id ? 'bg-primary text-white' : '' }}">{{ $loop->iteration }}</div>
-                                    <div class="fw-bold small text-truncate">{{ $lesson->title }}</div>
+                                    <div class="lesson-num-circle flex-shrink-0 {{ $lesson->id == $content->id ? 'bg-primary text-white' : ($lessonDone ? 'bg-success text-white' : '') }}">
+                                        @if($lessonDone && $lesson->id != $content->id)
+                                            <i class="bi bi-check2" style="font-size:12px;"></i>
+                                        @else
+                                            {{ $loop->iteration }}
+                                        @endif
+                                    </div>
+                                    <div style="min-width:0;flex:1;">
+                                        <div class="fw-bold small text-truncate {{ $lesson->id == $content->id ? 'text-primary' : 'text-dark' }}">{{ $lesson->title }}</div>
+                                        <div class="d-flex align-items-center gap-2 mt-1">
+                                            @if($lessonPct > 0 && !$lessonDone)
+                                                <div style="flex:1;height:3px;background:#e2e8f0;border-radius:4px;overflow:hidden;">
+                                                    <div style="width:{{ $lessonPct }}%;height:100%;background:linear-gradient(90deg,#4f46e5,#818cf8);border-radius:4px;"></div>
+                                                </div>
+                                                <span class="text-primary fw-bold" style="font-size:10px;white-space:nowrap;">{{ $lessonPct }}%</span>
+                                            @elseif($lessonDone)
+                                                <span class="text-success fw-bold" style="font-size:10px;">Completed</span>
+                                            @elseif($lesson->duration_label)
+                                                <span class="text-muted" style="font-size:10px;">{{ $lesson->duration_label }}</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                    @if($lesson->id == $content->id)
+                                        <i class="bi bi-play-circle-fill text-primary ms-auto flex-shrink-0"></i>
+                                    @elseif($lessonDone)
+                                        <i class="bi bi-check-circle-fill text-success ms-auto flex-shrink-0" style="font-size:14px;"></i>
+                                    @endif
                                 </a>
                             @endforeach
                         </div>
@@ -1391,6 +1331,8 @@
 <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 <script>
     const isAuthenticated = {{ auth()->check() ? 'true' : 'false' }};
+    const currentUserId = {{ auth()->check() ? auth()->id() : 'null' }};
+    const subtitlePrefKey = currentUserId ? `subtitle_lang_user_${currentUserId}` : 'subtitle_lang_guest';
     const isYoutube = document.querySelector('#player').dataset.plyrProvider === 'youtube';
 
     // Resume playback from saved progress
@@ -1404,37 +1346,51 @@
 
     // ─── RESUME FROM LAST POSITION ─────────────────────────────────────────────
     // For YouTube + Plyr: player.duration is 0 until the user clicks play.
-    // The ONLY reliable hook is the first 'playing' event.
-    // We hook it, immediately seek to saved time, which causes a tiny initial
-    // flash at 0:00 but is the same behaviour as YouTube's own resume.
+    // Setting currentTime too early on YouTube embeds can fail silently.
+    // We attempt to seek on player 'ready', 'playing', and run safety check timeouts
+    // to guarantee the player seeks to the target timestamp.
     if (shouldResume) {
         let seekApplied = false;
         const seekTime = savedWatchedSeconds;
 
-        if (!isYoutube) {
-            // For native HTML5 / MP4 videos: use loadedmetadata which fires before play
-            player.on('loadedmetadata', () => {
-                if (!seekApplied) {
-                    try { player.currentTime = seekTime; seekApplied = true; } catch(e) {}
-                }
+        const applySeek = () => {
+            if (seekApplied) return;
+            try {
+                player.currentTime = seekTime;
+                
+                // Safety timeouts: YouTube buffering states can reset/ignore the first seek command.
+                // We re-check currentTime and seek again if it was reset back to 0.
+                setTimeout(() => {
+                    if (Math.abs(player.currentTime - seekTime) > 3) {
+                        try { player.currentTime = seekTime; } catch(e) {}
+                    }
+                }, 200);
+
+                setTimeout(() => {
+                    if (Math.abs(player.currentTime - seekTime) > 3) {
+                        try { player.currentTime = seekTime; } catch(e) {}
+                    }
+                    seekApplied = true; // Final lock after state stabilization
+                }, 800);
+            } catch(e) {
+                console.warn("Seek attempt error:", e);
+            }
+        };
+
+        if (isYoutube) {
+            // Wait for player to build interface
+            player.on('ready', () => {
+                setTimeout(applySeek, 400); 
             });
-            player.on('canplay', () => {
-                if (!seekApplied) {
-                    try { player.currentTime = seekTime; seekApplied = true; } catch(e) {}
-                }
-            });
+        } else {
+            // HTML5 Video
+            player.on('loadedmetadata', applySeek);
+            player.on('canplay', applySeek);
         }
 
-        // For BOTH YouTube and HTML5: hook first 'playing' as the guaranteed fallback.
-        // On first play, seek immediately — player.currentTime is settable at this moment.
+        // Guaranteed fallback for first play on any player type
         const onFirstPlay = () => {
-            if (!seekApplied) {
-                try {
-                    player.currentTime = seekTime;
-                    seekApplied = true;
-                } catch(e) {}
-            }
-            // Remove listener so it only runs once
+            applySeek();
             player.off('playing', onFirstPlay);
         };
         player.on('playing', onFirstPlay);
@@ -1477,7 +1433,9 @@
     let englishCues = [];
     let arabicCues = [];
     let mergedCuesList = [];
-    let activeSubtitleLang = localStorage.getItem('activeSubtitleLang') || 'off'; // Persist choice!
+    let activeSubtitleLang = isAuthenticated
+        ? ("{{ auth()->check() ? auth()->user()->subtitle_lang : 'off' }}" || 'off')
+        : (localStorage.getItem(subtitlePrefKey) || 'off');
     let lastHighlightedIndex = -1;
 
     // Parse VTT format file
@@ -1661,7 +1619,25 @@
     // Subtitle lang setter
     window.setSubtitleLang = function(lang) {
         activeSubtitleLang = lang;
-        localStorage.setItem('activeSubtitleLang', lang);
+        localStorage.setItem(subtitlePrefKey, lang);
+        
+        if (isAuthenticated) {
+            fetch("{{ route('learn.subtitle-lang.update') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                },
+                body: JSON.stringify({ subtitle_lang: lang })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('Subtitle preference saved to DB:', data.subtitle_lang);
+            })
+            .catch(err => {
+                console.error('Error saving subtitle preference:', err);
+            });
+        }
         
         updateSubtitleControlsUI();
         updateSubtitles();
@@ -1832,6 +1808,7 @@
 
             fetch("{{ route('learn.progress.save') }}", {
                 method: 'POST',
+                keepalive: true,
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': "{{ csrf_token() }}"
@@ -1849,6 +1826,52 @@
                 const label = document.getElementById('progress-label');
                 if (bar) bar.style.width = data.completion_percent + '%';
                 if (label) label.textContent = Math.round(data.completion_percent) + '%';
+
+                const btnReset = document.getElementById('btn-reset-progress');
+                const divReset = document.getElementById('reset-divider');
+                if (data.completion_percent > 1) {
+                    if (btnReset) btnReset.classList.remove('d-none');
+                    if (divReset) divReset.classList.remove('d-none');
+                } else {
+                    if (btnReset) btnReset.classList.add('d-none');
+                    if (divReset) divReset.classList.add('d-none');
+                }
+            })
+            .catch(e => {
+                // Silently catch fetch failures (e.g. during unload)
+            });
+        };
+
+        // Reset video progress Ajax
+        window.resetVideoProgress = (contentId) => {
+            if (!confirm('Are you sure you want to restart this lesson from the beginning?')) return;
+
+            fetch("{{ route('learn.progress.reset') }}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': "{{ csrf_token() }}"
+                },
+                body: JSON.stringify({ content_id: contentId })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (player) {
+                    player.currentTime = 0;
+                }
+                const bar = document.getElementById('progress-bar');
+                const label = document.getElementById('progress-label');
+                if (bar) bar.style.width = '0%';
+                if (label) label.textContent = '0%';
+
+                const btnReset = document.getElementById('btn-reset-progress');
+                const divReset = document.getElementById('reset-divider');
+                if (btnReset) btnReset.classList.add('d-none');
+                if (divReset) divReset.classList.add('d-none');
+
+                if (typeof showToast !== 'undefined') {
+                    showToast('Lesson progress restarted!', 'success');
+                }
             });
         };
 
@@ -1857,8 +1880,23 @@
             saveProgress(true);
         });
 
+        // Save on pause (handles case where user stops watching)
+        player.on('pause', () => {
+            saveProgress(true);
+        });
+
         // Save at the very end so 100% is reflected
         player.on('ended', () => {
+            saveProgress(true);
+        });
+
+        // Save when page becomes hidden or unloaded (e.g. tab close, navigation away)
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden') {
+                saveProgress(true);
+            }
+        });
+        window.addEventListener('pagehide', () => {
             saveProgress(true);
         });
 

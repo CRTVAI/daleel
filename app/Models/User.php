@@ -35,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'connection_code',
         'connection_code_issued_at',
         'can_access_team',
+        'subtitle_lang',
     ];
 
     protected $hidden = [

@@ -27,7 +27,7 @@
                         <i class="bi bi-shield-lock"></i> Password & Security
                     </a>
                     <a href="#connections" class="nav-link-custom" data-bs-toggle="pill">
-                        <i class="bi bi-link-45deg"></i> Connected Apps
+                        <i class="bi bi-link-45deg"></i>Most Used Apps
                     </a>
                     <a href="#bookmarks" class="nav-link-custom" data-bs-toggle="pill">
                         <i class="bi bi-bookmark-star"></i> My Bookmarks

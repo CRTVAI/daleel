@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Models\AiPrompt;
 
 class AdvancedSearchController extends Controller
 {
@@ -133,42 +134,11 @@ class AdvancedSearchController extends Controller
     {
         $toolListStr = implode(', ', $allToolNames);
 
-        $systemPrompt = <<<SYSTEM
-You are an intelligent search query processor for a video learning platform.
-Your job is to understand the user's intent and return a structured JSON response.
-SYSTEM;
-
-        $userPrompt = <<<PROMPT
-USER QUERY: "{$rawQuery}"
-
-AVAILABLE TOOLS IN OUR PLATFORM:
-{$toolListStr}
-
-YOUR TASKS:
-1. Fix any spelling or typo mistakes in the query.
-2. Classify the request into ONE type:
-   - "single_video": User wants ONE specific tutorial/how-to video (e.g. "how to connect excel", "fix css error", "what is an API").
-   - "course": User wants to deeply learn a tool or topic (e.g. "Excel Masterclass", "learn Python", "how to master Laravel").
-   - "roadmap": User has a broad career/productivity goal (e.g. "become a pro", "grow my career", "learning path for automation").
-3. Extract ONLY tool names from the AVAILABLE TOOLS list that the user mentioned or clearly implied.
-4. Summarize the user's goal/intent in one short sentence.
-5. Give a confidence score (0.0–1.0) for your classification.
-
-CRITICAL RULES:
-- "How to learn [Tool]" or "How to master [Tool]" → always "course".
-- Broad career/productivity goals (not tool-specific) → always "roadmap".
-- Specific how-to tasks → "single_video".
-- Only extract tools from the AVAILABLE TOOLS list. If no tool matches, return an empty array.
-
-Respond ONLY with valid JSON in this exact format (no markdown, no explanation):
-{
-  "fixed_query": "corrected query text",
-  "query_type": "single_video|course|roadmap",
-  "tools_mentioned": ["ToolA", "ToolB"],
-  "goals_intent": "short description of what the user wants",
-  "confidence_score": 0.95
-}
-PROMPT;
+        $systemPrompt = AiPrompt::getPrompt('search_parser_system');
+        $userPrompt = AiPrompt::getPrompt('search_parser_user', [
+            'raw_query' => $rawQuery,
+            'tool_list_str' => $toolListStr
+        ]);
 
         $fallback = [
             'fixed_query'      => $rawQuery,
@@ -264,7 +234,10 @@ PROMPT;
         $cacheKey = 'roadmap_tools:' . md5($goal);
 
         return Cache::remember($cacheKey, 3600, function () use ($goal, $toolList) {
-            $prompt = "GOAL: {$goal}\nTOOLS:\n{$toolList}\nSelect only the tools that are directly mentioned or absolutely essential to achieving the goal. Avoid selecting tangentially related tools (e.g. do not select Python for an Excel goal unless Python is explicitly mentioned or requested). Reply ONLY with the comma-separated IDs.";
+            $prompt = AiPrompt::getPrompt('search_tool_matching', [
+                'goal' => $goal,
+                'tool_list' => $toolList
+            ]);
             try {
                 $response = Http::withToken(config('services.openai.key'))
                     ->post('https://api.openai.com/v1/chat/completions', [
@@ -599,23 +572,11 @@ PROMPT;
     {
         $typeLabel = $type === 'course' ? 'course' : 'video lesson';
 
-        $prompt = <<<PROMPT
-User is searching for a {$typeLabel}: "{$query}"
-
-Available {$typeLabel}s:
-{$list}
-
-TASK: Find the single best matching ID.
-
-RULES:
-- Match by meaning, not just exact words (e.g., "AI" matches "Artificial Intelligence")
-- Handle common typos (e.g., "excell" matches "Excel", "javscript" matches "JavaScript")
-- Consider topic relevance and content scope
-- If nothing is a reasonable match, respond with 0
-- Reply ONLY with the ID number
-
-Best match ID:
-PROMPT;
+        $prompt = AiPrompt::getPrompt('search_hybrid_pick', [
+            'type_label' => $typeLabel,
+            'query' => $query,
+            'list' => $list
+        ]);
 
         try {
             $response = Http::withToken(config('services.openai.key'))

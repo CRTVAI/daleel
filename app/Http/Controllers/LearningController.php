@@ -100,6 +100,20 @@ class LearningController extends Controller
                 ->whereHas('contents', fn($q) => $q->where('contents.id', $content->id))
                 ->with(['contents' => fn($q) => $q->orderBy('sort_order')->orderBy('id')])
                 ->first();
+
+            if ($course && $user) {
+                $courseVideoIds = $course->contents->pluck('id');
+                $progressMap = $user->videoProgress()
+                    ->whereIn('content_id', $courseVideoIds)
+                    ->get()
+                    ->keyBy('content_id');
+
+                foreach ($course->contents as $lesson) {
+                    $p = $progressMap->get($lesson->id);
+                    $lesson->completion_pct  = $p ? round($p->completion_percent) : 0;
+                    $lesson->is_completed    = $p?->completed ?? false;
+                }
+            }
         }
 
         // ── Context 3: Standalone – build recommended list ────────────────
@@ -217,6 +231,45 @@ class LearningController extends Controller
         $user->recordActivity();
 
         return response()->json(['status' => 'ok', 'completion_percent' => $percent]);
+    }
+
+    /**
+     * Reset video progress via AJAX.
+     */
+    public function resetProgress(Request $request)
+    {
+        $request->validate([
+            'content_id' => 'required|exists:contents,id',
+        ]);
+
+        $user = Auth::user();
+        $content = Content::findOrFail($request->content_id);
+
+        UserVideoProgress::updateOrCreate(
+            ['user_id' => $user->id, 'content_id' => $content->id],
+            [
+                'watched_seconds'  => 0,
+                'completion_percent' => 0,
+                'completed'        => false,
+                'last_watched_at'  => null,
+            ]
+        );
+
+        return response()->json(['status' => 'ok', 'completion_percent' => 0]);
+    }
+
+    public function updateSubtitleLang(Request $request)
+    {
+        $request->validate([
+            'subtitle_lang' => 'required|string|in:en,ar,off',
+        ]);
+
+        $user = Auth::user();
+        if ($user) {
+            $user->update(['subtitle_lang' => $request->subtitle_lang]);
+        }
+
+        return response()->json(['status' => 'ok', 'subtitle_lang' => $request->subtitle_lang]);
     }
 
     public function explore(Request $request)

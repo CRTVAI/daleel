@@ -458,6 +458,11 @@
                             </td>
                             <td>
                                 <div class="table-title">{{ $content->title }}</div>
+                                @if($content->author_name)
+                                    <div class="table-subtitle">
+                                        <i class="bi bi-person-fill small"></i> {{ $content->author_name }}
+                                    </div>
+                                @endif
                                 <div class="table-subtitle">
                                     @if($content->section_part_label)
                                         <i class="bi bi-layers-half small"></i> {{ $content->section_part_label }}
@@ -558,6 +563,10 @@
                                         <div class="col-12">
                                             <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-fonts"></i> Video Title</label>
                                             <input type="text" name="title" class="form-control" value="{{ $content->title }}" placeholder="e.g. Master AI Automation with ChatGPT" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-person-fill"></i> Author Name</label>
+                                            <input type="text" name="author_name" class="form-control" value="{{ $content->author_name }}" placeholder="e.g. John Doe">
                                         </div>
                                         <div class="col-12">
                                             <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-cloud-upload text-indigo"></i> Video Upload</label>
@@ -714,6 +723,10 @@
                                     <div class="col-12">
                                         <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-fonts"></i> Video Title</label>
                                         <input type="text" name="title" class="form-control" placeholder="e.g. Master AI Automation with ChatGPT" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-person-fill"></i> Author Name</label>
+                                        <input type="text" name="author_name" class="form-control" placeholder="e.g. John Doe">
                                     </div>
                                     <div class="col-12">
                                         <label class="form-label d-flex align-items-center gap-1"><i class="bi bi-cloud-upload text-indigo"></i> Video Upload</label>

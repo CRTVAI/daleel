@@ -8,13 +8,20 @@ return new class extends Migration
 {
     public function up(): void
     {
-        // Gap 3: Add a true DB-level UNIQUE constraint on users.connection_code
-        // Only add if it doesn't already exist (safe to re-run)
-        $indexes = collect(\Illuminate\Support\Facades\DB::select("SHOW INDEX FROM users WHERE Key_name = 'users_connection_code_unique'"));
-        if ($indexes->isEmpty()) {
-            Schema::table('users', function (Blueprint $table) {
-                $table->unique('connection_code', 'users_connection_code_unique');
-            });
+        $dbDriver = \Illuminate\Support\Facades\DB::getDriverName();
+        if ($dbDriver === 'sqlite') {
+            try {
+                Schema::table('users', function (Blueprint $table) {
+                    $table->unique('connection_code', 'users_connection_code_unique');
+                });
+            } catch (\Exception $e) {}
+        } else {
+            $indexes = collect(\Illuminate\Support\Facades\DB::select("SHOW INDEX FROM users WHERE Key_name = 'users_connection_code_unique'"));
+            if ($indexes->isEmpty()) {
+                Schema::table('users', function (Blueprint $table) {
+                    $table->unique('connection_code', 'users_connection_code_unique');
+                });
+            }
         }
 
         // Gap 2: Track when an employee code was last rotated so we can

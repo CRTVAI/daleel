@@ -84,6 +84,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::delete('/admin/profile-options/experience-levels/{level}', [App\Http\Controllers\AdminController::class, 'destroyExperienceLevel'])->name('admin.profile-options.experience-levels.destroy');
     Route::resource('/admin/tools', App\Http\Controllers\ToolController::class)->names('admin.tools');
     Route::resource('/admin/blogs', App\Http\Controllers\AdminBlogController::class)->names('admin.blogs');
+    Route::get('/admin/prompts', [App\Http\Controllers\AdminPromptController::class, 'index'])->name('admin.prompts.index');
+    Route::put('/admin/prompts/{prompt}', [App\Http\Controllers\AdminPromptController::class, 'update'])->name('admin.prompts.update');
 });
 
 // Protected User Routes
@@ -96,6 +98,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/learn/explore', [App\Http\Controllers\LearningController::class, 'explore'])->name('learn.explore');
     Route::get('/learn/courses/{course}', [App\Http\Controllers\LearningController::class, 'courseView'])->name('course.view');
     Route::post('/learn/progress/save', [App\Http\Controllers\LearningController::class, 'saveProgress'])->name('learn.progress.save');
+    Route::post('/learn/progress/reset', [App\Http\Controllers\LearningController::class, 'resetProgress'])->name('learn.progress.reset');
+    Route::post('/learn/subtitle-lang', [App\Http\Controllers\LearningController::class, 'updateSubtitleLang'])->name('learn.subtitle-lang.update');
     Route::post('/extension/verification-codes', [\App\Http\Controllers\Api\Extension\VerificationCodeController::class, 'store'])->name('extension.verify-code');
     Route::post('/extension/device/{device}/revoke', [App\Http\Controllers\HomeController::class, 'revokeDevice'])->name('extension.device.revoke');
     Route::get('/downloads/desktop-app', function () {
@@ -126,6 +130,21 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/team/departments/{department}/top-sites', [App\Http\Controllers\TeamController::class, 'departmentTopSites'])->name('team.departments.top-sites');
     Route::get('/team/overall-top-sites', [App\Http\Controllers\TeamController::class, 'overallTopSites'])->name('team.overall-top-sites');
     Route::get('/team/employees/{employee}/help-requests', [App\Http\Controllers\TeamController::class, 'employeeHelpRequests'])->name('team.employees.help-requests');
+    Route::get('/team/reports', [App\Http\Controllers\TeamController::class, 'reportsIndex'])->name('team.reports');
+    Route::get('/team/report-data', [App\Http\Controllers\TeamController::class, 'reportData'])->name('team.report-data');
+    Route::get('/team/report/download', [App\Http\Controllers\TeamController::class, 'reportDownload'])->name('team.report.download');
+
+    // Placeholder (will be replaced later with real report UI/logic)
+    Route::get('/team/report/view', function () {
+        return view('team.placeholder-report');
+    })->name('team.report.view');
+
+    // Inspector Training Intelligence Report
+    Route::get('/team/inspector-report', [App\Http\Controllers\TeamController::class, 'inspectorReport'])->name('team.inspector-report');
+    Route::get('/team/inspector-report/download', [App\Http\Controllers\TeamController::class, 'inspectorReportDownloadPdf'])->name('team.inspector-report.download');
+
+
+
 
     // Onboarding
     Route::post('/onboarding/store', [App\Http\Controllers\OnboardingController::class, 'store'])->name('onboarding.store');

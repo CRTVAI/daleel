@@ -13,6 +13,7 @@
         position: relative;
         overflow: hidden;
         box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        border-bottom: 4px solid #6366f1;
     }
     .setup-hero::after {
         content: '';
@@ -274,6 +275,104 @@
         font-weight: 800;
         text-transform: uppercase;
     }
+    /* Premium Hero Download Group styling */
+    .hero-dl-group {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 32px;
+    }
+    .hero-dl-btn {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: rgba(255, 255, 255, 0.06);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        border-radius: 18px;
+        padding: 16px 24px;
+        color: #fff;
+        text-decoration: none !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        min-width: 220px;
+        flex: 1;
+    }
+    .hero-dl-btn:hover:not(.disabled) {
+        background: #fff;
+        color: #020617 !important;
+        border-color: #fff;
+        transform: translateY(-3px);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.22);
+    }
+    .hero-dl-btn.disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+    .hero-dl-btn .dl-btn-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        transition: all 0.3s;
+    }
+    .hero-dl-btn:hover:not(.disabled) .dl-btn-icon {
+        background: rgba(99, 102, 241, 0.15);
+        color: #6366f1;
+    }
+    .hero-dl-btn.disabled .dl-btn-icon {
+        background: rgba(255, 255, 255, 0.04);
+    }
+    .hero-dl-btn .dl-btn-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.25;
+        text-align: left;
+    }
+    .hero-dl-btn .dl-subtitle {
+        font-size: 0.7rem;
+        opacity: 0.65;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 700;
+        transition: opacity 0.3s;
+    }
+    .hero-dl-btn:hover:not(.disabled) .dl-subtitle {
+        opacity: 0.8;
+    }
+    .hero-dl-btn .dl-title {
+        font-size: 1rem;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+    }
+    .hero-dl-btn .badge-soon {
+        background: rgba(255, 255, 255, 0.12);
+        color: #fff;
+        font-size: 0.58rem;
+        font-weight: 800;
+        padding: 2px 6px;
+        border-radius: 6px;
+        margin-left: 6px;
+        vertical-align: middle;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+    }
+    .hero-dl-btn .dl-desc {
+        font-size: 0.72rem;
+        opacity: 0.65;
+        margin-top: 6px;
+        line-height: 1.4;
+        font-weight: 500;
+        transition: all 0.3s;
+    }
+    .hero-dl-btn:hover:not(.disabled) .dl-desc {
+        color: #475569;
+        opacity: 0.9;
+    }
+
+
     @media (max-width: 767px) {
         .workflow-connect-grid {
             grid-template-columns: none;
@@ -299,6 +398,60 @@
             min-height: auto;
             flex: 0 0 260px;
             scroll-snap-align: start;
+        }
+
+        /* Hero mobile fixes */
+        .setup-hero {
+            padding: 36px 24px 32px !important;
+            border-radius: 20px !important;
+            margin-bottom: 32px !important;
+            border-bottom: 4px solid #6366f1 !important;
+        }
+        .setup-hero h1.display-4 {
+            font-size: 1.6rem !important;
+            letter-spacing: -0.03em !important;
+            margin-bottom: 0.75rem !important;
+        }
+        .setup-hero p.fs-5 {
+            font-size: 0.95rem !important;
+            margin-bottom: 1.5rem !important;
+        }
+        .setup-hero .d-flex.gap-2.mb-4 {
+            margin-bottom: 1rem !important;
+        }
+        .feature-badge {
+            font-size: 9px !important;
+            padding: 4px 10px !important;
+        }
+
+        /* Hero download button stack on mobile */
+        .hero-dl-group {
+            flex-direction: column !important;
+            gap: 12px !important;
+            margin-top: 24px !important;
+        }
+        .hero-dl-btn {
+            width: 100% !important;
+            min-width: 0 !important;
+            padding: 14px 20px !important;
+        }
+
+        /* Activity data header: stack title + reset button on mobile */
+        .ev-section .d-flex.justify-content-between.align-items-center.mb-4 {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 12px !important;
+        }
+        .ev-section .d-flex.justify-content-between.align-items-center.mb-4 form {
+            width: 100%;
+        }
+        .ev-section .d-flex.justify-content-between.align-items-center.mb-4 form button {
+            width: 100%;
+            justify-content: center;
+            display: flex;
+            align-items: center;
+            padding: 10px 16px !important;
+            font-size: 13px !important;
         }
     }
 </style>
@@ -327,32 +480,33 @@
                 <p class="fs-5 opacity-75 mb-5 fw-500" style="max-width: 600px; line-height: 1.6;">
                     Analyze web content, extract insights, and connect your workflow directly to the Daleel AI ecosystem. Our custom-built extension brings the power of your AI Mentor to every tab you visit.
                 </p>
-                <div class="workflow-connect-grid mt-4">
-                    <article class="workflow-connect-card" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);">
-                        <div class="card-icon" style="background:rgba(99,102,241,0.2);color:#a5b4fc;"><i class="bi bi-browser-chrome"></i></div>
-                        <h5 style="color:#fff;">Chrome Extension</h5>
-                        <p style="color:rgba(255,255,255,0.7);">Get AI learning recommendations synced directly into your browser tab.</p>
-                        <a href="https://chromewebstore.google.com/detail/daleel-mentor/bpkbkfdbanbdlfmkmgcdkhlobfdifhpi" target="_blank" class="btn btn-primary rounded-4 fw-700" style="background:#fff;color:#020617;border:none;">
-                            <i class="bi bi-plus-lg"></i> Add to Chrome
-                        </a>
-                    </article>
-                    <article class="workflow-connect-card" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);">
-                        <div class="card-icon" style="background:rgba(99,102,241,0.2);color:#a5b4fc;"><i class="bi bi-laptop"></i></div>
-                        <h5 style="color:#fff;">Desktop App</h5>
-                        <p style="color:rgba(255,255,255,0.7);">Get real-time guidance directly across your desktop software.</p>
-                        <a href="{{ route('downloads.desktop-app') }}" target="_blank" class="btn btn-outline-primary rounded-4 fw-700" style="border-color:rgba(255,255,255,0.3);color:#fff;">
-                            <i class="bi bi-download"></i> Download App
-                        </a>
-                    </article>
-                    <article class="workflow-connect-card" style="background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.15);">
-                        <span class="coming-soon-badge" style="background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);">Coming Soon</span>
-                        <div class="card-icon" style="background:rgba(99,102,241,0.2);color:#a5b4fc;"><i class="bi bi-phone"></i></div>
-                        <h5 style="color:#fff;">Mobile App</h5>
-                        <p style="color:rgba(255,255,255,0.7);">Track your focus score and access quick learning paths on the go.</p>
-                        <button type="button" class="btn rounded-4 fw-700" style="background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.5);border-color:rgba(255,255,255,0.1);" disabled>
-                            <i class="bi bi-bell"></i> Notify Me
-                        </button>
-                    </article>
+                <div class="hero-dl-group mt-4">
+                    <a href="https://chromewebstore.google.com/detail/daleel-mentor/bpkbkfdbanbdlfmkmgcdkhlobfdifhpi" target="_blank" class="hero-dl-btn">
+                        <div class="dl-btn-icon"><i class="bi bi-browser-chrome"></i></div>
+                        <div class="dl-btn-text">
+                            <span class="dl-subtitle">Chrome Extension</span>
+                            <span class="dl-title">Add to Chrome</span>
+                            <span class="dl-desc">Get AI learning recommendations synced directly into your browser tab.</span>
+                        </div>
+                    </a>
+
+                    <a href="{{ route('downloads.desktop-app') }}" target="_blank" class="hero-dl-btn">
+                        <div class="dl-btn-icon"><i class="bi bi-laptop"></i></div>
+                        <div class="dl-btn-text">
+                            <span class="dl-subtitle">Desktop App</span>
+                            <span class="dl-title">Download App</span>
+                            <span class="dl-desc">Get real-time guidance directly across your desktop software.</span>
+                        </div>
+                    </a>
+
+                    <div class="hero-dl-btn disabled">
+                        <div class="dl-btn-icon"><i class="bi bi-phone"></i></div>
+                        <div class="dl-btn-text">
+                            <span class="dl-subtitle">Mobile App <span class="badge-soon">Coming Soon</span></span>
+                            <span class="dl-title">Notify Me</span>
+                            <span class="dl-desc">Track your focus score and access quick learning paths on the go.</span>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="col-lg-5 d-none d-lg-block text-center">
@@ -395,7 +549,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h3 class="fw-800 text-dark mb-2" style="font-size: 1.8rem; letter-spacing:-0.03em;">Activity Data Viewer</h3>
-                <p class="text-muted fw-600 mb-0">Insights gathered securely from your Daleel AI browser extension.</p>
+                
             </div>
             <form method="POST" action="{{ route('extension.data.reset') }}" onsubmit="return confirm('Are you sure you want to permanently wipe all your tracked extension data? This cannot be undone.');">
                 @csrf
@@ -693,31 +847,89 @@
 
     <!-- Installation Steps -->
     <div class="mb-5 animate-slide-up delay-1">
-        <div class="text-center mb-5">
+        <div class="text-center mb-4">
             <h2 class="fw-800 text-dark" style="letter-spacing: -0.03em;">Setup Instructions</h2>
-            <p class="text-muted">Follow these 3 simple steps to activate your workspace connection.</p>
+            <p class="text-muted mb-0">Choose your client type and follow the steps to connect your account.</p>
         </div>
 
-        <div class="row g-4">
+        {{-- Client-type Tab Switcher --}}
+        <div class="d-flex justify-content-center mb-5">
+            <div class="d-flex gap-2 p-2 rounded-4" style="background:#f1f5f9; border:1px solid #e2e8f0;">
+                <button id="si-tab-ext"
+                    onclick="siSwitch('ext')"
+                    class="btn fw-800 rounded-3 px-4 py-2"
+                    style="background:#fff;color:#020617;font-size:0.88rem;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.07);transition:all .2s;">
+                    <i class="bi bi-browser-chrome me-2" style="color:#6366f1;"></i>Chrome Extension
+                </button>
+                <button id="si-tab-app"
+                    onclick="siSwitch('app')"
+                    class="btn fw-800 rounded-3 px-4 py-2"
+                    style="background:transparent;color:#64748b;font-size:0.88rem;border:none;transition:all .2s;">
+                    <i class="bi bi-laptop me-2"></i>Desktop App
+                </button>
+            </div>
+        </div>
+
+        {{-- Extension Steps --}}
+        <div id="si-panel-ext" class="row g-4">
             <div class="col-md-4">
                 <div class="step-card">
                     <div class="step-number">1</div>
-                    <h5 class="fw-800 text-dark mb-3">Download & Extract</h5>
-                    <p class="text-muted small fw-600 mb-0">Click the download button above to get the extension ZIP. Extract the contents to a folder on your computer where it won't be moved.</p>
+                    <h5 class="fw-800 text-dark mb-3">Add to Chrome</h5>
+                    <p class="text-muted small fw-600 mb-0">
+                        Click <strong>"Add to Chrome"</strong> in the hero above (or visit the
+                        <a href="https://chromewebstore.google.com/detail/daleel-mentor/bpkbkfdbanbdlfmkmgcdkhlobfdifhpi" target="_blank" class="text-primary text-decoration-none">Chrome Web Store</a>)
+                        and confirm the installation when prompted.
+                    </p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="step-card">
                     <div class="step-number">2</div>
-                    <h5 class="fw-800 text-dark mb-3">Load Extension</h5>
-                    <p class="text-muted small fw-600 mb-0">Open Chrome and navigate to <code>chrome://extensions</code>. Enable <strong>Developer Mode</strong> at the top right, then click <strong>"Load unpacked"</strong> and select your extracted folder.</p>
+                    <h5 class="fw-800 text-dark mb-3">Pin the Extension</h5>
+                    <p class="text-muted small fw-600 mb-0">
+                        Click the puzzle-piece <strong>Extensions</strong> icon in Chrome's toolbar, find <em>Daleel Mentor</em>, and click the 📌 pin icon so it's always visible and easy to access.
+                    </p>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="step-card">
                     <div class="step-number">3</div>
-                    <h5 class="fw-800 text-dark mb-3">Connect Profile</h5>
-                    <p class="text-muted small fw-600 mb-0">Open the extension from your toolbar. Use the Unique Connection Key provided below to link your account and start syncing data.</p>
+                    <h5 class="fw-800 text-dark mb-3">Connect Your Account</h5>
+                    <p class="text-muted small fw-600 mb-0">
+                        Click the Daleel icon in your toolbar. Generate a <strong>Connection Key</strong> below, paste it into the extension's setup screen, and you're live.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        {{-- Desktop App Steps --}}
+        <div id="si-panel-app" class="row g-4" style="display:none!important;">
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h5 class="fw-800 text-dark mb-3">Download the App</h5>
+                    <p class="text-muted small fw-600 mb-0">
+                        Click <strong>"Download App"</strong> in the hero above. Save the installer to your computer and run it — no admin rights required.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h5 class="fw-800 text-dark mb-3">Install &amp; Launch</h5>
+                    <p class="text-muted small fw-600 mb-0">
+                        Follow the on-screen installer. Once installed, open <strong>Daleel AI</strong> from your Start Menu or dock. It will run quietly in your system tray.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h5 class="fw-800 text-dark mb-3">Connect Your Account</h5>
+                    <p class="text-muted small fw-600 mb-0">
+                        Open the app and go to <strong>Settings → Connect Account</strong>. Generate a <strong>Connection Key</strong> below, paste it in, and the app will start syncing your activity.
+                    </p>
                 </div>
             </div>
         </div>
@@ -822,6 +1034,26 @@
 
 @section('scripts')
 <script>
+    // Setup Instructions tab switcher
+    function siSwitch(type) {
+        const extPanel = document.getElementById('si-panel-ext');
+        const appPanel = document.getElementById('si-panel-app');
+        const extBtn   = document.getElementById('si-tab-ext');
+        const appBtn   = document.getElementById('si-tab-app');
+
+        if (type === 'ext') {
+            extPanel.style.removeProperty('display');
+            appPanel.style.setProperty('display', 'none', 'important');
+            extBtn.style.cssText = 'background:#fff;color:#020617;font-size:0.88rem;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.07);transition:all .2s;';
+            appBtn.style.cssText = 'background:transparent;color:#64748b;font-size:0.88rem;border:none;transition:all .2s;';
+        } else {
+            appPanel.style.removeProperty('display');
+            extPanel.style.setProperty('display', 'none', 'important');
+            appBtn.style.cssText = 'background:#fff;color:#020617;font-size:0.88rem;border:none;box-shadow:0 2px 8px rgba(0,0,0,0.07);transition:all .2s;';
+            extBtn.style.cssText = 'background:transparent;color:#64748b;font-size:0.88rem;border:none;transition:all .2s;';
+        }
+    }
+
     let timerInterval;
 
     function generateCode() {

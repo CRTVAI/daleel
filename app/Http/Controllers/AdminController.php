@@ -232,6 +232,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'author_name' => 'nullable|string|max:255',
             'video_file' => 'required|file|mimes:mp4,mov,avi,wmv,m4v|max:204800', // 200MB max
             'video_url' => 'nullable|url',
             'thumbnail_base64' => 'nullable|string',
@@ -314,6 +315,7 @@ class AdminController extends Controller
     {
         $request->validate([
             'title' => 'required|string|max:255',
+            'author_name' => 'nullable|string|max:255',
             'video_file' => 'nullable|file|mimes:mp4,mov,avi,wmv,m4v|max:204800',
             'video_url' => 'nullable|url',
             'thumbnail_base64' => 'nullable|string',

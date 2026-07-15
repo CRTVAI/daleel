@@ -294,6 +294,9 @@
                 <li class="menu-item {{ request()->routeIs('admin.profile-options.*') ? 'active' : '' }}">
                     <a href="{{ route('admin.profile-options.index') }}"><i class="bi bi-list-check"></i> Profile Options</a>
                 </li>
+                <li class="menu-item {{ request()->routeIs('admin.prompts.*') ? 'active' : '' }}">
+                    <a href="{{ route('admin.prompts.index') }}"><i class="bi bi-chat-left-quote-fill"></i> AI Prompts</a>
+                </li>
                 <li class="menu-item {{ request()->routeIs('admin.users.index') ? 'active' : '' }}">
                     <a href="{{ route('admin.users.index') }}"><i class="bi bi-people-fill"></i> User Management</a>
                 </li>

@@ -419,6 +419,241 @@
     nav .d-sm-flex.justify-content-sm-between {
         justify-content: center !important;
     }
+
+    /* View More Button for Mobile */
+    .view-more-btn {
+        display: none;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        margin-top: 16px;
+        padding: 14px;
+        background: #f8fafc;
+        border: 1.5px dashed #cbd5e1;
+        border-radius: 16px;
+        color: #4338ca;
+        font-weight: 800;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.2s;
+        letter-spacing: -0.01em;
+    }
+
+    .view-more-btn:hover {
+        background: #eef2ff;
+        border-color: #4338ca;
+        box-shadow: 0 4px 12px rgba(67, 56, 202, 0.08);
+    }
+
+    .view-more-btn i {
+        font-size: 16px;
+    }
+
+    /* ==================== MOBILE OPTIMIZATIONS ==================== */
+    @media (max-width: 768px) {
+        /* Reduce hero padding */
+        .explore-hero-premium {
+            padding: 2rem 1rem !important;
+            border-radius: 18px !important;
+            margin-bottom: 1.5rem !important;
+        }
+
+        /* Hero title adjustments */
+        .explore-title {
+            font-size: 1.5rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        .explore-hero-premium p {
+            font-size: 0.85rem !important;
+            margin-bottom: 1rem !important;
+        }
+
+        /* Search input compact */
+        .search-input-premium {
+            padding: 0.85rem 1rem 0.85rem 2.75rem !important;
+            font-size: 0.9rem !important;
+            border-radius: 12px !important;
+        }
+
+        .search-icon-premium {
+            left: 0.85rem !important;
+            font-size: 1.1rem !important;
+        }
+
+        /* Quick tags */
+        .quick-tags {
+            margin-top: 0.8rem !important;
+        }
+
+        .quick-tag-btn {
+            padding: 0.25rem 0.6rem !important;
+            font-size: 0.7rem !important;
+        }
+
+        /* Type switcher */
+        .type-switcher {
+            margin-bottom: 1.25rem !important;
+            padding: 0.3rem !important;
+            border-radius: 12px !important;
+            width: 100% !important;
+        }
+
+        .type-switch-btn {
+            padding: 0.5rem 0.8rem !important;
+            font-size: 0.75rem !important;
+            flex: 1 !important;
+            text-align: center !important;
+            border-radius: 8px !important;
+        }
+
+        /* Category pills */
+        .topic-slider {
+            gap: 0.4rem !important;
+            margin-bottom: 1.25rem !important;
+            padding-bottom: 0.5rem !important;
+        }
+
+        .topic-pill {
+            padding: 0.45rem 0.9rem !important;
+            font-size: 0.72rem !important;
+        }
+
+        /* Card grid */
+        .row.g-4 {
+            --bs-gutter-y: 0.75rem !important;
+            --bs-gutter-x: 0.75rem !important;
+        }
+
+        .col-xl-3.col-lg-4.col-md-6 {
+            padding-left: 0.375rem !important;
+            padding-right: 0.375rem !important;
+        }
+
+        /* Premium card adjustments */
+        .premium-card {
+            border-radius: 14px !important;
+        }
+
+        .premium-thumb {
+            height: 130px !important;
+        }
+
+        .premium-body {
+            padding: 0.9rem !important;
+        }
+
+        .premium-title {
+            font-size: 0.8rem !important;
+            height: 34px !important;
+            margin-bottom: 0.3rem !important;
+        }
+
+        .premium-desc {
+            font-size: 0.7rem !important;
+            height: 30px !important;
+            margin-bottom: 0.7rem !important;
+        }
+
+        .premium-footer {
+            padding-top: 0.7rem !important;
+            font-size: 0.65rem !important;
+        }
+
+        .watch-cta-btn {
+            font-size: 0.65rem !important;
+        }
+
+        /* Badge adjustments */
+        .premium-badge {
+            font-size: 0.6rem !important;
+            padding: 0.2rem 0.45rem !important;
+        }
+
+        .tool-connection-badge {
+            font-size: 0.6rem !important;
+            padding: 0.2rem 0.45rem !important;
+        }
+
+        .premium-bookmark-btn {
+            width: 28px !important;
+            height: 28px !important;
+            border-radius: 7px !important;
+            top: 0.5rem !important;
+            right: 0.5rem !important;
+        }
+
+        .premium-card-overlay {
+            top: 0.5rem !important;
+            left: 0.5rem !important;
+            gap: 0.25rem !important;
+        }
+
+        /* Section header */
+        .mb-4 h4.fw-800 {
+            font-size: 1.1rem !important;
+            margin-bottom: 0 !important;
+        }
+
+        .d-flex.justify-content-between.align-items-center.mb-4 {
+            margin-bottom: 1rem !important;
+        }
+
+        /* Pagination */
+        .pagination-wrapper {
+            margin-top: 2rem !important;
+        }
+
+        .pagination .page-item .page-link {
+            padding: 0.45rem 0.75rem !important;
+            font-size: 0.72rem !important;
+            border-radius: 8px !important;
+        }
+
+        /* Items count */
+        .text-muted.small.fw-800 {
+            font-size: 0.7rem !important;
+        }
+
+        /* View More Button - Show on mobile */
+        .view-more-btn {
+            display: flex !important;
+        }
+
+        /* Hide items beyond 6th on mobile when collapsed */
+        .items-grid .col-xl-3.col-lg-4.col-md-6:nth-child(n+7) {
+            display: none;
+        }
+
+        .items-grid .col-xl-3.col-lg-4.col-md-6.expanded {
+            display: block !important;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .explore-hero-premium {
+            padding: 1.5rem 0.75rem !important;
+        }
+
+        .explore-title {
+            font-size: 1.3rem !important;
+        }
+
+        .premium-thumb {
+            height: 110px !important;
+        }
+
+        .premium-title {
+            font-size: 0.72rem !important;
+            height: 30px !important;
+        }
+
+        .type-switch-btn {
+            padding: 0.45rem 0.5rem !important;
+            font-size: 0.7rem !important;
+        }
+    }
 </style>
 @endsection
 
@@ -503,7 +738,7 @@
             </h4>
         </div>
         
-        <div class="row g-4 mb-4">
+        <div class="row g-4 mb-4 items-grid">
             @forelse($items as $item)
                 <div class="col-xl-3 col-lg-4 col-md-6">
                     @if($type === 'course')
@@ -572,6 +807,11 @@
                 </div>
             @endforelse
         </div>
+
+        {{-- View More Button (Mobile Only) --}}
+        <button class="view-more-btn" id="viewMoreBtn" onclick="toggleMoreItems()">
+            <i class="bi bi-plus-circle"></i> View More Lessons
+        </button>
     </div>
 
     {{-- Pagination Grid --}}
@@ -608,5 +848,44 @@
         })
         .catch(err => console.error('Bookmark toggle failed', err));
     }
+
+    // View More / Show Less functionality for mobile
+    let isExpanded = false;
+
+    function toggleMoreItems() {
+        const itemsGrid = document.querySelector('.items-grid');
+        const viewMoreBtn = document.getElementById('viewMoreBtn');
+        
+        if (!itemsGrid || !viewMoreBtn) return;
+        
+        const hiddenItems = itemsGrid.querySelectorAll('.col-xl-3.col-lg-4.col-md-6:nth-child(n+7)');
+        
+        isExpanded = !isExpanded;
+        
+        if (isExpanded) {
+            hiddenItems.forEach(item => item.classList.add('expanded'));
+            viewMoreBtn.innerHTML = '<i class="bi bi-dash-circle"></i> Show Less';
+        } else {
+            hiddenItems.forEach(item => item.classList.remove('expanded'));
+            viewMoreBtn.innerHTML = '<i class="bi bi-plus-circle"></i> View More Lessons';
+            
+            // Scroll back to the grid
+            itemsGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+    }
+
+    // Hide view more button if there are 6 or fewer items
+    document.addEventListener('DOMContentLoaded', function() {
+        const itemsGrid = document.querySelector('.items-grid');
+        const viewMoreBtn = document.getElementById('viewMoreBtn');
+        
+        if (itemsGrid && viewMoreBtn) {
+            const totalItems = itemsGrid.querySelectorAll('.col-xl-3.col-lg-4.col-md-6').length;
+            
+            if (totalItems <= 6) {
+                viewMoreBtn.style.display = 'none';
+            }
+        }
+    });
 </script>
 @endsection

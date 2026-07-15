@@ -132,7 +132,7 @@ function shellFooter() {
             <h3>Company</h3>
             <a href="about">About</a>
             <a href="pricing">Pricing</a>
-            <a href="contact">hello@Daleel.ai</a>
+            <a href="contact">noreply@daleelmentor.com</a>
             <a href="terms">Terms</a>
             <a href="privacy">Privacy Policy</a>
             <a href="cookies">Cookie Policy</a>

@@ -1,87 +1,300 @@
 @extends('layouts.public')
 
-@section('title', 'Daleel AI | Help Center')
+@section('title', 'Help Center - Daleel AI')
 
 @section('content')
-<section class="page-hero">
-  <div class="container hero-grid">
-    <div>
-      <p class="eyebrow">Help center</p>
-      <h1>Answers for learners, teams, and admins</h1>
-      <p class="lead">Search common questions about learning paths, pricing, extension privacy, enterprise analytics, and account setup.</p>
-      <div class="hero-actions">
-        <a class="btn primary" href="{{ url('contact') }}">Contact Support</a>
-        <a class="btn secondary" href="{{ url('privacy') }}">Read Privacy Policy</a>
-      </div>
-    </div>
-  </div>
-</section>
+<style>
+  :root {
+    --hc-bg: #f8fafb;
+    --hc-surface: #ffffff;
+    --hc-border: #e8ecf1;
+    --hc-text: #0f172a;
+    --hc-text-secondary: #475569;
+    --hc-accent: #2563eb;
+    --hc-accent-light: #eff6ff;
+    --hc-radius: 14px;
+  }
 
-<section class="section">
-  <div class="container">
-    <div class="filter-toolbar" style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 32px; flex-wrap: wrap; gap: 20px;">
-      <div><p class="eyebrow">Support</p><h2>Search help topics</h2></div>
-      <div class="search-bar" style="display: flex; gap: 12px; flex-wrap: wrap;">
-        <input id="helpSearch" type="search" placeholder="Search help center" style="padding: 10px 16px; border: 1px solid var(--line); border-radius: 8px;">
-        <select id="helpTopic" style="padding: 10px 16px; border: 1px solid var(--line); border-radius: 8px;"><option value="All">All topics</option></select>
+  .help-center {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--hc-text);
+    background: var(--hc-bg);
+    min-height: 100vh;
+  }
+
+  .hc-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* Hero */
+  .hc-hero {
+    padding: 56px 0 52px;
+    text-align: center;
+    background: var(--hc-surface);
+    border-bottom: 1px solid var(--hc-border);
+  }
+
+  .hc-badge {
+    display: inline-block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--hc-accent);
+    background: var(--hc-accent-light);
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+    letter-spacing: 0.03em;
+  }
+
+  .hc-hero h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 0 0 12px;
+    line-height: 1.2;
+  }
+
+  .hc-hero p {
+    font-size: 1.05rem;
+    color: var(--hc-text-secondary);
+    margin: 0 auto 28px;
+    max-width: 500px;
+    line-height: 1.6;
+  }
+
+  .hc-hero-btns {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .hc-btn {
+    display: inline-flex;
+    align-items: center;
+    padding: 11px 24px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+
+  .hc-btn-primary {
+    background: var(--hc-accent);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+  }
+
+  .hc-btn-primary:hover {
+    background: #1d4ed8;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    transform: translateY(-1px);
+  }
+
+  .hc-btn-ghost {
+    background: var(--hc-surface);
+    color: var(--hc-text);
+    border-color: var(--hc-border);
+  }
+
+  .hc-btn-ghost:hover {
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+  }
+
+  /* FAQ Section */
+  .hc-faq {
+    padding: 48px 0 80px;
+  }
+
+  .hc-faq-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+
+  .hc-faq-card {
+    background: var(--hc-surface);
+    border: 1px solid var(--hc-border);
+    border-radius: var(--hc-radius);
+    padding: 24px;
+    transition: box-shadow 0.2s;
+  }
+
+  .hc-faq-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
+  }
+
+  .hc-faq-card h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--hc-accent);
+    margin: 0 0 16px;
+    letter-spacing: -0.01em;
+  }
+
+  .hc-faq-items {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .hc-faq-item {
+    border-bottom: 1px solid #f1f5f9;
+  }
+
+  .hc-faq-item:last-child {
+    border-bottom: none;
+  }
+
+  .hc-faq-item summary {
+    padding: 14px 0;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--hc-text);
+    transition: color 0.15s;
+  }
+
+  .hc-faq-item summary:hover {
+    color: var(--hc-accent);
+  }
+
+  .hc-faq-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .hc-faq-item summary::after {
+    content: '+';
+    font-size: 1.1rem;
+    color: #94a3b8;
+    transition: transform 0.25s;
+    font-weight: 400;
+  }
+
+  .hc-faq-item[open] summary::after {
+    transform: rotate(45deg);
+    color: var(--hc-accent);
+  }
+
+  .hc-faq-item[open] summary {
+    color: var(--hc-accent);
+    padding-bottom: 8px;
+  }
+
+  .hc-faq-item p {
+    margin: 0;
+    padding: 0 0 14px;
+    font-size: 0.88rem;
+    color: var(--hc-text-secondary);
+    line-height: 1.6;
+  }
+
+  @media (max-width: 640px) {
+    .hc-hero h1 {
+      font-size: 1.9rem;
+    }
+    .hc-hero p {
+      font-size: 0.95rem;
+    }
+    .hc-faq-grid {
+      grid-template-columns: 1fr;
+    }
+    .hc-container {
+      padding: 0 20px;
+    }
+  }
+</style>
+
+<div class="help-center">
+  {{-- Hero Section --}}
+  <section class="hc-hero">
+    <div class="hc-container">
+      <span class="hc-badge">Help Center</span>
+      <h1>How can we help you?</h1>
+      <p>Find answers about learning paths, pricing, extension privacy, and account management.</p>
+      <div class="hc-hero-btns">
+        <a href="{{ url('contact') }}" class="hc-btn hc-btn-primary">Contact Support</a>
+        <a href="{{ url('privacy') }}" class="hc-btn hc-btn-ghost">Privacy Policy →</a>
       </div>
     </div>
-    <div class="accordion" id="helpResults">
-      <!-- To be filled by JS -->
+  </section>
+
+  {{-- FAQ Section --}}
+  <section class="hc-faq">
+    <div class="hc-container">
+      <div class="hc-faq-grid" id="faqGrid"></div>
     </div>
-  </div>
-</section>
+  </section>
+</div>
 @endsection
 
 @section('scripts')
 <script>
-const helpTopics = [
-  ["Getting Started", "How do recommendations work?", "Daleel AI uses your role, goals, selected tools, completed lessons, saved items, and optional workflow signals to recommend practical lessons."],
-  ["Getting Started", "Can individuals use the platform?", "Yes. Individual learners can use role-based paths, video lessons, saved lessons, and the AI mentor without joining a company workspace."],
-  ["Enterprise", "What can managers track?", "Managers can track progress, completed paths, AI readiness, adoption by department, and estimated productivity impact."],
-  ["Enterprise", "Can we request custom training?", "Yes. Companies can request training content for internal tools, policies, departments, or workflows."],
-  ["Chrome Extension", "Does the extension read private content?", "The extension is designed to track work behavior signals such as tools used, repeated task patterns, and time allocation, not private content."],
-  ["Billing", "Is there a free plan?", "Yes. The free plan includes starter lessons, saved lessons, and limited AI mentor questions."],
-  ["Billing", "Can teams switch plans later?", "Yes. Teams can move between plans or talk to sales for enterprise needs."],
-  ["Privacy", "Can users pause workflow analysis?", "Yes. Users and companies can control extension usage and pause or limit tracking based on policy."]
-];
+  const faqData = [
+    {
+      category: "Getting Started",
+      items: [
+        { q: "How do recommendations work?", a: "Daleel AI analyzes your role, goals, completed lessons, saved items, and tool usage patterns to suggest the most relevant learning paths for you." },
+        { q: "Can individuals use the platform?", a: "Yes. Anyone can sign up and access role-based paths, video lessons, saved content, and the AI mentor without being part of a company workspace." }
+      ]
+    },
+    {
+      category: "Enterprise",
+      items: [
+        { q: "What can managers track?", a: "Managers can monitor team progress, completed paths, AI readiness scores, department adoption, and estimated productivity impact across the organization." },
+        { q: "Can we request custom training?", a: "Absolutely. We work with companies to build custom training content for internal tools, policies, departments, and specialized workflows." }
+      ]
+    },
+    {
+      category: "Chrome Extension",
+      items: [
+        { q: "Does the extension read private content?", a: "No. The extension only tracks work behavior signals like tools used, repeated task patterns, and time allocation. It never accesses or reads private content." }
+      ]
+    },
+    {
+      category: "Billing",
+      items: [
+        { q: "Is there a free plan available?", a: "Yes. The free plan includes starter lessons, unlimited saved items, and a limited number of AI mentor questions each month." },
+        { q: "Can teams switch plans later?", a: "Yes. Teams can upgrade or downgrade at any time. Enterprise customers can also contact sales for custom pricing and arrangements." }
+      ]
+    },
+    {
+      category: "Privacy",
+      items: [
+        { q: "Can users pause workflow analysis?", a: "Yes. Both individual users and company admins can control extension settings and pause or limit tracking based on their privacy preferences." }
+      ]
+    }
+  ];
 
-function initHelp() {
-  const results = document.getElementById("helpResults");
-  if (!results) return;
-  const search = document.getElementById("helpSearch");
-  const topic = document.getElementById("helpTopic");
-  
-  const groups = [...new Set(helpTopics.map(item => item[0]))];
-  groups.forEach(group => {
-    const opt = document.createElement("option");
-    opt.value = group;
-    opt.textContent = group;
-    topic.appendChild(opt);
-  });
-
-  const render = () => {
-    const query = search.value.toLowerCase();
-    const list = helpTopics.filter(([group, question, answer]) => {
-      return `${group} ${question} ${answer}`.toLowerCase().includes(query)
-        && (topic.value === "All" || group === topic.value);
-    });
-    results.innerHTML = list.map(([group, question, answer]) => `
-      <div class="accordion-item">
-        <button class="accordion-button" type="button">${group}: ${question}<span>+</span></button>
-        <div class="accordion-panel">${answer}</div>
-      </div>
-    `).join("") || `<div class="card card-body"><h3>No topics found</h3></div>`;
+  document.addEventListener('DOMContentLoaded', function() {
+    const grid = document.getElementById('faqGrid');
     
-    document.querySelectorAll(".accordion-button").forEach(button => {
-      button.onclick = () => {
-        button.closest(".accordion-item").classList.toggle("open");
-      };
-    });
-  };
-  [search, topic].forEach(control => control.addEventListener("input", render));
-  render();
-}
-initHelp();
+    grid.innerHTML = faqData.map(function(cat) {
+      return `
+        <div class="hc-faq-card">
+          <h3>${cat.category}</h3>
+          <div class="hc-faq-items">
+            ${cat.items.map(function(item) {
+              return `
+                <details class="hc-faq-item">
+                  <summary>${item.q}</summary>
+                  <p>${item.a}</p>
+                </details>
+              `;
+            }).join('')}
+          </div>
+        </div>
+      `;
+    }).join('');
+  });
 </script>
 @endsection

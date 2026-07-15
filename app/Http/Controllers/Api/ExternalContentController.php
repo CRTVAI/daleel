@@ -33,6 +33,7 @@ class ExternalContentController extends Controller
         // 2. Validation
         $validated = $request->validate([
             'title' => 'required|string|max:255',
+            'author_name' => 'nullable|string|max:255',
             'video_url' => 'required|string',
             'video_url_ar' => 'nullable|url',
             'category' => 'nullable|string',

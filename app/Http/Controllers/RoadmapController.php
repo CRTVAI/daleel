@@ -23,7 +23,167 @@ class RoadmapController extends Controller
 
         $roadmaps = UserRoadmap::where('user_id', Auth::id())->latest()->get();
         $manualRoadmapsCount = $roadmaps->where('is_auto_generated', false)->count();
-        return view('roadmap.index', compact('roadmaps', 'pendingData', 'manualRoadmapsCount'));
+
+        // ── Build the full set of roadmap video IDs + lookup map ──────────
+        $roadmapVideoIds   = collect();
+        $roadmapIdByVideoId = []; // videoId => roadmapId
+        foreach ($roadmaps as $rm) {
+            $phases = $rm->curriculum['phases'] ?? $rm->curriculum ?? [];
+            $ids = collect($phases)
+                ->filter(fn($ph) => is_array($ph))
+                ->flatMap(fn($ph) => collect($ph['videos'] ?? [])->pluck('id'));
+            foreach ($ids as $vid) {
+                $roadmapIdByVideoId[$vid] = $rm->id;
+            }
+            $roadmapVideoIds = $roadmapVideoIds->merge($ids);
+        }
+        $roadmapVideoIds = $roadmapVideoIds->unique()->values();
+
+        // ── All started video progress records (include completed) ───────────
+        $allProgress = \App\Models\UserVideoProgress::where('user_id', $user->id)
+            ->where('completion_percent', '>', 0)
+            ->orderByDesc('last_watched_at')
+            ->with('content')
+            ->get()
+            ->filter(fn($p) => $p->content && $p->content->status === 'active');
+
+        // ── Collect all active course IDs for this user's in-progress items ──
+        // We identify course membership via the content's course_id column (if it exists)
+        // or via the Course relationship.
+        $courseMap = []; // content_id => course_id
+
+        // Pre-load courses for all in-progress content
+        $inProgressContentIds = $allProgress->pluck('content.id')->filter()->unique()->values();
+        $courseContents = \App\Models\Course::whereHas('contents', fn($q) => $q->whereIn('contents.id', $inProgressContentIds))
+            ->with(['contents' => fn($q) => $q->whereIn('contents.id', $inProgressContentIds)])
+            ->get();
+        foreach ($courseContents as $course) {
+            foreach ($course->contents as $c) {
+                $courseMap[$c->id] = $course->id;
+            }
+        }
+
+        // Build a map of ALL content IDs belonging to ANY active course (for full course stats)
+        $allCoursesForUser = \App\Models\Course::active()
+            ->whereHas('contents', fn($q) => $q->whereIn('contents.id', $inProgressContentIds))
+            ->with('contents')
+            ->get();
+
+        // ── CONTINUE COURSES ───────────────────────────────────────────────
+        // Group in-progress videos by course and build course-level cards
+        $continueCourses = collect();
+        $processedCourseIds = [];
+
+        foreach ($allProgress as $p) {
+            $contentId = $p->content->id;
+            $cid = $courseMap[$contentId] ?? null;
+            if (!$cid || in_array($cid, $processedCourseIds)) continue;
+            $processedCourseIds[] = $cid;
+
+            $course = $allCoursesForUser->firstWhere('id', $cid);
+            if (!$course) continue;
+
+            // All videos in this course (ordered by sort_order)
+            $allCourseVideos = $course->contents()->orderBy('sort_order')->get();
+            $totalVideos = $allCourseVideos->count();
+            if ($totalVideos === 0) continue;
+
+            // Get progress for all videos in this course
+            $courseVideoIds = $allCourseVideos->pluck('id');
+            $courseProgressMap = \App\Models\UserVideoProgress::where('user_id', $user->id)
+                ->whereIn('content_id', $courseVideoIds)
+                ->get()->keyBy('content_id');
+
+            $watchedCount = 0;
+            $nextVideo = null;
+            $lastWatchedAt = null;
+
+            foreach ($allCourseVideos as $video) {
+                $prog = $courseProgressMap->get($video->id);
+                $isWatched = $prog && ($prog->completed || $prog->completion_percent >= 90);
+                if ($isWatched) {
+                    $watchedCount++;
+                    if (!$lastWatchedAt || ($prog->last_watched_at && $prog->last_watched_at > $lastWatchedAt)) {
+                        $lastWatchedAt = $prog->last_watched_at;
+                    }
+                } elseif (!$nextVideo) {
+                    // This is the next video to watch
+                    $nextVideo = $video;
+                    if ($prog) {
+                        $nextVideo->resume_seconds = (int) $prog->watched_seconds;
+                        $nextVideo->completion_pct = round($prog->completion_percent);
+                    } else {
+                        $nextVideo->resume_seconds = 0;
+                        $nextVideo->completion_pct = 0;
+                    }
+                }
+            }
+
+            $progressPct = $totalVideos > 0 ? round(($watchedCount / $totalVideos) * 100) : 0;
+
+            $continueCourses->push([
+                'course'        => $course,
+                'total'         => $totalVideos,
+                'watched'       => $watchedCount,
+                'progress_pct'  => $progressPct,
+                'next_video'    => $nextVideo,
+                'last_watched_at' => $lastWatchedAt,
+                'all_videos'    => $allCourseVideos,
+                'progress_map'  => $courseProgressMap,
+            ]);
+        }
+
+        // Sort courses by last activity
+        $continueCourses = $continueCourses->sortByDesc('last_watched_at')->values();
+
+        // ── ROADMAP WATCHING (individual video progress inside roadmaps) ──
+        $roadmapWatching = $allProgress
+            ->filter(fn($p) =>
+                !isset($courseMap[$p->content->id]) &&
+                $roadmapVideoIds->contains($p->content->id) &&
+                $p->completion_percent > 0
+            )
+            ->take(24)
+            ->map(function ($p) use ($roadmapIdByVideoId) {
+                $content = $p->content;
+                $content->resume_seconds       = (int) $p->watched_seconds;
+                $content->completion_pct       = round($p->completion_percent);
+                $content->last_watched_at      = $p->last_watched_at;
+                $content->duration_label_local = $p->duration_seconds > 0
+                    ? floor($p->duration_seconds / 60) . 'm'
+                    : ($content->duration_label ?? '—');
+                $content->roadmap_id = $roadmapIdByVideoId[$content->id] ?? null;
+                $content->course_id  = null;
+                return $content;
+            })
+            ->values();
+
+        // ── CONTINUE WATCHING (individual only — no course, no roadmap) ────
+        $continueWatching = $allProgress
+            ->filter(fn($p) =>
+                !isset($courseMap[$p->content->id]) &&
+                !$roadmapVideoIds->contains($p->content->id) &&
+                $p->completion_percent > 0
+            )
+            ->take(24)
+            ->map(function ($p) {
+                $content = $p->content;
+                $content->resume_seconds       = (int) $p->watched_seconds;
+                $content->completion_pct       = round($p->completion_percent);
+                $content->last_watched_at      = $p->last_watched_at;
+                $content->duration_label_local = $p->duration_seconds > 0
+                    ? floor($p->duration_seconds / 60) . 'm'
+                    : ($content->duration_label ?? '—');
+                $content->roadmap_id = null;
+                $content->course_id  = null;
+                return $content;
+            })
+            ->values();
+
+        return view('roadmap.index', compact(
+            'roadmaps', 'pendingData', 'manualRoadmapsCount',
+            'continueWatching', 'continueCourses', 'roadmapWatching'
+        ));
     }
 
     public function show(UserRoadmap $roadmap)

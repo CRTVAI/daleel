@@ -187,17 +187,76 @@
                 @endif
             </div>
         </div>
-    </div>
+    </div>    {{-- ===== CONTINUE LEARNING ===== --}}
+    @php $hasAnyContinue = $continueCourses->isNotEmpty() || $roadmaps->isNotEmpty() || $continueWatching->isNotEmpty(); @endphp
+    @if($hasAnyContinue)
+    <div class="mb-5" id="continue-watching-section">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+            <div>
+                <h5 class="fw-800 text-dark mb-1" style="font-size:1.1rem;letter-spacing:-0.02em;">
+                    <i class="bi bi-play-circle-fill me-2" style="color:#4f46e5;"></i>Continue Learning
+                </h5>
+                <p class="text-muted mb-0" style="font-size:0.8rem;font-weight:500;">Pick up right where you left off &mdash; progress is saved automatically.</p>
+            </div>
+            <a href="{{ route('learn.explore') }}" class="btn btn-sm rounded-pill fw-700 px-3" style="background:#f1f5f9;color:#475569;font-size:0.78rem;border:none;">Browse All <i class="bi bi-arrow-right ms-1"></i></a>
+        </div>
 
-    <div class="row g-4">
+        {{-- Filter tabs --}}
+        <div class="d-flex align-items-center gap-2 mb-3 overflow-x-auto" id="cw-filter-tabs" style="scrollbar-width:thin;">
+            <button class="cw-tab active" onclick="filterCW('all',this)">All ({{ $continueCourses->count()+$roadmaps->count()+$continueWatching->count() }})</button>
+            <button class="cw-tab" onclick="filterCW('roadmap',this)">Roadmaps ({{ $roadmaps->count() }})</button>
+            <button class="cw-tab" onclick="filterCW('course',this)">Courses ({{ $continueCourses->count() }})</button>
+            <button class="cw-tab" onclick="filterCW('individual',this)">Videos ({{ $continueWatching->count() }})</button>
+        </div>
 
+        <div class="row g-3" id="cw-grid">
 
-        @forelse($roadmaps as $item)
+            {{-- COURSE CARDS --}}
+            @foreach($continueCourses as $entry)
+            @php
+                $course  = $entry['course'];
+                $nv      = $entry['next_video'];
+                $thumb   = $course->thumbnail ? asset('storage/'.$course->thumbnail)
+                         : ($nv ? ($nv->thumbnail_url ?: 'https://img.youtube.com/vi/'.$nv->youtube_id.'/hqdefault.jpg') : null);
+                $rUrl    = $nv ? route('learn.watch',[$nv,'course_id'=>$course->id]) : route('learn.explore');
+            @endphp
+            <div class="col-xl-4 col-md-6 col-12" data-type="course">
+                <div class="cc-card">
+                    <a href="{{ $rUrl }}" class="cc-thumb-wrap">
+                        @if($thumb)<img src="{{ $thumb }}" alt="{{ $course->title }}" class="cc-thumb">
+                        @else<div class="cc-no-thumb"><i class="bi bi-collection-play-fill"></i></div>@endif
+                        <div class="cc-overlay"><div class="cc-play-btn"><i class="bi bi-play-fill"></i></div></div>
+                        <div class="cc-vid-badge"><i class="bi bi-camera-video-fill me-1"></i>{{ $entry['watched'] }}/{{ $entry['total'] }}</div>
+                        <div class="cc-bar"><div class="cc-bar-fill" style="width:{{ $entry['progress_pct'] }}%"></div></div>
+                    </a>
+                    <div class="cc-body">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="cw-pill cw-pill-course"><i class="bi bi-collection me-1"></i>Course</span>
+                            @if($entry['last_watched_at'])<span class="cw-time">{{ $entry['last_watched_at']->diffForHumans() }}</span>@endif
+                        </div>
+                        <div class="cc-title" title="{{ $course->title }}">{{ $course->title }}</div>
+                        @if($nv)
+                        <div class="cc-next"><i class="bi bi-arrow-right-circle-fill" style="color:#0ea5e9;flex-shrink:0;"></i><span class="text-truncate" style="min-width:0;">Next: {{ $nv->title }}</span></div>
+                        @endif
+                        <div class="cw-prog-row">
+                            <div class="cw-prog-bar"><div class="cw-prog-fill cc-fill" style="width:{{ $entry['progress_pct'] }}%"></div></div>
+                            <span class="cw-prog-pct cc-pct">{{ $entry['progress_pct'] }}%</span>
+                        </div>
+                        <a href="{{ $rUrl }}" class="cw-btn cc-btn">
+                            <i class="bi bi-play-fill me-1"></i>{{ $entry['watched']===0 ? 'Start Course' : 'Continue Course' }}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            @endforeach
+
+            {{-- ROADMAP CARDS --}}
+            @foreach($roadmaps as $item)
             @php
                 $toolsCount = count($item->tools);
                 $isCompleted = $item->progress >= 100;
             @endphp
-            <div class="col-xl-4 col-md-6">
+            <div class="col-xl-4 col-md-6 col-12" data-type="roadmap">
                 <div class="roadmap-card">
                     <div class="roadmap-card-header">
                         <div class="tool-stack">
@@ -223,7 +282,7 @@
                                     data-bs-toggle="modal" 
                                     data-bs-target="#deleteRoadmapModal" 
                                     title="Delete Roadmap"
-                                    style="font-size: 1rem; line-height: 1; background: #fee2e2; color: #dc2626; border-radius: 6px;">
+                                    style="font-size:1rem;line-height:1;background:#fee2e2;color:#dc2626;border-radius:6px;">
                                 <i class="bi bi-trash-fill"></i>
                             </button>
                         </div>
@@ -272,21 +331,115 @@
                     </div>
                 </div>
             </div>
-        @empty
-            <div class="col-12 text-center py-5 mt-5">
-                <div class="bg-primary bg-opacity-10 text-primary w-100 h-100 rounded-circle d-flex align-items-center justify-content-center mb-4 mx-auto pulse-icon" style="width: 100px !important; height: 100px !important;">
-                    <i class="bi bi-map-fill" style="font-size: 3rem;"></i>
+            @endforeach
+
+            {{-- INDIVIDUAL VIDEO CARDS --}}
+            @foreach($continueWatching as $item)
+            @php
+                $wUrl  = route('learn.watch',[$item]);
+                $thumb = $item->thumbnail_url ?: 'https://img.youtube.com/vi/'.$item->youtube_id.'/hqdefault.jpg';
+            @endphp
+            <div class="col-xl-4 col-md-6 col-12" data-type="individual">
+                <div class="cw-card">
+                    <a href="{{ $wUrl }}" class="cw-thumb-wrap">
+                        <img src="{{ $thumb }}" alt="{{ $item->title }}" class="cw-thumb">
+                        <div class="cc-overlay"><div class="cw-play-btn"><i class="bi bi-play-fill"></i></div></div>
+                        <div class="cw-pct-badge">{{ $item->completion_pct }}%</div>
+                        <div class="cc-bar"><div class="cw-bar-fill" style="width:{{ $item->completion_pct }}%"></div></div>
+                    </a>
+                    <div class="cw-body">
+                        <div class="cw-title" title="{{ $item->title }}">{{ $item->title }}</div>
+                        <div class="cw-meta"><i class="bi bi-clock me-1"></i>{{ $item->duration_label_local }} &middot; {{ $item->last_watched_at?->diffForHumans() ?? 'Recently' }}</div>
+                        <div class="cw-prog-row">
+                            <div class="cw-prog-bar"><div class="cw-prog-fill" style="width:{{ $item->completion_pct }}%"></div></div>
+                            <span class="cw-prog-pct">{{ $item->completion_pct }}%</span>
+                        </div>
+                        <div class="d-flex gap-2 mt-1">
+                            <a href="{{ $wUrl }}" class="cw-btn flex-grow-1 text-center" data-start="{{ $item->resume_seconds }}"><i class="bi bi-play-fill me-1"></i>Resume</a>
+                        </div>
+                    </div>
                 </div>
-                <h2 class="fw-900 text-dark mb-3">No learning journeys yet</h2>
-                <p class="text-muted mx-auto mb-5" style="max-width: 450px;">
-                    Search for a career goal or a tool you want to master, and our AI will build a personalized curriculum for you.
-                </p>
-                <a href="{{ route('learn.explore') }}" class="btn btn-primary rounded-pill px-5 py-3 fw-800 shadow">
-                    Create Your First Roadmap
-                </a>
             </div>
-        @endforelse
+            @endforeach
+
+        </div>
+        <div id="cw-empty-msg" style="display:none;" class="text-center py-4">
+            <i class="bi bi-play-circle" style="font-size:36px;color:#cbd5e1;display:block;margin-bottom:8px;"></i>
+            <p style="font-weight:600;color:#64748b;font-size:14px;margin:0;">No in-progress items in this category</p>
+        </div>
     </div>
+
+    <style>
+        .cw-tab { background:#f1f5f9;color:#475569;border:none;border-radius:50px;padding:5px 14px;font-size:.78rem;font-weight:700;cursor:pointer;white-space:nowrap;transition:all .2s; }
+        .cw-tab:hover { background:#e2e8f0; }
+        .cw-tab.active { background:#4f46e5;color:#fff; }
+
+        /* Shared card base */
+        .cc-card,.cw-card { background:#fff;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;transition:all .25s cubic-bezier(.4,0,.2,1);height:100%; }
+        .cc-card { border:1px solid #e0f2fe; }
+        .cw-card { border:1px solid #e8edf5; }
+        .cc-card:hover { transform:translateY(-5px);box-shadow:0 16px 40px rgba(14,165,233,.12);border-color:#7dd3fc; }
+        .cw-card:hover { transform:translateY(-5px);box-shadow:0 16px 40px rgba(15,23,42,.1);border-color:#c7d2fe; }
+
+        /* Thumbnails */
+        .cc-thumb-wrap,.cw-thumb-wrap { position:relative;display:block;aspect-ratio:16/9;overflow:hidden;text-decoration:none;flex-shrink:0; }
+        .cc-thumb-wrap { background:#0c4a6e; }
+        .cw-thumb-wrap { background:#1e1b4b; }
+        .cc-thumb,.cw-thumb { width:100%;height:100%;object-fit:cover;transition:transform .3s;display:block; }
+        .cc-card:hover .cc-thumb,.cw-card:hover .cw-thumb { transform:scale(1.04); }
+        .cc-no-thumb { width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;color:rgba(255,255,255,.3); }
+        .cc-overlay { position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.35);opacity:0;transition:opacity .2s; }
+        .cc-card:hover .cc-overlay,.cw-card:hover .cc-overlay { opacity:1; }
+        .cc-play-btn,.cw-play-btn { width:48px;height:48px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;transform:scale(.85);transition:transform .2s;box-shadow:0 4px 16px rgba(0,0,0,.25); }
+        .cc-play-btn { color:#0ea5e9; }
+        .cw-play-btn { color:#4f46e5; }
+        .cc-card:hover .cc-play-btn,.cw-card:hover .cw-play-btn { transform:scale(1); }
+        .cc-vid-badge { position:absolute;top:8px;left:8px;background:rgba(0,0,0,.65);color:#fff;font-size:.68rem;font-weight:800;border-radius:8px;padding:2px 10px;backdrop-filter:blur(4px); }
+        .cw-pct-badge { position:absolute;top:8px;right:8px;background:rgba(0,0,0,.65);color:#fff;font-size:.68rem;font-weight:800;border-radius:8px;padding:2px 8px;backdrop-filter:blur(4px); }
+        .cc-bar { position:absolute;bottom:0;left:0;right:0;height:3px;background:rgba(255,255,255,.2); }
+        .cc-bar-fill,.cw-bar-fill { height:100%;border-radius:0 2px 2px 0; }
+        .cc-bar-fill { background:#0ea5e9; }
+        .cw-bar-fill { background:#4f46e5; }
+        .rm-fill { background:#7c3aed; }
+
+        /* Bodies */
+        .cc-body,.cw-body { padding:14px 16px 16px;display:flex;flex-direction:column;gap:7px;flex:1; }
+        .cc-title,.cw-title { font-weight:700;font-size:.9rem;color:#0f172a;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden; }
+        .cc-next { display:flex;align-items:center;gap:6px;font-size:.75rem;color:#475569;font-weight:500;overflow:hidden; }
+        .cw-meta { font-size:.72rem;color:#94a3b8;font-weight:500; }
+        .cw-time { font-size:.68rem;color:#94a3b8;font-weight:500; }
+
+        /* Pills */
+        .cw-pill { border-radius:8px;padding:2px 8px;font-size:.65rem;font-weight:700;flex-shrink:0; }
+        .cw-pill-course { background:#e0f2fe;color:#0369a1; }
+        .cw-pill-roadmap { background:#ede9fe;color:#5b21b6; }
+
+        /* Progress bars */
+        .cw-prog-row { display:flex;align-items:center;gap:8px; }
+        .cw-prog-bar { flex:1;height:5px;background:#f1f5f9;border-radius:5px;overflow:hidden; }
+        .cw-prog-fill { height:100%;border-radius:5px;transition:width .6s;background:linear-gradient(90deg,#4f46e5,#818cf8); }
+        .cc-fill { background:linear-gradient(90deg,#0ea5e9,#38bdf8); }
+        .rm-prog { background:linear-gradient(90deg,#7c3aed,#a78bfa); }
+        .cw-prog-pct { font-size:.7rem;font-weight:800;color:#4f46e5;min-width:32px;text-align:right; }
+        .cc-pct { color:#0ea5e9; }
+        .rm-pct { color:#7c3aed; }
+
+        /* Buttons */
+        .cw-btn { display:flex;align-items:center;justify-content:center;border-radius:10px;padding:9px 0;font-weight:700;font-size:.85rem;text-decoration:none;transition:all .2s;background:#4f46e5;color:#fff;margin-top:2px; }
+        .cw-btn:hover { background:#4338ca;color:#fff;transform:scale(1.02);box-shadow:0 6px 16px rgba(79,70,229,.25); }
+        .cc-btn { background:#0ea5e9; }
+        .cc-btn:hover { background:#0284c7;box-shadow:0 6px 16px rgba(14,165,233,.3); }
+        .rm-btn { background:#7c3aed; }
+        .rm-btn:hover { background:#6d28d9;box-shadow:0 6px 16px rgba(124,58,237,.25); }
+
+        @media (max-width:768px) {
+            .cc-card,.cw-card { border-radius:14px; }
+            .cc-body,.cw-body { padding:10px 12px 12px;gap:5px; }
+            .cc-title,.cw-title { font-size:.84rem; }
+            .cw-btn { font-size:.8rem;padding:8px 0; }
+        }
+    </style>
+    @endif
 </div>
 
 <!-- Create Roadmap Modal -->
@@ -325,10 +478,6 @@
                         </button>
                     </div>
                 </form>
-                
-                <div class="text-center mt-4">
-                    <span class="badge bg-light text-muted rounded-pill px-3 py-2 fw-700" style="font-size: 10px; letter-spacing: 1px; text-transform: uppercase;">Powered by GPT-4o Mini</span>
-                </div>
             </div>
             <button type="button" class="btn-close position-absolute top-0 end-0 m-4 shadow-none" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
@@ -421,17 +570,65 @@
     document.addEventListener('DOMContentLoaded', function () {
         const deleteForm = document.getElementById('deleteRoadmapForm');
         const deleteName = document.getElementById('deleteRoadmapName');
-        
+
         document.querySelectorAll('.delete-roadmap-btn').forEach(btn => {
             btn.addEventListener('click', function () {
-                const id = this.getAttribute('data-id');
+                const id    = this.getAttribute('data-id');
                 const title = this.getAttribute('data-title');
-                
-                // Set the dynamic action route URL
                 deleteForm.action = `{{ url('/roadmap') }}/${id}`;
                 deleteName.innerHTML = `Are you sure you want to permanently delete <strong class="text-dark">"${title}"</strong>? This action cannot be undone.`;
             });
         });
     });
+
+    // ── Tab filter ──────────────────────────────────────────────────────────
+    window.filterCW = function(type, btn) {
+        document.querySelectorAll('#cw-filter-tabs .cw-tab').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+
+        const grid  = document.getElementById('cw-grid');
+        const empty = document.getElementById('cw-empty-msg');
+        if (!grid) return;
+
+        let visible = 0;
+        grid.querySelectorAll('[data-type]').forEach(card => {
+            const match = type === 'all' || card.getAttribute('data-type') === type;
+            card.style.display = match ? '' : 'none';
+            if (match) visible++;
+        });
+
+        if (empty) empty.style.display = visible === 0 ? 'block' : 'none';
+    };
+
+    // ── Reset progress ──────────────────────────────────────────────────────
+    window.resetIndexProgress = function(event, contentId, button) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (!confirm('Reset progress for this video?')) return;
+
+        fetch("{{ route('learn.progress.reset') }}", {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': "{{ csrf_token() }}", 'Accept': 'application/json' },
+            body: JSON.stringify({ content_id: contentId })
+        })
+        .then(r => r.json())
+        .then(() => {
+            const card = button.closest('[data-type]');
+            if (card) {
+                card.style.transition = 'all .4s ease';
+                card.style.opacity    = '0';
+                card.style.transform  = 'scale(0.9)';
+                setTimeout(() => {
+                    card.remove();
+                    const grid = document.getElementById('cw-grid');
+                    if (grid && grid.querySelectorAll('[data-type]:not([style*="display: none"])').length === 0) {
+                        const section = document.getElementById('continue-watching-section');
+                        if (section) section.remove();
+                    }
+                }, 400);
+            }
+        })
+        .catch(() => alert('Could not reset progress. Please try again.'));
+    };
 </script>
 @endsection

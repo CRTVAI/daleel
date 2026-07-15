@@ -2,696 +2,552 @@
 
 @section('title', 'Contact Us | Daleel AI')
 
-@section('styles')
+@section('content')
 <style>
-/* ==================== CSS VARIABLES ==================== */
-:root {
-    --primary: #6366F1;
-    --primary-light: #EEF2FF;
-    --primary-dark: #4F46E5;
-    --text: #0F172A;
-    --text-secondary: #475569;
-    --text-muted: #94A3B8;
-    --bg: #FFFFFF;
-    --bg-secondary: #F8FAFC;
-    --border: #E2E8F0;
-    --border-light: #F1F5F9;
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 20px;
-    --radius-xl: 28px;
-    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
-    --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.02);
-    --shadow-lg: 0 20px 40px -10px rgba(0, 0, 0, 0.06);
-    --shadow-xl: 0 30px 50px -15px rgba(0, 0, 0, 0.08);
-}
+  :root {
+    --contact-bg: #ffffff;
+    --contact-surface: #f8fafc;
+    --contact-border: #e8ecf1;
+    --contact-text: #0f172a;
+    --contact-text-secondary: #64748b;
+    --contact-accent: #6366f1;
+    --contact-accent-light: #eef2ff;
+    --contact-radius: 16px;
+  }
 
-/* ==================== GLOBAL STYLES ==================== */
-.contact-page {
-    background: white;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-}
+  .contact-page {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--contact-text);
+    background: var(--contact-bg);
+  }
 
-.eyebrow {
-    display: inline-flex;
-    padding: 8px 18px;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(168, 85, 247, 0.08));
-    color: var(--primary-dark);
+  .contact-container {
+    max-width: 880px;
+    margin: 0 auto;
+    padding: 0 24px;
+    width: 100%;
+  }
+
+  /* Hero */
+  .contact-hero {
+    padding: 36px 0 32px;
+    text-align: center;
+  }
+
+  .contact-badge {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--contact-accent);
+    background: var(--contact-accent-light);
+    padding: 4px 12px;
     border-radius: 100px;
-    font-size: 13px;
-    font-weight: 800;
-    letter-spacing: 0.5px;
+    margin-bottom: 14px;
+    letter-spacing: 0.04em;
     text-transform: uppercase;
-    margin-bottom: 24px;
-    border: 1px solid rgba(99, 102, 241, 0.15);
-}
+  }
 
-/* ==================== HERO SECTION ==================== */
-.page-hero {
-    padding: 50px 0 40px;
+  .contact-hero h1 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin: 0 0 8px;
+    line-height: 1.2;
+  }
+
+  .contact-hero .lead {
+    font-size: 0.95rem;
+    color: var(--contact-text-secondary);
+    margin: 0 auto;
+    max-width: 440px;
+    line-height: 1.5;
+  }
+
+  /* Main Card */
+  .contact-wrapper {
+    background: #fff;
+    border-radius: 24px;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.04), 0 20px 60px -20px rgba(0,0,0,0.1);
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    margin-bottom: 48px;
+  }
+
+  /* Left Panel */
+  .contact-info-panel {
+    background: linear-gradient(160deg, #1e1b4b 0%, #312e81 40%, #4338ca 100%);
+    padding: 40px 32px;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     position: relative;
     overflow: hidden;
-    background: radial-gradient(circle at 80% 20%, rgba(238, 242, 255, 0.8) 0%, rgba(255, 255, 255, 1) 70%);
-}
+  }
 
-.page-hero::before {
+  .contact-info-panel::before {
     content: '';
     position: absolute;
-    top: -150px;
-    right: -150px;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(99, 102, 241, 0.04) 0%, transparent 70%);
+    top: -60px;
+    right: -60px;
+    width: 200px;
+    height: 200px;
+    background: rgba(255,255,255,0.06);
     border-radius: 50%;
-    z-index: 0;
-}
+  }
 
-.page-hero .container {
-    position: relative;
-    z-index: 1;
-}
-
-.page-hero h1 {
-    font-size: 48px;
-    font-weight: 850;
-    letter-spacing: -0.02em;
-    background: linear-gradient(135deg, #0F172A 0%, #4338CA 80%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 20px;
-}
-
-.page-hero .lead {
-    font-size: 18px;
-    color: var(--text-secondary);
-    line-height: 1.7;
-    font-weight: 450;
-}
-
-/* ==================== CONTACT FORM CARD ==================== */
-.contact-form-card {
-    background: rgba(255, 255, 255, 0.8);
-    backdrop-filter: blur(20px);
-    border-radius: var(--radius-xl);
-    box-shadow: var(--shadow-xl);
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    padding: 48px;
-    transition: transform 0.3s ease;
-}
-
-.contact-form-card:hover {
-    transform: translateY(-4px);
-}
-
-.contact-form-card h2 {
-    font-size: 28px;
-    font-weight: 800;
-    color: var(--text);
-    margin-bottom: 8px;
-    letter-spacing: -0.01em;
-}
-
-.form-label {
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 8px;
-    font-size: 14px;
-    letter-spacing: 0.2px;
-}
-
-.form-control, .form-select {
-    border: 1.5px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 14px 18px;
-    font-size: 15px;
-    color: var(--text);
-    transition: all 0.2s ease;
-    background: white;
-}
-
-.form-control:focus, .form-select:focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
-    outline: none;
-}
-
-.form-control::placeholder {
-    color: var(--text-muted);
-}
-
-/* ==================== BUTTONS ==================== */
-.btn-primary-contact {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 16px 32px;
-    background: linear-gradient(135deg, var(--primary), #8B5CF6);
-    color: white;
-    border: none;
-    border-radius: var(--radius-md);
-    font-size: 16px;
-    font-weight: 700;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    box-shadow: 0 8px 20px -8px rgba(99, 102, 241, 0.4);
-    position: relative;
-    overflow: hidden;
-    z-index: 1;
-    width: 100%;
-    letter-spacing: 0.2px;
-}
-
-.btn-primary-contact::before {
+  .contact-info-panel::after {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #8B5CF6, var(--primary));
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    z-index: -1;
-}
+    bottom: -40px;
+    left: -40px;
+    width: 160px;
+    height: 160px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 50%;
+  }
 
-.btn-primary-contact:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 14px 28px -6px rgba(99, 102, 241, 0.5);
-    color: white;
-}
+  .contact-info-content {
+    position: relative;
+    z-index: 1;
+  }
 
-.btn-primary-contact:hover::before {
-    opacity: 1;
-}
+  .contact-info-panel .badge {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.15);
+    padding: 5px 14px;
+    border-radius: 100px;
+    margin-bottom: 20px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    backdrop-filter: blur(4px);
+  }
 
-.btn-primary-contact:disabled {
-    opacity: 0.8;
-    transform: none;
-    box-shadow: 0 4px 10px -4px rgba(99, 102, 241, 0.3);
-}
+  .contact-info-panel h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin: 0 0 10px;
+    line-height: 1.25;
+  }
 
-/* ==================== INFO SIDEBAR ==================== */
-.info-card {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(12px);
-    border-radius: var(--radius-lg);
-    padding: 28px;
-    border: 1px solid var(--border-light);
-    transition: all 0.3s ease;
-}
+  .contact-info-panel .info-subtitle {
+    font-size: 0.88rem;
+    opacity: 0.75;
+    line-height: 1.6;
+    margin: 0 0 32px;
+  }
 
-.info-card:hover {
-    box-shadow: var(--shadow-lg);
-    border-color: rgba(99, 102, 241, 0.2);
-}
+  .contact-info-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    font-size: 0.88rem;
+  }
 
-.icon-box {
-    width: 52px;
-    height: 52px;
+  .contact-info-item .icon-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.12);
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: var(--radius-sm);
-    background: linear-gradient(135deg, var(--primary-light), white);
-    color: var(--primary);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
     flex-shrink: 0;
-}
+  }
 
-.icon-box-accent {
-    background: linear-gradient(135deg, #F3E8FF, white);
-    color: #7C3AED;
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
-}
+  .contact-info-item span {
+    opacity: 0.9;
+  }
 
-.enterprise-demo-card {
-    background: linear-gradient(135deg, #1E1B4B, #312E81, #4338CA);
-    border-radius: var(--radius-xl);
-    padding: 32px;
-    color: white;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 20px 40px -10px rgba(79, 70, 229, 0.4);
-}
+  /* Right Panel - Form */
+  .contact-form-panel {
+    padding: 40px 36px;
+  }
 
-.enterprise-demo-card::before {
-    content: '';
-    position: absolute;
-    top: -40px;
-    right: -40px;
-    width: 200px;
-    height: 200px;
-    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-    border-radius: 50%;
-}
-
-.enterprise-demo-card h4 {
-    font-weight: 800;
-    position: relative;
-    z-index: 1;
-}
-
-.enterprise-demo-card p {
-    opacity: 0.8;
-    position: relative;
-    z-index: 1;
-}
-
-.btn-outline-white-contact {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 14px 28px;
-    background: transparent;
-    color: white;
-    border: 1.5px solid rgba(255, 255, 255, 0.5);
-    border-radius: var(--radius-md);
-    font-size: 15px;
+  .contact-form-panel h3 {
+    font-size: 1.4rem;
     font-weight: 700;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(4px);
-    position: relative;
-    z-index: 1;
+    letter-spacing: -0.02em;
+    margin: 0 0 4px;
+  }
+
+  .contact-form-panel .form-subtitle {
+    font-size: 0.85rem;
+    color: var(--contact-text-secondary);
+    margin-bottom: 24px;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .form-group {
+    margin-bottom: 12px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--contact-text);
+    margin-bottom: 5px;
+    letter-spacing: -0.01em;
+  }
+
+  .form-group input,
+  .form-group select,
+  .form-group textarea {
     width: 100%;
-    letter-spacing: 0.2px;
-}
+    padding: 11px 14px;
+    border: 1.5px solid #e8ecf1;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    color: var(--contact-text);
+    background: #fafbfc;
+    transition: all 0.2s;
+    outline: none;
+  }
 
-.btn-outline-white-contact:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.8);
-    color: white;
-    transform: translateY(-2px);
-}
+  .form-group input:focus,
+  .form-group select:focus,
+  .form-group textarea:focus {
+    border-color: var(--contact-accent);
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.06);
+  }
 
-.social-links a {
+  .form-group input::placeholder,
+  .form-group textarea::placeholder {
+    color: #b0b8c1;
+  }
+
+  .form-group select {
+    appearance: none;
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%2394a3b8" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 36px;
+    cursor: pointer;
+  }
+
+  .form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .form-group .error-text {
+    font-size: 0.75rem;
+    color: #ef4444;
+    margin-top: 4px;
+  }
+
+  .form-group input.error,
+  .form-group select.error,
+  .form-group textarea.error {
+    border-color: #ef4444;
+  }
+
+  .submit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 4px;
+  }
+
+  .submit-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 44px;
-    height: 44px;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-sm);
-    color: var(--text-secondary);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    border: 1px solid var(--border-light);
-}
+    gap: 8px;
+    padding: 12px 28px;
+    background: var(--contact-accent);
+    color: #fff;
+    border: none;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.25s;
+    font-family: inherit;
+    box-shadow: 0 4px 14px rgba(99, 102, 241, 0.3);
+    white-space: nowrap;
+  }
 
-.social-links a:hover {
-    background: var(--primary-light);
-    color: var(--primary);
-    border-color: var(--primary);
-    transform: translateY(-2px);
-}
+  .submit-btn:hover {
+    background: #4f46e5;
+    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    transform: translateY(-1px);
+  }
 
-/* ==================== ALERT ==================== */
-.alert-success-custom {
-    background: #ECFDF5;
-    border: 1px solid #A7F3D0;
-    color: #065F46;
-    border-radius: var(--radius-md);
-    padding: 16px 20px;
+  .submit-btn:disabled {
+    opacity: 0.7;
+    transform: none;
+    cursor: not-allowed;
+  }
+
+  .response-time {
+    font-size: 0.8rem;
+    color: var(--contact-text-secondary);
+  }
+
+  /* Alerts */
+  .alert {
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    margin-bottom: 16px;
     font-weight: 500;
-}
+  }
 
-.alert-error-custom {
-    background: #FEF2F2;
-    border: 1px solid #FECACA;
-    color: #991B1B;
-    border-radius: var(--radius-md);
-    padding: 16px 20px;
-    font-weight: 500;
-}
+  .alert-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+  }
 
-.success-popup-backdrop {
+  .alert-success {
+    background: #f0fdf4;
+    color: #166534;
+    border: 1px solid #bbf7d0;
+  }
+
+  /* Success Popup */
+  .popup-backdrop {
     position: fixed;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
-    background: rgba(15, 23, 42, 0.42);
+    background: rgba(15, 23, 42, 0.5);
     backdrop-filter: blur(6px);
     z-index: 1080;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.24s ease, visibility 0.24s ease;
-}
+    transition: all 0.2s;
+  }
 
-.success-popup-backdrop.show {
+  .popup-backdrop.show {
     opacity: 1;
     visibility: visible;
-}
+  }
 
-.success-popup {
-    width: min(440px, 100%);
-    background: #FFFFFF;
-    border-radius: 24px;
-    padding: 34px 30px 30px;
+  .popup {
+    width: min(400px, 90%);
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px 28px;
     text-align: center;
-    box-shadow: 0 30px 80px rgba(15, 23, 42, 0.24);
-    border: 1px solid rgba(255, 255, 255, 0.7);
-    transform: translateY(16px) scale(0.96);
-    transition: transform 0.24s ease;
-}
+    box-shadow: 0 30px 60px rgba(0,0,0,0.2);
+    transform: translateY(10px);
+    transition: transform 0.2s;
+  }
 
-.success-popup-backdrop.show .success-popup {
-    transform: translateY(0) scale(1);
-}
+  .popup-backdrop.show .popup {
+    transform: translateY(0);
+  }
 
-.success-popup-icon {
-    width: 70px;
-    height: 70px;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
+  .popup-icon {
+    width: 60px;
+    height: 60px;
+    background: #f0fdf4;
     border-radius: 50%;
-    color: #047857;
-    background: linear-gradient(135deg, #D1FAE5, #ECFDF5);
-    box-shadow: 0 16px 32px rgba(16, 185, 129, 0.18);
-    margin-bottom: 20px;
-}
-
-.success-popup h3 {
-    color: var(--text);
-    font-size: 24px;
-    font-weight: 850;
-    margin-bottom: 10px;
-}
-
-.success-popup p {
-    color: var(--text-secondary);
-    font-size: 15px;
-    line-height: 1.65;
-    margin-bottom: 24px;
-}
-
-.success-popup-close {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 46px;
-    padding: 12px 24px;
-    border: 0;
-    border-radius: var(--radius-md);
-    background: linear-gradient(135deg, var(--primary), #8B5CF6);
-    color: #FFFFFF;
-    font-weight: 800;
+    color: #16a34a;
+    margin-bottom: 16px;
+  }
+
+  .popup h3 {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+
+  .popup p {
+    font-size: 0.88rem;
+    color: var(--contact-text-secondary);
+    margin: 0 0 20px;
+    line-height: 1.5;
+  }
+
+  .popup-close {
+    padding: 10px 26px;
+    border: none;
+    border-radius: 100px;
+    background: var(--contact-accent);
+    color: #fff;
+    font-weight: 600;
+    font-size: 0.88rem;
     cursor: pointer;
-    box-shadow: 0 12px 24px rgba(99, 102, 241, 0.24);
-}
+    font-family: inherit;
+  }
 
-.success-popup-close:hover {
-    background: linear-gradient(135deg, #4F46E5, #7C3AED);
-}
-
-/* ==================== ANIMATIONS ==================== */
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-.fade-in { animation: fadeIn 0.8s ease forwards; }
-.fade-up { opacity: 0; animation: fadeUp 0.8s ease forwards; }
-
-/* ==================== RESPONSIVE ==================== */
-@media (max-width: 992px) {
-    .contact-form-card { padding: 32px 24px; }
-    .page-hero h1 { font-size: 36px; }
-    .page-hero .lead { font-size: 16px; }
-    .info-card { padding: 20px; }
-    .enterprise-demo-card { padding: 24px; }
-}
-
-@media (max-width: 768px) {
-    .page-hero { padding: 40px 0 30px; }
-    .page-hero h1 { font-size: 32px; }
-    .page-hero .lead { font-size: 15px; }
-    .eyebrow { font-size: 12px; padding: 6px 14px; margin-bottom: 16px; }
-
-    .section { padding: 40px 0 60px !important; }
-    .row.g-5 { gap: 2rem !important; }
-    .contact-form-card { padding: 24px 20px; }
-    .contact-form-card h2 { font-size: 22px; }
-    .contact-form-card .text-muted { font-size: 14px !important; }
-    .form-control, .form-select { padding: 12px 14px; font-size: 14px; }
-    .field.mb-4 { margin-bottom: 1rem !important; }
-
-    .info-card { padding: 16px; }
-    .info-card h5 { font-size: 15px !important; }
-    .info-card p { font-size: 14px !important; }
-    .icon-box { width: 44px; height: 44px; }
-    .icon-box svg { width: 18px; height: 18px; }
-
-    .enterprise-demo-card { padding: 24px 20px; }
-    .enterprise-demo-card h4 { font-size: 18px; }
-    .enterprise-demo-card p { font-size: 13px !important; }
-    .enterprise-demo-card .btn { font-size: 14px; padding: 10px 20px; }
-
-    .social-links a { width: 40px; height: 40px; }
-
-    .success-popup { padding: 28px 20px 22px; border-radius: 16px; }
-    .success-popup h3 { font-size: 20px; }
-    .success-popup p { font-size: 14px; }
-    .success-popup-icon { width: 56px; height: 56px; }
-    .success-popup-icon svg { width: 28px; height: 28px; }
-}
-
-@media (max-width: 576px) {
-    .page-hero { padding: 30px 0 24px; }
-    .page-hero h1 { font-size: 26px; }
-    .page-hero .lead { font-size: 14px; }
-
-    .section { padding: 28px 0 48px !important; }
-    .contact-form-card { padding: 20px 16px; border-radius: 20px; }
-    .contact-form-card h2 { font-size: 20px; }
-    .contact-form-card .row.g-3 { --bs-gutter-y: 0; }
-    .contact-form-card .field { margin-bottom: 0.75rem !important; }
-    .btn-primary-contact { padding: 14px 24px; font-size: 15px; }
-
-    .info-card { border-radius: 14px; }
-    .enterprise-demo-card { border-radius: 20px; }
-    .social-links { justify-content: center; }
-
-    .success-popup { padding: 24px 18px 20px; border-radius: 14px; }
-    .success-popup h3 { font-size: 18px; }
-    .success-popup p { font-size: 13px; }
-    .success-popup-icon { width: 48px; height: 48px; }
-    .success-popup-icon svg { width: 24px; height: 24px; }
-    .success-popup-close { font-size: 14px; padding: 10px 20px; min-height: 40px; }
-}
+  @media (max-width: 768px) {
+    .contact-hero h1 {
+      font-size: 1.8rem;
+    }
+    .contact-wrapper {
+      grid-template-columns: 1fr;
+    }
+    .contact-info-panel {
+      padding: 28px 24px;
+    }
+    .contact-form-panel {
+      padding: 28px 24px;
+    }
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+    .submit-row {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+  }
 </style>
-@endsection
 
-@section('content')
 <div class="contact-page">
-    <!-- Hero Section -->
-    <section class="page-hero">
-        <div class="container text-center py-3">
-            <span class="eyebrow fade-in">Get in Touch</span>
-            <h1 class="fade-up">Contact Our Team</h1>
-        </div>
-    </section>
-
-    <section class="section" style="padding: 60px 0 100px;">
-        <div class="container">
-            <div class="row g-5">
-                <!-- Contact Form -->
-                <div class="col-lg-7">
-                    <div class="contact-form-card">
-                        <form id="enterpriseContactForm" class="contact-form" method="POST" action="{{ route('enterprise.contact.send') }}">
-                            @csrf
-                            <h2 class="mb-2">Send us a message</h2>
-                            <p class="text-muted mb-4" style="font-size: 15px;">Fill out the form below and we'll get back to you within 24 hours.</p>
-
-                            @if ($errors->any())
-                                <div class="alert-error-custom mb-4">
-                                    Please check the form and try again.
-                                </div>
-                            @endif
-
-                            @if (session('enterprise_contact_error'))
-                                <div class="alert-error-custom mb-4">
-                                    {{ session('enterprise_contact_error') }}
-                                </div>
-                            @endif
-                            
-                            <div class="row g-3">
-                                <div class="col-md-6">
-                                    <div class="field mb-3">
-                                        <label for="name" class="form-label">Full Name</label>
-                                        <input type="text" id="name" name="name" class="form-control @error('name') is-invalid @enderror" value="{{ old('name') }}" placeholder="John Doe" required>
-                                        @error('name')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="field mb-3">
-                                        <label for="email" class="form-label">Work Email</label>
-                                        <input type="email" id="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email') }}" placeholder="john@company.com" required>
-                                        @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="field mb-3">
-                                        <label for="subject" class="form-label">Subject</label>
-                                        <select id="subject" name="subject" class="form-select @error('subject') is-invalid @enderror" required>
-                                            <option value="enterprise" @selected(old('subject') === 'enterprise')>Enterprise Solutions</option>
-                                            <option value="support" @selected(old('subject') === 'support')>Technical Support</option>
-                                            <option value="partnership" @selected(old('subject') === 'partnership')>Partnership Inquiry</option>
-                                            <option value="other" @selected(old('subject') === 'other')>Other</option>
-                                        </select>
-                                        @error('subject')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                    </div>
-                                </div>
-                                <div class="col-md-12">
-                                    <div class="field mb-4">
-                                        <label for="message" class="form-label">Message</label>
-                                        <textarea id="message" name="message" class="form-control @error('message') is-invalid @enderror" rows="5" placeholder="Tell us how we can help..." required>{{ old('message') }}</textarea>
-                                        @error('message')<div class="invalid-feedback">{{ $message }}</div>@enderror
-                                    </div>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn-primary-contact">
-                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                </svg>
-                                Send Message
-                            </button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Contact Info & Sidebar -->
-                <div class="col-lg-5">
-                    <div class="ps-lg-3">
-                        <div class="mb-5">
-                            <h3 class="fw-800 mb-4" style="font-size: 22px;">Direct Contact</h3>
-                            
-                            <div class="info-card mb-4 d-flex align-items-start gap-3">
-                                <div class="icon-box">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                                        <polyline points="22,6 12,13 2,6"></polyline>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h5 class="fw-700 mb-1" style="font-size: 16px;">Email Us</h5>
-                                    <p class="text-muted mb-0" style="font-size: 15px;">hello@Daleel.ai</p>
-                                    <p class="text-muted" style="font-size: 13px;">Response time: < 24 hours</p>
-                                </div>
-                            </div>
-                            
-                            <div class="info-card d-flex align-items-start gap-3">
-                                <div class="icon-box icon-box-accent">
-                                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h5 class="fw-700 mb-1" style="font-size: 16px;">Live Support</h5>
-                                    <p class="text-muted mb-0" style="font-size: 15px;">Available for Enterprise customers</p>
-                                    <p class="text-muted" style="font-size: 13px;">Mon-Fri, 9am - 6pm EST</p>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="enterprise-demo-card mb-5">
-                            <h4 class="mb-3">Enterprise Demo</h4>
-                            <p class="small mb-4" style="font-size: 14px; line-height: 1.6;">Looking for a customized walk-through of our platform for your team? Schedule a dedicated demo session with our specialists.</p>
-                            <a href="{{ route('register') }}" class="btn btn-primary btn-xl">
-                                <span>Get Started Free</span>
-                                <i class="bi bi-arrow-right"></i>
-                            </a>                        </div>
-
-                        <div>
-                            <h4 class="fw-800 mb-3" style="font-size: 18px;">Follow Us</h4>
-                            <div class="social-links d-flex gap-3">
-                                <a href="#" title="LinkedIn">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path>
-                                        <rect x="2" y="9" width="4" height="12"></rect>
-                                        <circle cx="4" cy="4" r="2"></circle>
-                                    </svg>
-                                </a>
-                                <a href="#" title="Twitter / X">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path>
-                                    </svg>
-                                </a>
-                                <a href="#" title="YouTube">
-                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"></path>
-                                    </svg>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <div id="successPopup" class="success-popup-backdrop {{ session('enterprise_contact_success') ? 'show' : '' }}" role="dialog" aria-modal="true" aria-labelledby="successPopupTitle">
-        <div class="success-popup">
-            <div class="success-popup-icon" aria-hidden="true">
-                <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
-            </div>
-            <h3 id="successPopupTitle">Message Sent Successfully</h3>
-            <p>Thank you for reaching out. Your email has been sent to our team, and we will get back to you shortly.</p>
-            <button type="button" class="success-popup-close" id="successPopupClose">Great, thanks</button>
-        </div>
+  {{-- Hero --}}
+  <section class="contact-hero">
+    <div class="contact-container">
+      <span class="contact-badge">Get in Touch</span>
+      <h1>Contact Our Team</h1>
+      <p class="lead">We're here to help with any questions about Daleel AI.</p>
     </div>
+  </section>
+
+  {{-- Form Card --}}
+  <div class="contact-container">
+    <div class="contact-wrapper">
+      
+      {{-- Left Info Panel --}}
+      <div class="contact-info-panel">
+        <div class="contact-info-content">
+          <span class="badge">Contact</span>
+          <h2>Let's talk</h2>
+          <p class="info-subtitle">Fill in the form and we'll get back to you within 24 hours.</p>
+          
+          <div class="contact-info-item">
+            <div class="icon-circle">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            </div>
+            <span>noreply@daleelmentor.com</span>
+          </div>
+          
+          <div class="contact-info-item">
+            <div class="icon-circle">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <span>Response within 24h</span>
+          </div>
+        </div>
+      </div>
+
+      {{-- Right Form Panel --}}
+      <div class="contact-form-panel">
+        <h3>Send a message</h3>
+        <p class="form-subtitle">We'll reply as quickly as possible.</p>
+
+        @if ($errors->any())
+          <div class="alert alert-error">Please check the form and try again.</div>
+        @endif
+        @if (session('enterprise_contact_error'))
+          <div class="alert alert-error">{{ session('enterprise_contact_error') }}</div>
+        @endif
+        @if (session('enterprise_contact_success'))
+          <div class="alert alert-success">Message sent! We'll be in touch shortly.</div>
+        @endif
+
+        <form id="enterpriseContactForm" method="POST" action="{{ route('enterprise.contact.send') }}">
+          @csrf
+          
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Full Name</label>
+              <input type="text" id="name" name="name" class="@error('name') error @enderror" value="{{ old('name') }}" placeholder="John Doe" required>
+              @error('name')<div class="error-text">{{ $message }}</div>@enderror
+            </div>
+            <div class="form-group">
+              <label for="email">Work Email</label>
+              <input type="email" id="email" name="email" class="@error('email') error @enderror" value="{{ old('email') }}" placeholder="john@company.com" required>
+              @error('email')<div class="error-text">{{ $message }}</div>@enderror
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="subject">Subject</label>
+            <select id="subject" name="subject" class="@error('subject') error @enderror" required>
+              <option value="enterprise" @selected(old('subject') === 'enterprise')>Enterprise Solutions</option>
+              <option value="support" @selected(old('subject') === 'support')>Technical Support</option>
+              <option value="partnership" @selected(old('subject') === 'partnership')>Partnership Inquiry</option>
+              <option value="other" @selected(old('subject') === 'other')>Other</option>
+            </select>
+            @error('subject')<div class="error-text">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="form-group">
+            <label for="message">Message</label>
+            <textarea id="message" name="message" class="@error('message') error @enderror" rows="3" placeholder="Tell us how we can help..." required>{{ old('message') }}</textarea>
+            @error('message')<div class="error-text">{{ $message }}</div>@enderror
+          </div>
+
+          <div class="submit-row">
+            <span class="response-time">We respond within 24 hours</span>
+            <button type="submit" class="submit-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              Send Message
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {{-- Success Popup --}}
+  <div id="successPopup" class="popup-backdrop {{ session('enterprise_contact_success') ? 'show' : '' }}">
+    <div class="popup">
+      <div class="popup-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <h3>Message Sent</h3>
+      <p>Thanks for reaching out. We'll get back to you shortly.</p>
+      <button class="popup-close" id="successPopupClose">Got it</button>
+    </div>
+  </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('enterpriseContactForm');
     const popup = document.getElementById('successPopup');
-    const popupClose = document.getElementById('successPopupClose');
+    const closeBtn = document.getElementById('successPopupClose');
 
-    function closeSuccessPopup() {
-        if (popup) {
-            popup.classList.remove('show');
-        }
-    }
-    
-    if (form) {
-        form.addEventListener('submit', function(e) {
-            const btn = form.querySelector('button[type="submit"]');
-            
-            btn.disabled = true;
-            btn.innerHTML = `
-                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" style="width: 18px; height: 18px;"></span>
-                <span class="ms-2">Sending...</span>
-            `;
-        });
-    }
+    function closePopup() { popup?.classList.remove('show'); }
 
-    if (popupClose) {
-        popupClose.addEventListener('click', closeSuccessPopup);
-    }
-
-    if (popup) {
-        popup.addEventListener('click', function(e) {
-            if (e.target === popup) {
-                closeSuccessPopup();
-            }
-        });
-    }
-
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeSuccessPopup();
-        }
+    form?.addEventListener('submit', function() {
+      const btn = form.querySelector('.submit-btn');
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = 'Sending...';
+      }
     });
-});
+
+    closeBtn?.addEventListener('click', closePopup);
+    popup?.addEventListener('click', function(e) { if (e.target === popup) closePopup(); });
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closePopup(); });
+  });
 </script>
 @endsection

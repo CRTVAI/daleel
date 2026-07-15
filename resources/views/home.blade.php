@@ -8,9 +8,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
 
+<!-- ==================== GO TO TOP BUTTON ==================== -->
+<button id="goToTopBtn" class="go-to-top-btn" aria-label="Go to top">
+  <i class="bi bi-chevron-up"></i>
+</button>
+
 <!-- ==================== HERO SECTION ==================== -->
 <section class="hero-section" id="hero">
-  <!-- Background Pattern -->
   <div class="hero-bg-pattern"></div>
   
   <div class="container">
@@ -110,8 +114,8 @@
               <div class="ai-badge">
                 <i class="bi bi-magic"></i> AI Recommendation
               </div>
-              <h3>Automate Weekly Status Reports</h3>
-              <p>We detected you manually compile reports from Sheets & Gmail every Friday. Let AI handle this in seconds.</p>
+              <h3>Automate learning path create</h3>
+              <p>We detected you manually your computer and browser. And create a roadmap for you.</p>
               
               <div class="ai-card-footer">
                 <div class="time-badge">
@@ -168,12 +172,8 @@
   </div>
 </section>
 
-<!-- ==================== TRUSTED BY SECTION ==================== -->
-
-
 <!-- ==================== HOW IT WORKS SECTION ==================== -->
 <section class="how-section" id="how-it-works">
-  <!-- Section Divider -->
   <div class="section-divider">
     <div class="divider-line"></div>
     <div class="divider-icon">
@@ -196,7 +196,7 @@
       <!-- Step 1 -->
       <div class="step-card" data-aos="fade-up">
         <div class="step-illustration">
-          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80" alt="Intelligent Mapping" class="step-image">
+          <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=400&q=80" alt="Intelligent Mapping" class="step-image">
           <div class="step-number-badge">01</div>
         </div>
         <div class="step-content">
@@ -216,7 +216,7 @@
       <!-- Step 2 -->
       <div class="step-card" data-aos="fade-up" data-aos-delay="100">
         <div class="step-illustration">
-          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80" alt="Surgical Lessons" class="step-image">
+          <img src="https://images.unsplash.com/photo-1655720828018-edd2daec9349?auto=format&fit=crop&w=400&q=80" alt="Surgical Lessons" class="step-image">
           <div class="step-number-badge">02</div>
         </div>
         <div class="step-content">
@@ -236,7 +236,7 @@
       <!-- Step 3 -->
       <div class="step-card" data-aos="fade-up" data-aos-delay="200">
         <div class="step-illustration">
-          <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=400&q=80" alt="Impact Measurement" class="step-image">
+          <img src="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?auto=format&fit=crop&w=400&q=80" alt="Impact Measurement" class="step-image">
           <div class="step-number-badge">03</div>
         </div>
         <div class="step-content">
@@ -351,7 +351,6 @@
   </div>
 </section>
 
-
 <!-- ==================== FEATURES SHOWCASE SECTION ==================== -->
 <section class="features-showcase" id="features">
   <div class="container">
@@ -440,65 +439,71 @@
     </div>
     
     <div class="video-grid">
-      <div class="video-card-large">
-        <div class="video-thumbnail">
-          <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&w=600&q=80" alt="Daily Productivity">
-          <div class="play-button">
-            <i class="bi bi-play-fill"></i>
+      <a href="{{ url('learn/152') }}" class="video-card-link">
+        <div class="video-card-large">
+          <div class="video-thumbnail">
+            <img src="http://daleelmentor.com/storage/thumbnails/using-google-gemini-ai-effectively-1783078504.jpeg" alt="Using Google Gemini AI Effectively">
+            <div class="play-button">
+              <i class="bi bi-play-fill"></i>
+            </div>
+            <div class="duration-badge">1:30</div>
           </div>
-          <div class="duration-badge">14:22</div>
-        </div>
-        <div class="video-details">
-          <div class="video-category">Productivity</div>
-          <h4>Automate Daily Reports with AI</h4>
-          <p>Learn how to set up automated report generation using ChatGPT and Google Sheets integration.</p>
-          <div class="video-meta">
-            <span><i class="bi bi-eye"></i> 2.4K views</span>
-            <span><i class="bi bi-clock"></i> 14 min</span>
-            <span class="level beginner">Beginner</span>
+          <div class="video-details">
+            <div class="video-category">Productivity Software</div>
+            <h4>Using Google Gemini AI Effectively</h4>
+            <p>Master Google Gemini for writing, analyzing, and organizing tasks in Gmail, Docs, and Sheets.</p>
+            <div class="video-meta">
+              <span><i class="bi bi-eye"></i> 1.2K views</span>
+              <span><i class="bi bi-clock"></i> 1 min</span>
+              <span class="level beginner">Beginner</span>
+            </div>
           </div>
         </div>
-      </div>
+      </a>
       
-      <div class="video-card-large">
-        <div class="video-thumbnail">
-          <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=600&q=80" alt="Customer Support">
-          <div class="play-button">
-            <i class="bi bi-play-fill"></i>
+      <a href="{{ url('learn/140') }}" class="video-card-link">
+        <div class="video-card-large">
+          <div class="video-thumbnail">
+            <img src="http://daleelmentor.com/storage/thumbnails/gmail-ai-features-with-gemini-1783077804.jpeg" alt="Gmail AI Features with Gemini">
+            <div class="play-button">
+              <i class="bi bi-play-fill"></i>
+            </div>
+            <div class="duration-badge">0:33</div>
           </div>
-          <div class="duration-badge">18:45</div>
-        </div>
-        <div class="video-details">
-          <div class="video-category">Support</div>
-          <h4>AI-Powered Customer Response System</h4>
-          <p>Build an intelligent support system that handles common queries automatically.</p>
-          <div class="video-meta">
-            <span><i class="bi bi-eye"></i> 1.8K views</span>
-            <span><i class="bi bi-clock"></i> 18 min</span>
-            <span class="level intermediate">Intermediate</span>
+          <div class="video-details">
+            <div class="video-category">Email Communication</div>
+            <h4>Gmail AI Features with Gemini</h4>
+            <p>Discover how Gemini enhances Gmail with AI summaries, tone-matching replies, and smart inbox tools.</p>
+            <div class="video-meta">
+              <span><i class="bi bi-eye"></i> 980 views</span>
+              <span><i class="bi bi-clock"></i> 33 sec</span>
+              <span class="level beginner">Beginner</span>
+            </div>
           </div>
         </div>
-      </div>
+      </a>
       
-      <div class="video-card-large">
-        <div class="video-thumbnail">
-          <img src="https://images.unsplash.com/photo-1557838923-2985c318be48?auto=format&fit=crop&w=600&q=80" alt="Marketing">
-          <div class="play-button">
-            <i class="bi bi-play-fill"></i>
+      <a href="{{ url('learn/156') }}" class="video-card-link">
+        <div class="video-card-large">
+          <div class="video-thumbnail">
+            <img src="http://daleelmentor.com/storage/thumbnails/use-google-gemini-ai-for-creativity-1783078505.jpeg" alt="Use Google Gemini AI for Creativity">
+            <div class="play-button">
+              <i class="bi bi-play-fill"></i>
+            </div>
+            <div class="duration-badge">0:52</div>
           </div>
-          <div class="duration-badge">22:10</div>
-        </div>
-        <div class="video-details">
-          <div class="video-category">Marketing</div>
-          <h4>Prompt Engineering for Campaigns</h4>
-          <p>Master the art of writing prompts that generate high-converting marketing copy.</p>
-          <div class="video-meta">
-            <span><i class="bi bi-eye"></i> 3.1K views</span>
-            <span><i class="bi bi-clock"></i> 22 min</span>
-            <span class="level advanced">Advanced</span>
+          <div class="video-details">
+            <div class="video-category">Productivity Tools</div>
+            <h4>Use Google Gemini AI for Creativity</h4>
+            <p>Unlock Gemini's creative power — generate AI images, video, and music directly from your browser.</p>
+            <div class="video-meta">
+              <span><i class="bi bi-eye"></i> 1.5K views</span>
+              <span><i class="bi bi-clock"></i> 52 sec</span>
+              <span class="level beginner">Beginner</span>
+            </div>
           </div>
         </div>
-      </div>
+      </a>
     </div>
   </div>
 </section>
@@ -622,12 +627,18 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+  overflow-y: scroll !important;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   color: var(--text);
   background: var(--bg);
   -webkit-font-smoothing: antialiased;
   line-height: 1.6;
+  overflow-x: hidden;
 }
 
 .container {
@@ -643,10 +654,54 @@ body {
   background-clip: text;
 }
 
+/* ==================== GO TO TOP BUTTON ==================== */
+.go-to-top-btn {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 48px;
+  height: 48px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 24px;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  transition: all 0.3s ease;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(20px);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.go-to-top-btn.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.go-to-top-btn:hover {
+  background: var(--primary-dark);
+  transform: translateY(-4px) scale(1.05);
+  box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+}
+
+.go-to-top-btn:active {
+  transform: scale(0.95);
+}
+
+.go-to-top-btn i {
+  line-height: 1;
+}
+
 /* ==================== HERO SECTION ==================== */
 .hero-section {
   position: relative;
-  padding: 100px 0 0;
+  padding: 80px 0 0;
   background: linear-gradient(180deg, #FAFBFC 0%, #FFFFFF 30%);
   overflow: hidden;
 }
@@ -664,10 +719,11 @@ body {
 .hero-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 80px;
+  gap: 60px;
   align-items: center;
   position: relative;
   z-index: 1;
+  padding: 20px 0 60px;
 }
 
 /* Hero Content */
@@ -682,7 +738,7 @@ body {
   font-size: 14px;
   font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 32px;
+  margin-bottom: 28px;
   box-shadow: var(--shadow-sm);
 }
 
@@ -700,26 +756,27 @@ body {
 }
 
 .hero-title {
-  font-size: 56px;
+  font-size: 52px;
   font-weight: 900;
   line-height: 1.1;
   letter-spacing: -0.02em;
   color: var(--text);
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .hero-description {
   font-size: 18px;
   line-height: 1.7;
   color: var(--text-secondary);
-  margin-bottom: 40px;
+  margin-bottom: 36px;
   max-width: 520px;
 }
 
 .hero-buttons {
   display: flex;
   gap: 16px;
-  margin-bottom: 56px;
+  margin-bottom: 48px;
+  flex-wrap: wrap;
 }
 
 /* Buttons */
@@ -740,7 +797,7 @@ body {
   background: var(--primary);
   color: white;
   border: none;
-  padding: 16px 32px;
+  padding: 14px 28px;
 }
 
 .btn-primary:hover {
@@ -754,7 +811,7 @@ body {
   background: white;
   color: var(--text);
   border: 1.5px solid var(--border);
-  padding: 16px 32px;
+  padding: 14px 28px;
 }
 
 .btn-outline:hover {
@@ -765,12 +822,12 @@ body {
 }
 
 .btn-lg {
-  padding: 16px 32px;
+  padding: 14px 28px;
   font-size: 16px;
 }
 
 .btn-xl {
-  padding: 20px 40px;
+  padding: 18px 36px;
   font-size: 18px;
   border-radius: var(--radius-lg);
 }
@@ -778,14 +835,15 @@ body {
 /* Hero Stats */
 .hero-stats {
   display: flex;
-  gap: 24px;
+  gap: 20px;
+  flex-wrap: wrap;
 }
 
 .stat-card {
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 16px 20px;
+  gap: 12px;
+  padding: 14px 18px;
   background: white;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
@@ -793,19 +851,20 @@ body {
 }
 
 .stat-icon-wrapper {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   background: var(--primary-light);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--primary);
-  font-size: 20px;
+  font-size: 18px;
+  flex-shrink: 0;
 }
 
 .stat-number {
-  font-size: 24px;
+  font-size: 22px;
   font-weight: 800;
   color: var(--text);
   line-height: 1;
@@ -847,7 +906,7 @@ body {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 16px 20px;
+  padding: 14px 18px;
   background: #F8FAFC;
   border-bottom: 1px solid var(--border-light);
 }
@@ -861,6 +920,7 @@ body {
   width: 12px;
   height: 12px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .control.close { background: #EF4444; }
@@ -884,6 +944,7 @@ body {
   background: #ECFDF5;
   padding: 4px 12px;
   border-radius: 100px;
+  flex-shrink: 0;
 }
 
 .live-dot {
@@ -895,25 +956,26 @@ body {
 }
 
 .mockup-body {
-  padding: 24px;
+  padding: 20px;
 }
 
 .user-card {
   display: flex;
   align-items: center;
-  gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 24px;
+  gap: 14px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
   border-bottom: 1px solid var(--border-light);
 }
 
 .avatar-wrapper {
   position: relative;
+  flex-shrink: 0;
 }
 
 .user-image {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-md);
   object-fit: cover;
 }
@@ -944,8 +1006,8 @@ body {
 .ai-card {
   background: #FAFBFC;
   border-radius: var(--radius-lg);
-  padding: 20px;
-  margin-bottom: 24px;
+  padding: 18px;
+  margin-bottom: 20px;
   position: relative;
   border: 1px solid var(--border-light);
 }
@@ -969,27 +1031,29 @@ body {
   color: var(--primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .ai-card h3 {
   font-size: 16px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .ai-card p {
   font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.6;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .ai-card-footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .time-badge {
@@ -1030,18 +1094,19 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   display: block;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .tool-icons {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .tool-badge {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   background: white;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -1050,7 +1115,7 @@ body {
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s;
-  padding: 8px;
+  padding: 6px;
 }
 
 .tool-badge:hover {
@@ -1060,21 +1125,21 @@ body {
 }
 
 .tool-badge img {
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   object-fit: contain;
 }
 
 .add-tool-btn {
-  width: 42px;
-  height: 42px;
+  width: 38px;
+  height: 38px;
   border: 2px dashed #CBD5E1;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--text-muted);
-  font-size: 18px;
+  font-size: 16px;
   cursor: pointer;
   transition: all 0.2s;
 }
@@ -1089,13 +1154,13 @@ body {
 .floating-card {
   position: absolute;
   background: white;
-  padding: 12px 20px;
+  padding: 10px 16px;
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 14px;
+  gap: 8px;
+  font-size: 13px;
   font-weight: 600;
   color: var(--text);
   border: 1px solid var(--border-light);
@@ -1103,24 +1168,24 @@ body {
 
 .card-1 {
   top: 10%;
-  left: -10%;
+  left: -8%;
   animation: float 4s ease-in-out infinite;
 }
 
 .card-1 i {
   color: var(--success);
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .card-2 {
   bottom: 20%;
-  right: -8%;
+  right: -6%;
   animation: float 4s ease-in-out infinite 1s;
 }
 
 .card-2 i {
   color: var(--primary);
-  font-size: 18px;
+  font-size: 16px;
 }
 
 @keyframes float {
@@ -1139,123 +1204,30 @@ body {
 .wave-divider svg {
   width: 100%;
   height: auto;
-}
-
-/* ==================== TRUSTED SECTION ==================== */
-.trusted-section {
-  padding: 60px 0;
-  background: white;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.trusted-header {
-  text-align: center;
-  margin-bottom: 40px;
-}
-
-.section-eyebrow {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-muted);
-  letter-spacing: 2px;
-}
-
-.trusted-grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 24px;
-}
-
-.trusted-logo-card {
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-lg);
-  padding: 24px;
-  text-align: center;
-  transition: all 0.3s;
-}
-
-.trusted-logo-card:hover {
-  background: white;
-  border-color: var(--primary);
-  box-shadow: var(--shadow-lg);
-  transform: translateY(-4px);
-}
-
-.logo-icon {
-  width: 48px;
-  height: 48px;
-  background: var(--primary-light);
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 12px;
-  color: var(--primary);
-  font-size: 20px;
-}
-
-.trusted-logo-card span {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
-.trusted-logo-card .highlight {
-  color: var(--text);
-}
-
-/* ==================== SECTION DIVIDER ==================== */
-.section-divider {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 0;
-  position: relative;
-}
-
-.divider-line {
-  width: 100%;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--border), transparent);
-}
-
-.divider-icon {
-  position: absolute;
-  background: white;
-  padding: 8px;
-  border: 1px solid var(--border);
-  border-radius: 50%;
-  color: var(--text-muted);
-  font-size: 20px;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: block;
 }
 
 /* ==================== HOW IT WORKS SECTION ==================== */
 .how-section {
-  padding: 80px 0 100px;
+  padding: 60px 0 80px;
   background: white;
 }
 
 .section-badge {
   display: inline-flex;
   align-items: center;
-  padding: 8px 18px;
+  padding: 6px 16px;
   background: var(--primary-light);
   color: var(--primary-dark);
   border-radius: 100px;
   font-size: 13px;
   font-weight: 700;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
   letter-spacing: 0.5px;
 }
 
 .section-header {
-  margin-bottom: 64px;
+  margin-bottom: 48px;
 }
 
 .section-header.text-center {
@@ -1263,12 +1235,12 @@ body {
 }
 
 .section-title {
-  font-size: 42px;
+  font-size: 38px;
   font-weight: 800;
   line-height: 1.2;
   letter-spacing: -0.02em;
   color: var(--text);
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .section-subtitle {
@@ -1282,7 +1254,7 @@ body {
 .steps-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 32px;
+  gap: 28px;
   position: relative;
 }
 
@@ -1292,6 +1264,7 @@ body {
   border-radius: var(--radius-xl);
   overflow: hidden;
   transition: all 0.4s;
+  height: 100%;
 }
 
 .step-card:hover {
@@ -1302,7 +1275,7 @@ body {
 
 .step-illustration {
   position: relative;
-  height: 180px;
+  height: 160px;
   overflow: hidden;
 }
 
@@ -1314,49 +1287,56 @@ body {
 
 .step-number-badge {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 12px;
+  right: 12px;
   width: 40px;
   height: 40px;
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
   color: white;
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-size: 16px;
+  font-size: 15px;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.step-card:hover .step-number-badge {
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
 }
 
 .step-content {
-  padding: 24px;
+  padding: 20px;
 }
 
 .step-icon-circle {
-  width: 56px;
-  height: 56px;
+  width: 48px;
+  height: 48px;
   background: var(--primary-light);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--primary);
-  font-size: 24px;
-  margin-bottom: 20px;
+  font-size: 20px;
+  margin-bottom: 16px;
 }
 
 .step-content h3 {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .step-content p {
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.6;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .step-features {
@@ -1368,9 +1348,9 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .step-features li i {
@@ -1378,16 +1358,53 @@ body {
   font-weight: 700;
 }
 
+/* Step connector line */
+.steps-grid {
+  position: relative;
+}
+
+.steps-grid::before {
+  content: '';
+  position: absolute;
+  top: 80px;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--primary), var(--primary-light), var(--primary));
+  opacity: 0.25;
+  z-index: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .steps-grid::before {
+    display: none;
+  }
+}
+
+.step-card {
+  position: relative;
+  z-index: 1;
+}
+
+.mt-5 {
+  margin-top: 40px;
+}
+
+.text-center {
+  text-align: center;
+}
+
 /* ==================== FEATURES SHOWCASE ==================== */
 .features-showcase {
-  padding: 100px 0;
+  padding: 80px 0;
   background: var(--bg-secondary);
 }
 
 .showcase-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 80px;
+  gap: 60px;
   align-items: center;
 }
 
@@ -1408,7 +1425,7 @@ body {
 
 .main-image img {
   width: 100%;
-  height: 400px;
+  height: 380px;
   object-fit: cover;
   display: block;
 }
@@ -1438,7 +1455,7 @@ body {
 }
 
 .image-overlay i {
-  font-size: 48px;
+  font-size: 44px;
 }
 
 .floating-image-1,
@@ -1451,18 +1468,18 @@ body {
 }
 
 .floating-image-1 {
-  top: -30px;
-  right: -30px;
-  width: 160px;
-  height: 120px;
+  top: -24px;
+  right: -24px;
+  width: 140px;
+  height: 100px;
   animation: float 5s ease-in-out infinite;
 }
 
 .floating-image-2 {
-  bottom: -30px;
-  left: -30px;
-  width: 160px;
-  height: 120px;
+  bottom: -24px;
+  left: -24px;
+  width: 140px;
+  height: 100px;
   animation: float 5s ease-in-out infinite 1.5s;
 }
 
@@ -1476,15 +1493,15 @@ body {
 .feature-cards {
   display: flex;
   flex-direction: column;
-  gap: 20px;
-  margin: 36px 0;
+  gap: 16px;
+  margin: 28px 0;
 }
 
 .feature-card-mini {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   align-items: flex-start;
-  padding: 20px;
+  padding: 16px 18px;
   background: white;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-light);
@@ -1498,35 +1515,49 @@ body {
 }
 
 .feature-icon-mini {
-  width: 48px;
-  height: 48px;
+  width: 44px;
+  height: 44px;
   background: var(--primary-light);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--primary);
-  font-size: 22px;
+  font-size: 20px;
   flex-shrink: 0;
 }
 
 .feature-card-mini h4 {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--text);
   margin-bottom: 4px;
 }
 
 .feature-card-mini p {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.5;
 }
 
+.mt-4 {
+  margin-top: 16px;
+}
+
 /* ==================== VIDEO SECTION ==================== */
 .video-section {
-  padding: 100px 0;
+  padding: 80px 0;
   background: white;
+}
+
+.video-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+.video-card-link:hover {
+  color: inherit;
 }
 
 .video-grid {
@@ -1542,6 +1573,7 @@ body {
   overflow: hidden;
   transition: all 0.3s;
   cursor: pointer;
+  height: 100%;
 }
 
 .video-card-large:hover {
@@ -1552,7 +1584,7 @@ body {
 
 .video-thumbnail {
   position: relative;
-  height: 200px;
+  height: 180px;
   overflow: hidden;
 }
 
@@ -1567,15 +1599,15 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 56px;
-  height: 56px;
+  width: 50px;
+  height: 50px;
   background: rgba(99, 102, 241, 0.95);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 24px;
+  font-size: 22px;
   opacity: 0;
   transition: all 0.3s;
 }
@@ -1587,8 +1619,8 @@ body {
 
 .duration-badge {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
+  bottom: 10px;
+  right: 10px;
   background: rgba(15, 23, 42, 0.8);
   color: white;
   padding: 4px 10px;
@@ -1598,38 +1630,39 @@ body {
 }
 
 .video-details {
-  padding: 20px;
+  padding: 18px;
 }
 
 .video-category {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--primary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .video-details h4 {
   font-size: 16px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .video-details p {
-  font-size: 14px;
+  font-size: 13px;
   color: var(--text-secondary);
   line-height: 1.5;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .video-meta {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   align-items: center;
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
+  flex-wrap: wrap;
 }
 
 .video-meta span {
@@ -1651,7 +1684,7 @@ body {
 
 /* ==================== TESTIMONIALS ==================== */
 .testimonials-section {
-  padding: 100px 0;
+  padding: 80px 0;
   background: var(--bg-secondary);
 }
 
@@ -1659,15 +1692,16 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 24px;
-  margin-top: 48px;
+  margin-top: 40px;
 }
 
 .testimonial-card {
   background: white;
   border: 1px solid var(--border-light);
   border-radius: var(--radius-xl);
-  padding: 32px;
+  padding: 28px;
   transition: all 0.3s;
+  height: 100%;
 }
 
 .testimonial-card:hover {
@@ -1679,14 +1713,14 @@ body {
   color: #F59E0B;
   font-size: 16px;
   letter-spacing: 4px;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .testimonial-text {
   font-size: 15px;
   line-height: 1.7;
   color: var(--text-secondary);
-  margin-bottom: 24px;
+  margin-bottom: 20px;
   font-style: italic;
 }
 
@@ -1697,33 +1731,47 @@ body {
 }
 
 .testimonial-author img {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
   object-fit: cover;
 }
 
 .testimonial-author strong {
   display: block;
-  font-size: 15px;
+  font-size: 14px;
   color: var(--text);
 }
 
 .testimonial-author span {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--text-muted);
+}
+
+/* ==================== TEAMS SHOWCASE ==================== */
+.teams-showcase {
+  padding: 80px 0 !important;
+  background: var(--bg-tertiary);
+}
+
+.team-stats-mockup {
+  background: white;
+  padding: 32px !important;
+  border-radius: 32px;
+  box-shadow: var(--shadow-2xl);
+  border: 1px solid var(--border-light);
 }
 
 /* ==================== CTA SECTION ==================== */
 .cta-section {
-  padding: 80px 0 100px;
+  padding: 60px 0 80px;
   background: white;
 }
 
 .cta-card {
   background: #0F172A;
   border-radius: var(--radius-2xl);
-  padding: 80px 64px;
+  padding: 60px 48px;
   position: relative;
   overflow: hidden;
 }
@@ -1742,29 +1790,30 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 60px;
+  gap: 48px;
   position: relative;
   z-index: 1;
 }
 
 .cta-left h2 {
-  font-size: 40px;
+  font-size: 36px;
   font-weight: 800;
   color: white;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .cta-left p {
-  font-size: 17px;
+  font-size: 16px;
   color: #94A3B8;
   line-height: 1.6;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .cta-avatars {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
+  flex-wrap: wrap;
 }
 
 .avatar-stack {
@@ -1773,17 +1822,17 @@ body {
 }
 
 .avatar-stack img {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 3px solid #0F172A;
-  margin-right: -12px;
+  margin-right: -10px;
   object-fit: cover;
 }
 
 .avatar-count {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   background: var(--primary);
   border-radius: 50%;
   border: 3px solid #0F172A;
@@ -1791,7 +1840,7 @@ body {
   align-items: center;
   justify-content: center;
   color: white;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   margin-left: 4px;
 }
@@ -1801,7 +1850,7 @@ body {
   align-items: center;
   gap: 6px;
   color: #FBBF24;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 600;
 }
 
@@ -1813,7 +1862,7 @@ body {
 .cta-note {
   font-size: 13px;
   color: #64748B;
-  margin-top: 16px;
+  margin-top: 12px;
 }
 
 /* ==================== ANIMATIONS ==================== */
@@ -1843,10 +1892,14 @@ body {
 
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1024px) {
+  .container {
+    padding: 0 24px;
+  }
+
   .hero-grid,
   .showcase-grid {
     grid-template-columns: 1fr;
-    gap: 56px;
+    gap: 48px;
   }
 
   .hero-title {
@@ -1860,24 +1913,7 @@ body {
   .steps-grid,
   .video-grid,
   .testimonials-grid {
-    display: flex;
-    gap: 16px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scroll-snap-type: x mandatory;
-    padding: 8px 0 16px;
-    scrollbar-width: thin;
-  }
-
-  .steps-grid > *,
-  .video-grid > *,
-  .testimonials-grid > * {
-    flex: 0 0 320px;
-    scroll-snap-align: start;
-  }
-
-  .trusted-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: 1fr 1fr;
   }
 
   .cta-content {
@@ -1897,10 +1933,6 @@ body {
     display: none;
   }
 
-  .teams-showcase {
-    padding: 60px 0 !important;
-  }
-
   .showcase-content .btn-lg {
     display: flex;
     justify-content: center;
@@ -1910,43 +1942,114 @@ body {
   .team-stats-mockup {
     padding: 24px !important;
   }
+
+  .floating-image-1,
+  .floating-image-2 {
+    display: none;
+  }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .container {
-    padding: 0 20px;
+    padding: 0 16px;
   }
 
   .hero-section {
-    padding: 60px 0 0;
+    padding: 40px 0 0;
+  }
+
+  .hero-grid {
+    gap: 32px;
+    padding: 0 0 40px;
   }
 
   .hero-title {
     font-size: 32px;
   }
 
+  .hero-description {
+    font-size: 16px;
+    margin-bottom: 28px;
+  }
+
   .hero-buttons {
     flex-direction: column;
+    margin-bottom: 32px;
+  }
+
+  .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .btn-lg,
+  .btn-xl {
+    padding: 12px 24px;
+    font-size: 15px;
   }
 
   .hero-stats {
     flex-direction: column;
+    gap: 12px;
   }
 
-  .trusted-grid {
-    grid-template-columns: repeat(2, 1fr);
+  .stat-card {
+    padding: 12px 16px;
   }
 
-  .cta-card {
-    padding: 40px 24px;
+  .stat-number {
+    font-size: 20px;
   }
 
-  .cta-left h2 {
+  .steps-grid,
+  .video-grid,
+  .testimonials-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .section-title {
     font-size: 28px;
   }
 
+  .section-subtitle {
+    font-size: 15px;
+  }
+
+  .section-header {
+    margin-bottom: 32px;
+  }
+
+  .step-illustration {
+    height: 140px;
+  }
+
+  .step-content {
+    padding: 16px;
+  }
+
+  .feature-cards {
+    margin: 20px 0;
+  }
+
+  .feature-card-mini {
+    padding: 14px 16px;
+  }
+
+  .features-showcase {
+    padding: 48px 0;
+  }
+
+  .video-section {
+    padding: 48px 0;
+  }
+
+  .testimonials-section {
+    padding: 48px 0;
+  }
+
   .teams-showcase {
-    padding: 40px 0 !important;
+    padding: 48px 0 !important;
   }
 
   .team-stats-mockup {
@@ -1957,20 +2060,208 @@ body {
     font-size: 16px;
   }
 
-  .how-section .btn-lg {
-    width: 100%;
-    justify-content: center;
+  .cta-section {
+    padding: 40px 0 60px;
+  }
+
+  .cta-card {
+    padding: 32px 20px;
+  }
+
+  .cta-left h2 {
+    font-size: 28px;
+  }
+
+  .cta-left p {
+    font-size: 15px;
+  }
+
+  .cta-content {
+    gap: 32px;
+  }
+
+  .mockup-body {
+    padding: 16px;
+  }
+
+  .ai-card {
+    padding: 16px;
+  }
+
+  .ai-card-footer {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .tools-row {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  .tool-icons {
+    flex-wrap: nowrap;
+  }
+
+  .section-divider {
+    padding: 16px 0;
+  }
+
+  .divider-icon {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .how-section {
+    padding: 40px 0 60px;
+  }
+
+  .image-stack .main-image img {
+    height: 240px;
+  }
+
+  .testimonial-card {
+    padding: 20px;
+  }
+
+  .testimonial-text {
+    font-size: 14px;
+  }
+
+  .video-card-large .video-thumbnail {
+    height: 160px;
+  }
+
+  .video-details {
+    padding: 14px;
+  }
+
+  .video-details h4 {
+    font-size: 15px;
+  }
+
+  .go-to-top-btn {
+    bottom: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+
+  .mt-5 {
+    margin-top: 32px;
+  }
+
+  .mt-4 {
+    margin-top: 12px;
+  }
+
+  .showcase-grid {
+    gap: 32px;
   }
 
   .floating-image-1,
   .floating-image-2 {
     display: none;
   }
+
+  .team-stats-mockup div[style*="grid-template-columns"] {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+  }
+
+  .hero-title {
+    font-size: 28px;
+  }
+
+  .hero-badge {
+    font-size: 12px;
+    padding: 6px 14px;
+  }
+
+  .section-title {
+    font-size: 24px;
+  }
+
+  .section-badge {
+    font-size: 11px;
+    padding: 4px 12px;
+  }
+
+  .stat-card {
+    padding: 10px 14px;
+  }
+
+  .stat-number {
+    font-size: 18px;
+  }
+
+  .stat-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .cta-card {
+    padding: 24px 16px;
+  }
+
+  .cta-left h2 {
+    font-size: 24px;
+  }
+
+  .cta-avatars {
+    gap: 12px;
+  }
+
+  .avatar-stack img {
+    width: 32px;
+    height: 32px;
+  }
+
+  .avatar-count {
+    width: 32px;
+    height: 32px;
+    font-size: 9px;
+  }
+
+  .go-to-top-btn {
+    bottom: 16px;
+    right: 16px;
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
 }
 </style>
 
 <script>
-// Smooth scroll for anchor links
+// ==================== GO TO TOP BUTTON ====================
+const goToTopBtn = document.getElementById('goToTopBtn');
+
+window.addEventListener('scroll', function() {
+  if (window.pageYOffset > 300) {
+    goToTopBtn.classList.add('visible');
+  } else {
+    goToTopBtn.classList.remove('visible');
+  }
+});
+
+goToTopBtn.addEventListener('click', function() {
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+});
+
+// ==================== SMOOTH SCROLL FOR ANCHOR LINKS ====================
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function (e) {
     e.preventDefault();
@@ -1981,7 +2272,7 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   });
 });
 
-// Intersection Observer for scroll animations
+// ==================== INTERSECTION OBSERVER FOR SCROLL ANIMATIONS ====================
 const observerOptions = {
   threshold: 0.1,
   rootMargin: '0px 0px -50px 0px'
