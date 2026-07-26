@@ -238,6 +238,69 @@ body { overflow-x: hidden; }
 
 <div class="rpt-shell">
 
+    {{-- Plan Training trigger --}}
+    <div style="margin-bottom:.75rem;">
+        <button onclick="togglePlanForm()" style="display:inline-flex;align-items:center;gap:.45rem;background:var(--ink);color:#fff;border:none;border-radius:3px;font-weight:700;font-size:.78rem;padding:.5rem .95rem;cursor:pointer;font-family:var(--sans);">
+            <i class="bi bi-mortarboard-fill" style="color:var(--brass);"></i> Plan Training
+            <span id="plan-toggle-icon" style="font-size:.65rem;margin-left:.1rem;color:#8b8577;"><i class="bi bi-chevron-down"></i></span>
+        </button>
+        <span id="plan-status" style="font-size:.72rem;color:var(--muted);font-family:var(--mono);margin-left:.75rem;"></span>
+    </div>
+
+    {{-- Teaching Plan Generator form (hidden by default) --}}
+    <div id="plan-form-body" style="display:none;margin-bottom:1.25rem;">
+        <div class="rpt-card">
+            <div class="rpt-card-head">
+                <div><h3><i class="bi bi-magic" style="color:var(--brass);"></i> Session Planner</h3><p>Set parameters — AI will build a curriculum from the top tools above</p></div>
+                <span onclick="togglePlanForm()" style="cursor:pointer;color:var(--muted);font-size:1.1rem;"><i class="bi bi-x-lg"></i></span>
+            </div>
+            <div class="rpt-card-body">
+                <form id="plan-form" onsubmit="return generatePlan(event)">
+                    @csrf
+                    <input type="hidden" name="range" value="{{ $range }}">
+                    @if($deptId)<input type="hidden" name="dept_id" value="{{ $deptId }}">@endif
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;margin-bottom:.75rem;">
+                        <div>
+                            <label style="font-family:var(--mono);font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.3rem;">Total Sessions</label>
+                            <input type="number" name="total_session" min="1" max="20" value="4" required style="width:100%;padding:.5rem .7rem;border:1px solid var(--line);border-radius:2px;font-family:var(--mono);font-size:.8rem;color:var(--ink);background:var(--panel);">
+                        </div>
+                        <div>
+                            <label style="font-family:var(--mono);font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.3rem;">Hrs Per Session</label>
+                            <input type="number" name="hr_per_session" min="0.5" max="8" step="0.5" value="2" required style="width:100%;padding:.5rem .7rem;border:1px solid var(--line);border-radius:2px;font-family:var(--mono);font-size:.8rem;color:var(--ink);background:var(--panel);">
+                        </div>
+                        <div>
+                            <label style="font-family:var(--mono);font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.3rem;">Time Between Sessions</label>
+                            <input type="text" name="time_between_session" value="1 week" placeholder="e.g. 1 week, 3 days" style="width:100%;padding:.5rem .7rem;border:1px solid var(--line);border-radius:2px;font-family:var(--mono);font-size:.8rem;color:var(--ink);background:var(--panel);">
+                        </div>
+                        <div>
+                            <label style="font-family:var(--mono);font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.3rem;">Mode</label>
+                            <div style="display:flex;gap:.5rem;">
+                                <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:.35rem;padding:.5rem;border:1px solid var(--line);border-radius:2px;cursor:pointer;font-size:.8rem;font-weight:600;font-family:var(--mono);background:var(--panel);" onclick="selectMode(this,'online')">
+                                    <input type="radio" name="online_offline" value="Online" checked style="display:none;">
+                                    <i class="bi bi-wifi"></i> Online
+                                </label>
+                                <label style="flex:1;display:flex;align-items:center;justify-content:center;gap:.35rem;padding:.5rem;border:1px solid var(--line);border-radius:2px;cursor:pointer;font-size:.8rem;font-weight:600;font-family:var(--mono);background:var(--panel);" onclick="selectMode(this,'offline')">
+                                    <input type="radio" name="online_offline" value="Offline" style="display:none;">
+                                    <i class="bi bi-wifi-off"></i> Offline
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom:.75rem;">
+                        <label style="font-family:var(--mono);font-size:.65rem;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;display:block;margin-bottom:.3rem;">Instructor Notes / Focus Areas</label>
+                        <textarea name="notes" rows="2" placeholder="Optional: specific skills to cover, learner pain points, or focus areas..." style="width:100%;padding:.5rem .7rem;border:1px solid var(--line);border-radius:2px;font-family:var(--sans);font-size:.8rem;color:var(--ink);background:var(--panel);resize:vertical;"></textarea>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
+                        <button type="submit" id="plan-generate-btn" style="display:inline-flex;align-items:center;gap:.45rem;background:var(--teal);color:#fff;border:none;border-radius:2px;font-weight:700;font-size:.8rem;padding:.55rem 1.2rem;cursor:pointer;font-family:var(--sans);">
+                            <i class="bi bi-stars"></i> Generate Teaching Plan
+                        </button>
+                        <span onclick="togglePlanForm()" style="font-size:.75rem;color:var(--muted);cursor:pointer;text-decoration:underline;">Cancel</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     {{-- Toolbar --}}
     <div class="rpt-toolbar">
         <div style="display:flex;align-items:center;gap:.75rem;flex-wrap:wrap;">
@@ -266,7 +329,6 @@ body { overflow-x: hidden; }
             </form>
             @endif
             <a href="{{ route('team.inspector-report.download', ['range' => $range, 'dept_id' => $deptId]) }}" class="btn-print" style="background:var(--teal);"><i class="bi bi-filetype-pdf"></i> PDF</a>
-            <button class="btn-print" onclick="window.print()"><i class="bi bi-printer"></i> Print</button>
         </div>
     </div>
 
@@ -274,7 +336,7 @@ body { overflow-x: hidden; }
     <div class="rpt-cover">
         <div class="rpt-stamp">DALEEL · TRAINING<br>INTELLIGENCE UNIT</div>
         <div class="rpt-cover-eyebrow">Field Brief</div>
-        <h1>Inspector Training Brief</h1>
+        <h1>Inspector Report</h1>
         <p>What to teach next, what to automate, and where your learners are stuck — in one page.</p>
         <div class="rpt-cover-meta">
             <div class="rpt-cover-meta-item"><span class="rpt-cover-meta-label">Instructor</span><span class="rpt-cover-meta-value">{{ auth()->user()->name }}</span></div>
@@ -334,7 +396,7 @@ body { overflow-x: hidden; }
     </div>
 
     {{-- 2. AI Tool Upgrades --}}
-    <p class="rpt-section-title"><span class="n">02</span> Recommended AI Upgrades</p>
+    <p class="rpt-section-title">Recommended AI Upgrades</p>
     <p class="rpt-hint">Same tools learners already use — with an AI layer added.</p>
     @if(count($aiRecs))
     <div class="rec-grid">
@@ -362,36 +424,11 @@ body { overflow-x: hidden; }
     <div class="rpt-card"><div class="empty-rpt"><i class="bi bi-robot"></i><h6>No AI recs yet</h6><p>Connect extensions to unlock this.</p></div></div>
     @endif
 
-    {{-- 3. Topics --}}
-    <p class="rpt-section-title"><span class="n">03</span> Topics to Teach This Week</p>
-    @if(count($topicRecs))
-    <div class="rpt-card">
-        <div class="rpt-card-body" style="padding:0;">
-            <table class="rpt-table">
-                <thead><tr><th>#</th><th>Topic</th><th>Tool</th><th>Format</th></tr></thead>
-                <tbody>
-                    @foreach($topicRecs as $i => $rec)
-                    @if($i >= 5) @break @endif
-                    <tr>
-                        <td><span class="week-badge wk{{ min($i+1,4) }}" style="border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;padding:0;">{{ $i+1 }}</span></td>
-                        <td style="font-weight:700;color:var(--ink);">{{ $rec['topic'] }}</td>
-                        <td style="font-size:.78rem;">{{ $rec['tool'] }} · {{ $msLbl($rec['time'] ?? 0) }}</td>
-                        <td>
-                            @if($i === 0)<span class="week-badge wk1">Live</span>
-                            @elseif($i === 1)<span class="week-badge wk2">Workshop</span>
-                            @elseif($i === 2)<span class="week-badge wk3">Clinic</span>
-                            @else<span class="week-badge wk4">Lab</span>@endif
-                        </td>
-                    </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-    </div>
-    @endif
+    {{-- 3. Teaching Plan (generated) --}}
+    <div id="plan-results" style="margin-bottom:1.25rem;"></div>
 
     {{-- 4. Time Saves --}}
-    <p class="rpt-section-title"><span class="n">04</span> Time-Saving Opportunities</p>
+    <p class="rpt-section-title">Time-Saving Opportunities</p>
     @if(count($timeSaves))
     <div class="timesave-list">
         @foreach($timeSaves as $i => $rec)
@@ -406,7 +443,7 @@ body { overflow-x: hidden; }
     @endif
 
     {{-- 6. Coaching --}}
-    <p class="rpt-section-title"><span class="n">06</span> Coaching Principles</p>
+    <p class="rpt-section-title">Coaching Principles</p>
     <div class="rpt-card">
         <div class="rpt-card-body">
             @foreach($coachingTips as $i => $tip)
@@ -420,7 +457,7 @@ body { overflow-x: hidden; }
 
     <!-- {{-- 7. Friction --}}
     @if($frictionData->count())
-    <p class="rpt-section-title"><span class="n">07</span> Friction Signals</p>
+    <p class="rpt-section-title">Friction Signals</p>
     <div class="rpt-card">
         <div class="rpt-card-head"><div><h3><i class="bi bi-exclamation-triangle-fill" style="color:var(--rust);"></i> Repeated Sessions</h3><p>Same domain, many visits — likely confusion</p></div><span class="badge-inferred">Inferred</span></div>
         <div class="rpt-card-body" style="padding:0;">
@@ -454,4 +491,160 @@ body { overflow-x: hidden; }
     </div>
 
 </div>{{-- /rpt-shell --}}
+
+@section('scripts')
+<script>
+function togglePlanForm() {
+    const body = document.getElementById('plan-form-body');
+    const icon = document.getElementById('plan-toggle-icon');
+    if (body.style.display === 'none') {
+        body.style.display = 'block';
+        icon.innerHTML = '<i class="bi bi-chevron-up"></i>';
+    } else {
+        body.style.display = 'none';
+        icon.innerHTML = '<i class="bi bi-chevron-down"></i>';
+    }
+}
+
+function selectMode(el, mode) {
+    document.querySelectorAll('#plan-form-body label[onclick*="selectMode"]').forEach(l => {
+        l.style.borderColor = 'var(--line)';
+        l.style.background = 'var(--panel)';
+    });
+    el.style.borderColor = mode === 'online' ? 'var(--teal)' : 'var(--rust)';
+    el.style.background = mode === 'online' ? 'var(--teal-soft)' : 'var(--rust-soft)';
+    el.querySelector('input').checked = true;
+}
+
+async function generatePlan(e) {
+    e.preventDefault();
+    const form = document.getElementById('plan-form');
+    const btn = document.getElementById('plan-generate-btn');
+    const status = document.getElementById('plan-status');
+    const results = document.getElementById('plan-results');
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="bi bi-arrow-repeat"></i> Generating…';
+    status.textContent = 'Calling AI…';
+    results.style.display = 'none';
+
+    const formData = new FormData(form);
+
+    try {
+        const resp = await fetch('{{ route('team.inspector-report.generate-plan') }}', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value },
+            body: formData
+        });
+        const data = await resp.json();
+
+        if (data.error) {
+            status.textContent = 'Error: ' + data.error;
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-stars"></i> Generate Teaching Plan';
+            return;
+        }
+
+        status.textContent = '✅ Plan generated';
+        const planData = {
+            sessions: data.sessions,
+            totalSessions: formData.get('total_session'),
+            hrsPerSession: formData.get('hr_per_session'),
+            timeBetween: formData.get('time_between_session'),
+            mode: formData.get('online_offline'),
+            notes: formData.get('notes')
+        };
+        renderPlan(planData, results);
+        results.style.display = 'block';
+        results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        // Update PDF download link to include plan params
+        const pdfLink = document.querySelector('a[href*="inspector-report/download"]');
+        if (pdfLink) {
+            const url = new URL(pdfLink.href);
+            url.searchParams.set('total_session', formData.get('total_session'));
+            url.searchParams.set('hr_per_session', formData.get('hr_per_session'));
+            url.searchParams.set('time_between_session', formData.get('time_between_session'));
+            url.searchParams.set('online_offline', formData.get('online_offline'));
+            url.searchParams.set('notes', formData.get('notes'));
+            pdfLink.href = url.toString();
+            pdfLink.style.background = 'var(--brass)';
+        }
+    } catch (err) {
+        status.textContent = 'Request failed: ' + err.message;
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-stars"></i> Generate Teaching Plan';
+}
+
+function renderPlan(plan, container) {
+    const sessions = plan.sessions;
+    const hrsPerSession = parseFloat(plan.hrsPerSession) || 2;
+    const totalMinutes = Math.round(hrsPerSession * 60);
+
+    let html = `
+    <div class="rpt-card">
+        <div class="rpt-card-head" style="background:var(--ink);color:#fff;border-bottom-color:#333;">
+            <div><h3 style="color:#fff;"><i class="bi bi-mortarboard-fill" style="color:var(--brass);"></i> Teaching Guidance Plan</h3>
+            <p style="color:#B9B4A4;">${sessions.length} session${sessions.length > 1 ? 's' : ''} · ${plan.mode} · ${totalMinutes} min each</p></div>
+            <span class="badge-inferred" style="border-color:#8b8577;">AI Generated</span>
+        </div>
+        <div class="rpt-card-body" style="padding:0;">`;
+
+    sessions.forEach((s, i) => {
+        const topicCount = (s.items || []).length;
+        const minPerTopic = topicCount > 0 ? Math.round(totalMinutes / topicCount) : 0;
+        const tools = extractTools(s.items);
+
+        html += `
+        <div style="padding:1rem 1.2rem;${i > 0 ? 'border-top:1px solid var(--line);' : ''}">
+            <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.3rem;">
+                <span class="week-badge wk${Math.min(i, 3) + 1}" style="border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:.72rem;padding:0;">${s.session_number}</span>
+                <span style="font-weight:700;font-size:.9rem;color:var(--ink);font-family:var(--serif);">${s.title || 'Session ' + s.session_number}</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:.35rem .75rem;margin:0 0 .65rem 2.4rem;font-size:.7rem;font-family:var(--mono);color:var(--muted);">
+                <span><span style="font-weight:700;color:var(--ink);">${totalMinutes}m</span> total time</span>
+                <span><span style="font-weight:700;color:var(--ink);">${topicCount}</span> topic${topicCount > 1 ? 's' : ''}</span>
+                <span><span style="font-weight:700;color:var(--teal);">~${minPerTopic}m</span> per topic</span>
+                ${tools.length ? '<span>Tools: <span style="font-weight:700;color:var(--brass);">' + tools.join(', ') + '</span></span>' : ''}
+            </div>
+            <ul style="margin:0;padding-left:2.4rem;list-style:none;">`;
+        (s.items || []).forEach(item => {
+            const display = item.replace(/^\*\s*/, '');
+            html += `<li style="font-size:.8rem;color:var(--ink-soft);padding:.25rem 0;position:relative;">
+                <span style="position:absolute;left:-1.2rem;top:.3rem;width:6px;height:6px;border-radius:50%;background:var(--teal);"></span>
+                ${display}
+            </li>`;
+        });
+        html += `</ul></div>`;
+    });
+
+    html += `
+        </div>
+        <div style="padding:.6rem 1.2rem;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;align-items:center;gap:.75rem;">
+            <span style="font-size:.7rem;color:var(--muted);display:flex;align-items:center;gap:.35rem;"><i class="bi bi-info-circle-fill" style="color:var(--brass);"></i> Review and adjust before sharing.</span>
+            ${plan.notes ? '<span style="font-size:.7rem;color:var(--muted);font-family:var(--mono);">📝 ' + plan.notes + '</span>' : ''}
+        </div>
+    </div>`;
+
+    container.innerHTML = html;
+}
+
+function extractTools(items) {
+    const toolSet = new Set();
+    (items || []).forEach(item => {
+        const clean = item.replace(/^\*\s*/, '');
+        const match = clean.match(/^([^-]+?)\s*[-–—]/);
+        if (match) {
+            toolSet.add(match[1].trim());
+        } else {
+            const firstWord = clean.split(' ')[0];
+            if (firstWord) toolSet.add(firstWord);
+        }
+    });
+    return Array.from(toolSet);
+}
+</script>
+@endsection
 @endsection

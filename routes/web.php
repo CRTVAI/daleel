@@ -142,6 +142,7 @@ Route::middleware(['auth'])->group(function () {
     // Inspector Training Intelligence Report
     Route::get('/team/inspector-report', [App\Http\Controllers\TeamController::class, 'inspectorReport'])->name('team.inspector-report');
     Route::get('/team/inspector-report/download', [App\Http\Controllers\TeamController::class, 'inspectorReportDownloadPdf'])->name('team.inspector-report.download');
+    Route::post('/team/inspector-report/generate-plan', [App\Http\Controllers\TeamController::class, 'inspectorReportGeneratePlan'])->name('team.inspector-report.generate-plan');
 
 
 
@@ -224,6 +225,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Auto-Generated Roadmap Routes
     Route::post('/roadmap/auto/add-tool', [App\Http\Controllers\RoadmapController::class, 'addAutoTool'])->name('roadmap.auto.add-tool');
     Route::post('/roadmap/auto/dismiss-tool', [App\Http\Controllers\RoadmapController::class, 'dismissAutoTool'])->name('roadmap.auto.dismiss-tool');
+
+    // Tour dismissal
+    Route::post('/tour/dismiss', function () {
+        auth()->user()->update(['has_seen_tour' => true]);
+        return back();
+    })->name('tour.dismiss');
 });
 
 // Subtitle Converter Route (Converts SRT to WebVTT on the fly)

@@ -63,7 +63,8 @@ class AuthenticatedSessionController extends Controller
         }
 
         return redirect()->intended(route('user.dashboard', absolute: false))
-            ->with('status', 'login-success');
+            ->with('status', 'login-success')
+            ->with('show_tour', !$user->has_seen_tour);
     }
 
     /**

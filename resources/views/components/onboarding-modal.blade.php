@@ -1098,7 +1098,7 @@
                 });
 
                 if (response.ok) {
-                    window.location.href = '{{ route("extension.install") }}';
+                    window.location.href = '{{ route("user.dashboard") }}';
                 } else {
                     alert('Something went wrong. Please try again.');
                     finishBtn.disabled = false;

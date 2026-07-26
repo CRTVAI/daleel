@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -575,12 +576,18 @@ class TeamController extends Controller
 
         $reportDate = now()->format('d M Y');
 
+        // --- Optional teaching plan generation (for PDF download after plan generation) ---
+        $planSessions = [];
+        if ($request->filled('total_session') && $request->filled('hr_per_session')) {
+            $planSessions = $this->generatePlanSessions($request, $employeeIds, $dateFilter, $range);
+        }
+
         $pdf = Pdf::loadView('team.inspector-report-pdf', compact(
             'user', 'departments', 'dept', 'employees',
             'totalLearners', 'activeLearners', 'totalActiveHours',
             'funnel', 'topTools', 'frictionData', 'weeklyActivity',
             'learnerProfiles', 'medianLabel', 'reportDate',
-            'range', 'deptId', 'ms'
+            'range', 'deptId', 'ms', 'planSessions'
         ));
 
         $pdf->setPaper('a4', 'portrait');
@@ -594,6 +601,97 @@ class TeamController extends Controller
         $filename = "inspector-report-{$group}-{$reportDate}.pdf";
 
         return $pdf->download($filename);
+    }
+
+    public function inspectorReportGeneratePlan(Request $request)
+    {
+        $user = Auth::user();
+        [$range, $dateFilter] = $this->resolveRange($request);
+        $deptId = $request->get('dept_id');
+
+        $employeeIds = User::where('parent_id', $user->id)
+            ->when($deptId, fn($q) => $q->where('department_id', $deptId))
+            ->pluck('id');
+
+        $sessions = $this->generatePlanSessions($request, $employeeIds, $dateFilter, $range);
+
+        if (isset($sessions['error'])) {
+            return response()->json($sessions, 500);
+        }
+
+        return response()->json(['sessions' => $sessions]);
+    }
+
+    private function generatePlanSessions(Request $request, $employeeIds, $dateFilter, $range): array
+    {
+        $topTools = $this->sessionTopSites($employeeIds, $dateFilter, $range, true)->take(8);
+
+        $toolsList = $topTools->map(fn($t) => sprintf(
+            "- %s (%s) — %dh %dm",
+            $t->tool_name,
+            $t->domain,
+            intdiv($t->active_ms, 3600000),
+            intdiv($t->active_ms % 3600000, 60000)
+        ))->implode("\n");
+
+        $toolNames = $topTools->pluck('tool_name')->map(fn($n) => strtolower($n))->toArray();
+        $toolDomains = $topTools->pluck('domain')->map(fn($d) => strtolower(explode('.', $d)[0]))->toArray();
+
+        $prompt = \App\Models\AiPrompt::getPrompt('inspector_plan_generator', [
+            'online_offline' => $request->online_offline,
+            'total_session' => $request->total_session,
+            'hr_per_session' => $request->hr_per_session,
+            'time_between_session' => $request->time_between_session,
+            'notes' => $request->notes ?? '',
+            'tools_list' => $toolsList,
+        ]);
+
+        $apiKey = config('services.openai.key');
+        if (!$apiKey) {
+            return [];
+        }
+
+        try {
+            $response = Http::withToken($apiKey)
+                ->timeout(120)
+                ->post('https://api.openai.com/v1/chat/completions', [
+                    'model' => 'gpt-4o-mini',
+                    'messages' => [
+                        ['role' => 'system', 'content' => 'You are a precise training curriculum designer. Always respond with valid JSON. You MUST ONLY reference tools from the user\'s provided list. Never invent or suggest tools outside that list.'],
+                        ['role' => 'user', 'content' => $prompt],
+                    ],
+                    'temperature' => 0.7,
+                    'max_tokens' => 1500,
+                    'response_format' => ['type' => 'json_object'],
+                ]);
+
+            $content = $response->json('choices.0.message.content', '{}');
+            $parsed = json_decode($content, true);
+
+            if (!$parsed || !isset($parsed['sessions'])) {
+                return [];
+            }
+
+            // Filter out items referencing tools not in the top tools list
+            foreach ($parsed['sessions'] as &$session) {
+                if (!isset($session['items'])) continue;
+                $session['items'] = array_values(array_filter($session['items'], function ($item) use ($toolNames, $toolDomains) {
+                    $itemLower = strtolower($item);
+                    foreach ($toolNames as $name) {
+                        if (str_contains($itemLower, $name)) return true;
+                    }
+                    foreach ($toolDomains as $domain) {
+                        if (str_contains($itemLower, $domain)) return true;
+                    }
+                    return false;
+                }));
+            }
+
+            return array_values(array_filter($parsed['sessions'], fn($s) => !empty($s['items'])));
+        } catch (\Exception $e) {
+            Log::error('Inspector report GPT generation failed: ' . $e->getMessage());
+            return [];
+        }
     }
 
     public function reportData(Request $request)

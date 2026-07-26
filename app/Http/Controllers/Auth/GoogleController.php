@@ -48,7 +48,8 @@ class GoogleController extends Controller
                 
                 Auth::login($user);
                 return redirect()->intended(route('dashboard'))
-                    ->with('status', 'login-success');
+                    ->with('status', 'login-success')
+                    ->with('show_tour', !$user->has_seen_tour);
             } else {
                 // Create a new user
                 $newUser = User::create([
@@ -61,7 +62,8 @@ class GoogleController extends Controller
 
                 Auth::login($newUser);
                 
-                return redirect()->route('dashboard');
+                return redirect()->route('dashboard')
+                    ->with('show_tour', true);
             }
         } catch (Exception $e) {
             return redirect()->route('login')->with('error', 'Something went wrong with Google Login. Please try again.');

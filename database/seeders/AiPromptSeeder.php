@@ -46,6 +46,12 @@ class AiPromptSeeder extends Seeder
                 'description' => 'Sends list of candidate lessons to score.',
                 'prompt' => "User Question: {query}\n\nCandidate Lessons:\n{lesson_context}",
             ],
+        [
+                'key' => 'inspector_plan_generator',
+                'title' => 'Inspector Report: Teaching Plan Generator',
+                'description' => 'Generates a structured teaching plan from inspector inputs and top tools.',
+                'prompt' => "You are a training curriculum designer. Based on the context below, create a structured teaching guidance plan.\n\nTraining mode: {online_offline}\nTotal sessions: {total_session}\nHours per session: {hr_per_session}\nTime between sessions: {time_between_session}\nInstructor notes: {notes}\n\nTop tools used by learners (ONLY these tools are available — do NOT invent any tools):\n{tools_list}\n\nCRITICAL: You MUST ONLY use tools from the list above. Do NOT mention any other tools, platforms, or software. Every item's ToolName must appear in the list.\n\nReturn JSON with key 'sessions' — an array of session objects. Each session has:\n- session_number (int)\n- title (string, session focus)\n- items (array of strings, each formatted exactly as '* ToolName - what to teach'. The tool name must appear first, then a dash, then the skill/action. Example: '* ChatGPT - how to write professional emails' or '* Excel - how to build pivot tables' or '* Google Sheets - data validation techniques')",
+            ],
         ];
 
         foreach ($prompts as $p) {

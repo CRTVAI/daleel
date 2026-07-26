@@ -3,6 +3,19 @@
 @section('title', 'Dashboard — Daleel AI')
 
 @section('content')
+@if((session('show_tour') || !auth()->user()->has_seen_tour) && !auth()->user()->hasIncompleteProfile())
+    <div id="tourOverlay" class="tour-overlay" style="display:none;">
+        <div class="tour-panel" id="tourTop"></div>
+        <div class="tour-panel" id="tourBottom"></div>
+        <div class="tour-panel" id="tourLeft"></div>
+        <div class="tour-panel" id="tourRight"></div>
+        <div class="tour-tooltip" id="tourTooltip">
+            <div class="tour-tooltip-arrow"></div>
+            <div class="tour-tooltip-body" id="tourBody"></div>
+        </div>
+        <form id="tourDismissForm" action="{{ route('tour.dismiss') }}" method="POST" style="display:none;">@csrf</form>
+    </div>
+@endif
 <div class="dashboard-focus-modern pb-5">
     @if(isset($pendingData) && $pendingData)
     
@@ -1616,6 +1629,7 @@
         border-color: rgba(99, 102, 241, 0.12) !important;
     }
 </style>
+
 @endsection
 
 @section('scripts')
@@ -1750,10 +1764,10 @@
         // Animator for Hero Title
         if (heroTypingText) {
             const heroStrings = [
-                "use Copilot in Outlook?", 
-                "create a report from Excel?", 
-                "use ChatGPT for emails?",
-                "learn new AI skills?"
+                "Use Copilot in Outlook?", 
+                "Create a report from Excel?", 
+                "Use ChatGPT for emails?",
+                "Learn new AI skills?"
             ];
             let heroIdx = 0;
             let heroCharIdx = 0;
@@ -1917,5 +1931,238 @@
     }
     .btn-launch-journey { background: linear-gradient(135deg, #4338ca 0%, #7c3aed 100%); border: none; letter-spacing: 1px; }
     .opacity-05 { opacity: 0.05; }
+
+    .tour-overlay {
+        position: fixed; inset: 0; z-index: 9999; display: flex;
+        align-items: flex-start; justify-content: center;
+    }
+    .tour-panel {
+        position: fixed; background: rgba(15, 23, 42, 0.6);
+        transition: all 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #tourTop    { top: 0; left: 0; right: 0; }
+    #tourBottom { bottom: 0; left: 0; right: 0; }
+    #tourLeft   { top: 0; bottom: 0; left: 0; }
+    #tourRight  { top: 0; bottom: 0; right: 0; }
+    .tour-tooltip {
+        position: fixed; z-index: 10000;
+        transition: left 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+                    top 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .tour-tooltip-body {
+        background: #fff; border-radius: 20px; padding: 24px 28px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15); max-width: 360px;
+        text-align: center; position: relative;
+        transition: opacity 0.25s ease;
+    }
+    .tour-tooltip-arrow {
+        width: 16px; height: 16px; background: #fff;
+        position: absolute; top: -8px; left: 50%; margin-left: -8px;
+        transform: rotate(45deg); border-radius: 3px;
+    }
+    .tour-tooltip-icon {
+        width: 52px; height: 52px; margin: -8px auto 12px;
+        background: linear-gradient(135deg, #eef2ff, #e0e7ff);
+        border-radius: 16px; display: flex; align-items: center;
+        justify-content: center; font-size: 24px; color: #4338ca;
+    }
+    .tour-tooltip-title {
+        font-weight: 800; font-size: 17px; color: #0f172a;
+        margin-bottom: 6px; letter-spacing: -0.02em;
+    }
+    .tour-tooltip-text {
+        font-size: 13.5px; color: #475569; line-height: 1.5;
+        margin-bottom: 16px;
+    }
+    .tour-got-it-btn {
+        background: linear-gradient(135deg, #4338ca, #7c3aed);
+        color: #fff; border: none; padding: 10px 28px;
+        border-radius: 30px; font-weight: 700; font-size: 14px;
+        cursor: pointer; transition: transform 0.15s, box-shadow 0.15s;
+        display: inline-flex; align-items: center; gap: 6px;
+    }
+    .tour-got-it-btn:hover {
+        transform: translateY(-1px); box-shadow: 0 6px 20px rgba(67,56,202,0.25);
+    }
 </style>
+
+<script>
+(function() {
+    var overlay = document.getElementById('tourOverlay');
+    if (!overlay) return;
+
+    var topPanel = document.getElementById('tourTop');
+    var bottomPanel = document.getElementById('tourBottom');
+    var leftPanel = document.getElementById('tourLeft');
+    var rightPanel = document.getElementById('tourRight');
+    var tooltip = document.getElementById('tourTooltip');
+    var body = document.getElementById('tourBody');
+    var dismissForm = document.getElementById('tourDismissForm');
+
+    var steps = [
+        {
+            selector: '.search-wrapper',
+            icon: 'bi-search',
+            title: 'AI-Powered Search',
+            text: 'Ask AI anything \u2014 instantly find courses, tools, and videos on any topic you want to learn.'
+        },
+        {
+            selector: ".nav-link-neo[href*='learn/explore']",
+            icon: 'bi-collection-play',
+            title: 'Content Library',
+            text: 'Browse our full library \u2014 explore all videos, courses, and tutorials on any skill or tool.'
+        },
+        {
+            selector: ".nav-link-neo[href*='roadmap']",
+            icon: 'bi-graph-up-arrow',
+            title: 'Your Progress',
+            text: 'Monitor your learning journey \u2014 completed videos, course progress, and roadmap milestones all in one place.'
+        },
+        {
+            selector: ".nav-link-neo[href*='extension']",
+            icon: 'bi-puzzle',
+            title: 'AI Extension',
+            text: 'Install the browser extension to sync your browsing activity across devices and get personalized recommendations.'
+        },
+        {
+            selector: '.navbar-actions .icon-btn-neo',
+            icon: 'bi-map',
+            title: 'Your Roadmaps',
+            text: 'Quick access to your learning paths \u2014 continue your current roadmap or start a new journey from here.'
+        }
+    ];
+
+    var currentStep = 0;
+
+    function positionSpotlight(selector) {
+        var el = document.querySelector(selector);
+        if (!el) return;
+
+        var rect = el.getBoundingClientRect();
+        var pad = 24;
+
+        topPanel.style.height = (rect.top - pad) + 'px';
+        bottomPanel.style.top = (rect.bottom + pad) + 'px';
+        leftPanel.style.width = (rect.left - pad) + 'px';
+        leftPanel.style.top = (rect.top - pad) + 'px';
+        leftPanel.style.height = (rect.bottom - rect.top + pad * 2) + 'px';
+        rightPanel.style.left = (rect.right + pad) + 'px';
+        rightPanel.style.top = (rect.top - pad) + 'px';
+        rightPanel.style.height = (rect.bottom - rect.top + pad * 2) + 'px';
+
+        var tooltipWidth = 360;
+        var tooltipLeft = rect.left + rect.width / 2 - tooltipWidth / 2;
+        tooltipLeft = Math.max(16, Math.min(tooltipLeft, window.innerWidth - tooltipWidth - 16));
+        tooltip.style.left = tooltipLeft + 'px';
+        tooltip.style.top = (rect.bottom + pad + 16) + 'px';
+    }
+
+    function renderStep(index) {
+        var step = steps[index];
+        if (!step) return;
+
+        var isLast = index === steps.length - 1;
+        var wasFirst = index === 0;
+
+        if (wasFirst) {
+            body.innerHTML =
+                '<div class="tour-tooltip-icon"><i class="bi ' + step.icon + '"></i></div>' +
+                '<h5 class="tour-tooltip-title">' + step.title + '</h5>' +
+                '<p class="tour-tooltip-text">' + step.text + '</p>' +
+                '<button class="tour-got-it-btn" id="tourActionBtn">' +
+                (isLast ? 'Got it! \u2728' : 'Next \u2192') +
+                '</button>';
+            body.style.opacity = '1';
+            positionSpotlight(step.selector);
+            setTimeout(function() { positionSpotlight(step.selector); }, 120);
+            setTimeout(function() { positionSpotlight(step.selector); }, 450);
+            document.getElementById('tourActionBtn').onclick = actionClick;
+            return;
+        }
+
+        body.style.opacity = '0';
+
+        setTimeout(function() {
+            body.innerHTML =
+                '<div class="tour-tooltip-icon"><i class="bi ' + step.icon + '"></i></div>' +
+                '<h5 class="tour-tooltip-title">' + step.title + '</h5>' +
+                '<p class="tour-tooltip-text">' + step.text + '</p>' +
+                '<button class="tour-got-it-btn" id="tourActionBtn">' +
+                (isLast ? 'Got it! \u2728' : 'Next \u2192') +
+                '</button>';
+
+            positionSpotlight(step.selector);
+
+            setTimeout(function() {
+                body.style.opacity = '1';
+            }, 60);
+
+            document.getElementById('tourActionBtn').onclick = actionClick;
+        }, 280);
+    }
+
+    function actionClick() {
+        var isLast = currentStep === steps.length - 1;
+        if (isLast) {
+            document.body.style.overflow = '';
+            dismissForm.submit();
+        } else {
+            currentStep++;
+            renderStep(currentStep);
+        }
+    }
+
+    function startTour() {
+        document.body.style.overflow = 'hidden';
+        var panelTransition = topPanel.style.transition;
+        topPanel.style.transition = 'none';
+        bottomPanel.style.transition = 'none';
+        leftPanel.style.transition = 'none';
+        rightPanel.style.transition = 'none';
+        tooltip.style.transition = 'none';
+        positionSpotlight(steps[0].selector);
+        overlay.style.display = '';
+        overlay.getBoundingClientRect();
+        topPanel.style.transition = panelTransition;
+        bottomPanel.style.transition = panelTransition;
+        leftPanel.style.transition = panelTransition;
+        rightPanel.style.transition = panelTransition;
+        tooltip.style.transition = '';
+        renderStep(0);
+        currentStep = 0;
+    }
+
+    var heroCard = document.querySelector('.hero-focus-card');
+    var hasAnim = heroCard && typeof heroCard.getAnimations === 'function';
+    var anims = hasAnim ? heroCard.getAnimations() : [];
+    if (anims.length) {
+        Promise.all(anims.map(function(a) { return a.finished; })).then(function() {
+            setTimeout(startTour, 60);
+        });
+    } else {
+        if (document.readyState === 'complete') {
+            startTour();
+        } else {
+            window.addEventListener('load', startTour);
+        }
+    }
+
+    window.addEventListener('scroll', function() {
+        if (!steps[currentStep]) return;
+        clearTimeout(window._tourScroll);
+        window._tourScroll = setTimeout(function() {
+            positionSpotlight(steps[currentStep].selector);
+        }, 50);
+    }, {passive: true});
+
+    var resizeTimer;
+    window.addEventListener('resize', function() {
+        if (!steps[currentStep]) return;
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(function() {
+            positionSpotlight(steps[currentStep].selector);
+        }, 100);
+    });
+})();
+</script>
 @endsection

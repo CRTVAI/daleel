@@ -36,6 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'connection_code_issued_at',
         'can_access_team',
         'subtitle_lang',
+        'has_seen_tour',
     ];
 
     protected $hidden = [
@@ -56,6 +57,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'last_activity_at'           => 'datetime',
             'connection_code_issued_at'  => 'datetime',
             'pro_expires_at'             => 'datetime',
+            'has_seen_tour'              => 'boolean',
         ];
     }
 

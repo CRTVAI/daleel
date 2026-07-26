@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>Inspector Training Brief — Daleel AI</title>
+<title>Inspector Report — Daleel AI</title>
 <style>
 body {
     margin: 0;
@@ -356,7 +356,7 @@ table { border-collapse: collapse; width: 100%; }
     {{-- Cover --}}
     <div class="cover">
         <div class="stamp">DALEEL · TRAINING<br>INTELLIGENCE UNIT</div>
-        <h1>Inspector Training Brief</h1>
+        <h1>Inspector Report</h1>
         <p class="sub">What to teach next, what to automate, and where your learners are stuck.</p>
         <table class="cover-meta">
             <tr>
@@ -411,7 +411,7 @@ table { border-collapse: collapse; width: 100%; }
     </div>
 
     {{-- 02. AI Upgrades --}}
-    <div class="sec-title"><span class="num">02</span>  Recommended AI Upgrades</div>
+    <div class="sec-title">Recommended AI Upgrades</div>
     <div class="sec-hint">Same tools learners already use — with an AI layer added.</div>
     @if(count($aiRecs))
     <table class="upgrade-table">
@@ -442,32 +442,31 @@ table { border-collapse: collapse; width: 100%; }
 
     <div style="page-break-before:always;"></div>
 
-    {{-- 03. Topics --}}
-    <div class="sec-title"><span class="num">03</span>  Topics to Teach This Week</div>
-    @if(count($topicRecs))
+    {{-- 03. Teaching Plan --}}
+    @if(!empty($planSessions))
+    <div class="sec-title">Teaching Plan</div>
     <div class="card">
-        <table class="topic-table">
-            <tr><th>#</th><th>Topic</th><th>Tool</th><th>Format</th></tr>
-            @foreach($topicRecs as $i => $rec)
-            @if($i >= 5) @break @endif
+        <table style="width:100%;border-collapse:collapse;">
+            @foreach($planSessions as $i => $s)
             <tr>
-                <td width="30"><span class="topic-num wk{{ min($i+1,4) }}">{{ $i+1 }}</span></td>
-                <td style="font-weight:700;">{{ $rec['topic'] }}</td>
-                <td style="white-space:nowrap;">{{ $rec['tool'] }} · {{ $msLbl($rec['time'] ?? 0) }}</td>
-                <td width="80">
-                    @if($i === 0)<span class="badge-live">Live</span>
-                    @elseif($i === 1)<span class="badge-workshop">Workshop</span>
-                    @elseif($i === 2)<span class="badge-clinic">Clinic</span>
-                    @else<span class="badge-lab">Lab</span>@endif
+                <td colspan="2" style="padding:5pt 8pt 3pt;border-bottom:1px solid #E4DFD1;{{ $i > 0 ? '' : '' }}">
+                    <span class="topic-num wk{{ min($i,3)+1 }}">{{ $s['session_number'] }}</span>
+                    <strong style="font-size:9pt;margin-left:4pt;">{{ $s['title'] ?? ('Session ' . $s['session_number']) }}</strong>
                 </td>
             </tr>
+            @foreach($s['items'] ?? [] as $item)
+            <tr>
+                <td width="20" style="padding:2pt 4pt 2pt 16pt;border-bottom:none;font-size:7pt;color:#0E6B5C;">▸</td>
+                <td style="padding:2pt 8pt 2pt 0;border-bottom:none;font-size:8pt;">{{ ltrim($item, '* ') }}</td>
+            </tr>
+            @endforeach
             @endforeach
         </table>
     </div>
     @endif
 
     {{-- 04. Time Saves --}}
-    <div class="sec-title"><span class="num">04</span>  Time-Saving Opportunities</div>
+    <div class="sec-title">Time-Saving Opportunities</div>
     @if(count($timeSaves))
     @foreach($timeSaves as $i => $rec)
     @if($i >= 5) @break @endif
@@ -487,7 +486,7 @@ table { border-collapse: collapse; width: 100%; }
     @endif
 
     {{-- 06. Coaching --}}
-    <div class="sec-title"><span class="num">06</span>  Coaching Principles</div>
+    <div class="sec-title">Coaching Principles</div>
     <div class="card">
         <table class="tip-table">
             @foreach($coachingTips as $i => $tip)
