@@ -279,8 +279,11 @@
 
         <!-- Sticky Input Area -->
         <div class="mentor-input-wrapper">
-            <form action="{{ route('ai.mentor') }}" method="GET">
+            <form action="{{ route('ai.mentor.ask') }}" method="POST">
+                @csrf
                 @if(request()->has('domain'))<input type="hidden" name="domain" value="{{ request()->domain }}">@endif
+                @if(request()->has('device_id'))<input type="hidden" name="device_id" value="{{ request()->device_id }}">@endif
+                @if(request()->has('url'))<input type="hidden" name="url" value="{{ request()->url }}">@endif
                 <div class="input-box">
                     <input type="text" name="query" placeholder="Ask your AI Mentor a question..." autocomplete="off">
                     <button type="submit" class="btn-send shadow-sm">

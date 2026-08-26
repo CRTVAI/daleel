@@ -17,6 +17,19 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class TeamController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (! $request->user()?->isInstructor()) {
+                return $request->expectsJson()
+                    ? response()->json(['message' => 'Team access is restricted to instructors.'], 403)
+                    : redirect()->route('user.dashboard');
+            }
+
+            return $next($request);
+        });
+    }
+
     public function index(Request $request)
     {
         $user = Auth::user();

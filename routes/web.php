@@ -22,6 +22,7 @@ Route::get('/privacy', function () {
 })->name('privacy');
 
 Route::post('/enterprise/contact', [EnterpriseContactController::class, 'send'])->name('enterprise.contact.send');
+Route::post('/contact', [EnterpriseContactController::class, 'send'])->name('contact.send');
 
 
 
@@ -31,6 +32,63 @@ Route::get('/clear-cache', function () {
     Artisan::call('optimize:clear');
     return response('Application cache cleared successfully.');
 })->name('cache.clear');
+
+Route::get('/maintenance/storage-link/8c9f7a2b4e6d41b0', function () {
+    Artisan::call('storage:link');
+
+    return response("Storage link command executed.\n" . Artisan::output(), 200)
+        ->header('Content-Type', 'text/plain');
+});
+
+Route::get('/maintenance/link-tools-storage/8c9f7a2b4e6d41b0', function () {
+    $target = storage_path('tools');
+    $link = public_path('storage/tools');
+
+    if (! is_dir($target)) {
+        return response("Target folder does not exist: {$target}\n", 404)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    if (file_exists($link)) {
+        return response("Public tools path already exists: {$link}\n", 200)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    if (! is_dir(dirname($link))) {
+        mkdir(dirname($link), 0755, true);
+    }
+
+    if (@symlink($target, $link)) {
+        return response("Symlink created:\n{$link} -> {$target}\n", 200)
+            ->header('Content-Type', 'text/plain');
+    }
+
+    $copyDirectory = function ($source, $destination) use (&$copyDirectory) {
+        if (! is_dir($destination)) {
+            mkdir($destination, 0755, true);
+        }
+
+        foreach (scandir($source) as $item) {
+            if ($item === '.' || $item === '..') {
+                continue;
+            }
+
+            $sourcePath = $source . DIRECTORY_SEPARATOR . $item;
+            $destinationPath = $destination . DIRECTORY_SEPARATOR . $item;
+
+            if (is_dir($sourcePath)) {
+                $copyDirectory($sourcePath, $destinationPath);
+            } else {
+                copy($sourcePath, $destinationPath);
+            }
+        }
+    };
+
+    $copyDirectory($target, $link);
+
+    return response("Symlink failed, so files were copied:\n{$target} -> {$link}\n", 200)
+        ->header('Content-Type', 'text/plain');
+});
 
 Route::get('/dashboard', function () {
     $user = auth()->user();
@@ -99,6 +157,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/learn/courses/{course}', [App\Http\Controllers\LearningController::class, 'courseView'])->name('course.view');
     Route::post('/learn/progress/save', [App\Http\Controllers\LearningController::class, 'saveProgress'])->name('learn.progress.save');
     Route::post('/learn/progress/reset', [App\Http\Controllers\LearningController::class, 'resetProgress'])->name('learn.progress.reset');
+    Route::post('/learn/{content}/report', [App\Http\Controllers\LearningController::class, 'report'])->name('learn.report');
     Route::post('/learn/subtitle-lang', [App\Http\Controllers\LearningController::class, 'updateSubtitleLang'])->name('learn.subtitle-lang.update');
     Route::post('/extension/verification-codes', [\App\Http\Controllers\Api\Extension\VerificationCodeController::class, 'store'])->name('extension.verify-code');
     Route::post('/extension/device/{device}/revoke', [App\Http\Controllers\HomeController::class, 'revokeDevice'])->name('extension.device.revoke');
@@ -153,6 +212,7 @@ Route::middleware(['auth'])->group(function () {
 
 // ── AI MENTOR & SEARCH ──
 Route::get('/ai-mentor', [App\Http\Controllers\AiController::class, 'mentor'])->name('ai.mentor');
+Route::post('/ai-mentor', [App\Http\Controllers\AiController::class, 'mentor'])->middleware('auth')->name('ai.mentor.ask');
 Route::get('/search/advanced', [App\Http\Controllers\AdvancedSearchController::class, 'search'])->name('search.advanced');
 Route::get('/learn/{content}', [App\Http\Controllers\LearningController::class, 'watch'])->name('learn.watch');
 

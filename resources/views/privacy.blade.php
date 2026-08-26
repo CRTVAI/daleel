@@ -227,7 +227,7 @@
       <div class="privacy-hero-content">
         <span class="privacy-badge">Legal</span>
         <h1>Privacy Policy</h1>
-        <p class="lead">Sample legal content for the static public website. Replace with reviewed production policy text before launch.</p>
+        <p class="lead">How Daleel AI collects, uses, protects, and manages information across our learning platform and browser-extension features.</p>
         <div class="privacy-hero-btns">
           <a href="{{ url('contact') }}" class="privacy-btn privacy-btn-primary">Contact</a>
           <a href="{{ url('/') }}" class="privacy-btn privacy-btn-ghost">Back Home</a>
@@ -241,7 +241,7 @@
     <div class="privacy-container">
       <div class="privacy-notice">
         <span class="privacy-notice-icon">⚠️</span>
-        <p>This is sample placeholder text. Replace with reviewed legal language before production launch.</p>
+        <p>This policy explains the main categories of information Daleel AI handles and the controls available to learners, instructors, and team administrators.</p>
       </div>
       
       <div class="privacy-card">

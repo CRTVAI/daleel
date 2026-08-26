@@ -183,7 +183,7 @@
       <div class="tos-hero-content">
         <span class="tos-badge">Legal</span>
         <h1>Terms of Service</h1>
-        <p class="lead">Sample legal content for the static public website. Replace with reviewed production policy text before launch.</p>
+        <p class="lead">The terms that govern access to Daleel AI, our learning platform, browser-extension features, and related services.</p>
         <div class="tos-hero-btns">
           <a href="{{ url('contact') }}" class="tos-btn tos-btn-primary">Contact</a>
           <a href="{{ url('/') }}" class="tos-btn tos-btn-ghost">Back Home</a>
@@ -197,12 +197,12 @@
     <div class="tos-container">
       <div class="tos-notice">
         <span class="tos-notice-icon">⚠️</span>
-        <p>This is sample placeholder text. Replace with reviewed legal language before production launch.</p>
+        <p>These terms are provided for product use and should be reviewed periodically as Daleel AI features, plans, and policies evolve.</p>
       </div>
       
       <div class="tos-card">
         <h3>1. Scope</h3>
-        <p>This sample page outlines expected public website terms for Daleel AI. Replace this copy with reviewed legal language before launch.</p>
+        <p>These terms apply when you access Daleel AI websites, learning content, dashboards, browser-extension experiences, team analytics, or related services.</p>
 
         <h3>2. Responsibilities</h3>
         <p>Users are responsible for using lessons, templates, and AI recommendations in accordance with their company policies and applicable laws.</p>

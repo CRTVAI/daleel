@@ -18,17 +18,17 @@
     <div class="d-flex justify-content-between align-items-center mb-3">
         <ul class="nav nav-pills gap-2" id="user-filter-tabs">
             <li class="nav-item">
-                <a href="{{ route('admin.users.index') }}" class="nav-link py-2 px-3 rounded-pill fw-bold small {{ !request('account_type') ? 'active bg-dark text-white' : 'text-secondary bg-light' }}">
+                <a href="{{ route('admin.users.index', ['search' => request('search')]) }}" class="nav-link py-2 px-3 rounded-pill fw-bold small {{ !request('account_type') ? 'active bg-dark text-white' : 'text-secondary bg-light' }}">
                     All Users
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.users.index', ['account_type' => 'Pro']) }}" class="nav-link py-2 px-3 rounded-pill fw-bold small {{ request('account_type') === 'Pro' ? 'active bg-primary text-white' : 'text-secondary bg-light' }}">
+                <a href="{{ route('admin.users.index', ['account_type' => 'Pro', 'search' => request('search')]) }}" class="nav-link py-2 px-3 rounded-pill fw-bold small {{ request('account_type') === 'Pro' ? 'active bg-primary text-white' : 'text-secondary bg-light' }}">
                     <i class="bi bi-stars text-warning me-1"></i> Pro Users
                 </a>
             </li>
             <li class="nav-item">
-                <a href="{{ route('admin.users.index', ['account_type' => 'Free Plan']) }}" class="nav-link py-2 px-3 rounded-pill fw-bold small {{ request('account_type') === 'Free Plan' ? 'active bg-secondary text-white' : 'text-secondary bg-light' }}">
+                <a href="{{ route('admin.users.index', ['account_type' => 'Free Plan', 'search' => request('search')]) }}" class="nav-link py-2 px-3 rounded-pill fw-bold small {{ request('account_type') === 'Free Plan' ? 'active bg-secondary text-white' : 'text-secondary bg-light' }}">
                     Free Users
                 </a>
             </li>
@@ -37,6 +37,20 @@
             Total: {{ $users->total() }} Users
         </div>
     </div>
+
+    <form action="{{ route('admin.users.index') }}" method="GET" class="mb-3">
+        @if(request('account_type'))
+            <input type="hidden" name="account_type" value="{{ request('account_type') }}">
+        @endif
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="search" name="search" id="admin-user-search" value="{{ request('search') }}" class="form-control border-start-0" placeholder="Search users by name, email, or plan...">
+            @if(request('search'))
+                <a href="{{ route('admin.users.index', ['account_type' => request('account_type')]) }}" class="btn btn-light border">Clear</a>
+            @endif
+            <button class="btn btn-dark px-4 fw-bold" type="submit">Search</button>
+        </div>
+    </form>
 
     <div class="card border-0 shadow-sm overflow-hidden">
         <div class="table-responsive">

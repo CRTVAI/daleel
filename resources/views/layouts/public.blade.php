@@ -55,7 +55,7 @@
     <div class="container">
       <div class="footer-grid">
         <div class="footer-brand">
-          <a class="brand" href="/"><img src="{{ asset('images/dashboard/logo-white.png') }}"></a>
+          <a class="brand" href="/"><img style="height: 160px;" src="{{ asset('images/dashboard/logo-white.png') }}"></a>
           <p>AI lessons matched to daily tasks, repeated work, and real workplace goals.</p>
         </div>
         <div>

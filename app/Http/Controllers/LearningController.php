@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\UserVideoProgress;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class LearningController extends Controller
 {
@@ -174,6 +175,22 @@ class LearningController extends Controller
             'content', 'progress', 'recommended', 'course',
             'roadmapContext', 'roadmapData', 'roadmapContents'
         ));
+    }
+
+    public function report(Request $request, Content $content)
+    {
+        $data = $request->validate([
+            'reason' => ['nullable', 'string', 'max:1000'],
+        ]);
+
+        Log::warning('Lesson reported as outdated', [
+            'content_id' => $content->id,
+            'title' => $content->title,
+            'user_id' => Auth::id(),
+            'reason' => $data['reason'] ?? null,
+        ]);
+
+        return response()->json(['message' => 'Report received.']);
     }
 
     /**

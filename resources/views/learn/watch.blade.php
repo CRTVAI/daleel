@@ -787,6 +787,327 @@
         line-height: 1.5;
         font-weight: 500;
     }
+
+    @media (max-width: 768px) {
+        body {
+            background: #f6f8fb !important;
+        }
+
+        .main-container-neo {
+            width: 100% !important;
+            padding: 8px 10px 18px !important;
+        }
+
+        .watch-page {
+            animation: none !important;
+        }
+
+        .watch-page > .row {
+            --bs-gutter-x: 0 !important;
+            --bs-gutter-y: 12px !important;
+        }
+
+        .watch-page .col-lg-8,
+        .watch-page .col-lg-4 {
+            padding-left: 0 !important;
+            padding-right: 0 !important;
+        }
+
+        .player-wrapper {
+            border-radius: 12px !important;
+            margin-bottom: 12px !important;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12) !important;
+            border: 1px solid rgba(15, 23, 42, 0.08);
+        }
+
+        .yt-header-blocker {
+            height: 42px !important;
+        }
+
+        #next-video-overlay {
+            display: none !important;
+        }
+
+        .custom-subtitles-overlay {
+            bottom: 48px !important;
+            left: 8px !important;
+            right: 8px !important;
+            gap: 5px !important;
+        }
+
+        .subtitle-text {
+            max-width: 100% !important;
+            padding: 6px 10px !important;
+            border-radius: 7px !important;
+            font-size: 12px !important;
+            line-height: 1.35 !important;
+        }
+
+        .subtitle-ar {
+            font-size: 14px !important;
+        }
+
+        .watch-progress-bar {
+            background: #ffffff;
+            border: 1px solid #e5eaf1;
+            border-radius: 12px;
+            padding: 10px 12px;
+            margin-bottom: 12px !important;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.035);
+        }
+
+        .watch-progress-bar .small {
+            font-size: 11px !important;
+        }
+
+        .watch-progress-bar .progress {
+            height: 5px !important;
+            background: #edf1f5 !important;
+        }
+
+        .watch-progress-bar .progress-bar {
+            background: #111827 !important;
+        }
+
+        .watch-progress-bar + .d-flex.align-items-center.gap-3 {
+            align-items: center !important;
+            gap: 10px !important;
+            padding: 12px !important;
+            margin-bottom: 12px !important;
+            border-radius: 12px !important;
+            box-shadow: none !important;
+            border-color: #e5eaf1 !important;
+        }
+
+        #btn-next-video {
+            border-radius: 9px !important;
+            padding: 8px 10px !important;
+            background: #111827 !important;
+            font-size: 11px !important;
+            white-space: nowrap;
+        }
+
+        .translation-controls-card {
+            border-radius: 12px !important;
+            padding: 12px !important;
+            margin-bottom: 12px !important;
+            box-shadow: none !important;
+            border-color: #e5eaf1 !important;
+        }
+
+        .translation-controls-card > .d-flex {
+            align-items: stretch !important;
+        }
+
+        .translation-controls-card .btn-group {
+            display: grid !important;
+            grid-template-columns: repeat(auto-fit, minmax(84px, 1fr));
+            width: 100%;
+            gap: 6px;
+            border-radius: 0 !important;
+            overflow: visible !important;
+        }
+
+        .translation-controls-card .btn {
+            border-radius: 8px !important;
+            font-size: 11px !important;
+            padding: 7px 8px !important;
+        }
+
+        .video-meta-card {
+            border-radius: 12px !important;
+            padding: 14px !important;
+            margin-bottom: 12px !important;
+            border-color: #e5eaf1 !important;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.035);
+        }
+
+        .video-meta-card > .d-flex.align-items-center.justify-content-between {
+            align-items: flex-start !important;
+            flex-direction: column !important;
+            gap: 12px !important;
+            margin-bottom: 10px !important;
+        }
+
+        .video-meta-card h1 {
+            width: 100%;
+            text-align: center;
+            font-size: 18px !important;
+            line-height: 1.3 !important;
+            letter-spacing: 0 !important;
+            color: #111827;
+        }
+
+        .video-meta-card > .d-flex > .d-flex.gap-2 {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .interaction-controls {
+            gap: 6px !important;
+        }
+
+        .btn-interact,
+        .btn-bookmark {
+            width: 36px !important;
+            height: 36px !important;
+            border-radius: 9px !important;
+            font-size: 16px !important;
+            background: #f9fafb !important;
+            box-shadow: none !important;
+        }
+
+        .btn-bookmark.active {
+            background: #111827 !important;
+            border-color: #111827 !important;
+        }
+
+        .video-meta-card p {
+            text-align: center;
+            font-size: 13px !important;
+            line-height: 1.6 !important;
+            color: #5f6b7a !important;
+        }
+
+        .btn-report-outdated {
+            display: flex !important;
+            justify-content: center;
+            margin-top: 12px !important;
+            font-size: 11px !important;
+        }
+
+        .sidebar-section {
+            position: static !important;
+            top: auto !important;
+        }
+
+        .sidebar-section > h6 {
+            text-align: center;
+            font-size: 14px !important;
+            font-weight: 900 !important;
+            margin: 8px 0 10px !important;
+            color: #111827;
+        }
+
+        .sidebar-section .card {
+            border: 1px solid #e5eaf1 !important;
+            border-radius: 12px !important;
+            box-shadow: 0 6px 16px rgba(15, 23, 42, 0.035) !important;
+            margin-bottom: 12px !important;
+        }
+
+        .sidebar-section .card-header {
+            padding: 12px 14px !important;
+            text-align: center;
+            background: #111827 !important;
+        }
+
+        .sidebar-section .card-header .small {
+            font-size: 9px !important;
+            letter-spacing: 0.06em;
+        }
+
+        .sidebar-section .card-header h6 {
+            font-size: 13px !important;
+        }
+
+        .sidebar-section .card-body {
+            max-height: none !important;
+            overflow: visible !important;
+        }
+
+        .sidebar-section .px-4.py-3 {
+            padding: 10px 12px !important;
+        }
+
+        .curriculum-item {
+            gap: 10px !important;
+            padding: 11px 12px !important;
+            border-bottom-color: #edf1f5 !important;
+        }
+
+        .curriculum-item:hover {
+            transform: none !important;
+        }
+
+        .curriculum-item.active {
+            background: #f5f7ff !important;
+            border-left: 0 !important;
+            box-shadow: inset 3px 0 0 #4f46e5;
+        }
+
+        .lesson-num-circle {
+            width: 26px !important;
+            height: 26px !important;
+            border-radius: 8px !important;
+            font-size: 10px !important;
+        }
+
+        .next-video-card {
+            border-radius: 12px !important;
+            padding: 10px !important;
+            margin-bottom: 10px !important;
+            border-color: #e5eaf1 !important;
+            box-shadow: none !important;
+        }
+
+        .next-video-card:hover {
+            transform: none !important;
+            border-color: #d8dee8 !important;
+        }
+
+        .next-thumb {
+            width: 84px !important;
+            height: 54px !important;
+            border-radius: 9px !important;
+        }
+
+        .lesson-meta-grid {
+            grid-template-columns: 1fr !important;
+            gap: 12px !important;
+            margin-top: 16px !important;
+            padding-top: 16px !important;
+        }
+
+        .transcript-tab-container {
+            border-radius: 12px !important;
+        }
+
+        .transcript-tabs {
+            padding: 0 8px !important;
+        }
+
+        .transcript-tab-btn {
+            flex: 1;
+            padding: 11px 8px !important;
+            font-size: 12px !important;
+        }
+
+        .transcript-panel {
+            padding: 12px !important;
+        }
+
+        .transcript-scroll-area {
+            max-height: 260px !important;
+        }
+
+        .transcript-line {
+            align-items: flex-start !important;
+            gap: 8px !important;
+            padding: 9px 10px !important;
+            margin-bottom: 5px !important;
+        }
+    }
+
+    @media (max-width: 380px) {
+        .video-meta-card h1 {
+            font-size: 16px !important;
+        }
+
+        .translation-controls-card .btn-group {
+            grid-template-columns: 1fr;
+        }
+    }
 </style>
 @endif
 @endsection
@@ -1942,11 +2263,34 @@
     }
 
     function reportOutdated(contentId) {
-        if (typeof showToast !== 'undefined') {
-            showToast('Thank you for reporting. Our team will review this lesson.', 'success');
-        } else {
-            alert('Thank you for reporting. Our team will review this lesson.');
-        }
+        if (!confirm('Report this lesson as outdated or inaccurate?')) return;
+
+        const reason = prompt('Optional: tell us what needs review.', '');
+
+        fetch(`/learn/${contentId}/report`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({ reason: reason || '' })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Report failed');
+            if (typeof showToast !== 'undefined') {
+                showToast('Thank you for reporting. Our team will review this lesson.', 'success');
+            } else {
+                alert('Thank you for reporting. Our team will review this lesson.');
+            }
+        })
+        .catch(() => {
+            if (typeof showToast !== 'undefined') {
+                showToast('Could not submit the report. Please try again.', 'info');
+            } else {
+                alert('Could not submit the report. Please try again.');
+            }
+        });
     }
 </script>
 @endsection

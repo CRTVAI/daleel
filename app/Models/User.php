@@ -171,6 +171,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return !empty($this->google_id);
     }
 
+    public function isInstructor(): bool
+    {
+        return $this->is_admin || (bool) $this->can_access_team;
+    }
+
     /**
      * Send the email verification notification.
      *

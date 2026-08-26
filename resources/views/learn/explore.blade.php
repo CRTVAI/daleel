@@ -452,29 +452,44 @@
 
     /* ==================== MOBILE OPTIMIZATIONS ==================== */
     @media (max-width: 768px) {
+        .main-container-neo {
+            width: 100% !important;
+            padding: 10px !important;
+        }
+
         /* Reduce hero padding */
         .explore-hero-premium {
-            padding: 2rem 1rem !important;
-            border-radius: 18px !important;
-            margin-bottom: 1.5rem !important;
+            padding: 1.25rem 0.9rem !important;
+            border-radius: 14px !important;
+            margin-bottom: 1rem !important;
+            background: #111827 !important;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.14) !important;
+        }
+
+        .explore-hero-premium::before,
+        .explore-hero-premium::after {
+            display: none !important;
         }
 
         /* Hero title adjustments */
         .explore-title {
-            font-size: 1.5rem !important;
-            margin-bottom: 0.5rem !important;
+            font-size: 1.35rem !important;
+            margin-bottom: 0.35rem !important;
+            letter-spacing: 0 !important;
         }
 
         .explore-hero-premium p {
-            font-size: 0.85rem !important;
-            margin-bottom: 1rem !important;
+            font-size: 0.78rem !important;
+            margin-bottom: 0.75rem !important;
         }
 
         /* Search input compact */
         .search-input-premium {
-            padding: 0.85rem 1rem 0.85rem 2.75rem !important;
-            font-size: 0.9rem !important;
-            border-radius: 12px !important;
+            min-height: 40px !important;
+            padding: 0.65rem 2.35rem 0.65rem 2.3rem !important;
+            font-size: 0.78rem !important;
+            border-radius: 10px !important;
+            box-shadow: none !important;
         }
 
         .search-icon-premium {
@@ -484,7 +499,8 @@
 
         /* Quick tags */
         .quick-tags {
-            margin-top: 0.8rem !important;
+            margin-top: 0.65rem !important;
+            display: none !important;
         }
 
         .quick-tag-btn {
@@ -494,30 +510,50 @@
 
         /* Type switcher */
         .type-switcher {
-            margin-bottom: 1.25rem !important;
+            margin-bottom: 0.85rem !important;
             padding: 0.3rem !important;
-            border-radius: 12px !important;
+            border-radius: 10px !important;
             width: 100% !important;
         }
 
         .type-switch-btn {
-            padding: 0.5rem 0.8rem !important;
-            font-size: 0.75rem !important;
+            min-height: 34px !important;
+            padding: 0.45rem 0.5rem !important;
+            font-size: 0.72rem !important;
             flex: 1 !important;
             text-align: center !important;
             border-radius: 8px !important;
+            white-space: nowrap !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
         }
 
         /* Category pills */
         .topic-slider {
-            gap: 0.4rem !important;
-            margin-bottom: 1.25rem !important;
-            padding-bottom: 0.5rem !important;
+            gap: 0.45rem !important;
+            margin: 0 -10px 0.95rem !important;
+            padding: 0 10px 0.4rem !important;
+            overflow-x: auto !important;
+            scrollbar-width: none !important;
+            -ms-overflow-style: none !important;
+            scroll-padding-left: 10px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .topic-slider::-webkit-scrollbar {
+            display: none !important;
+            height: 0 !important;
         }
 
         .topic-pill {
-            padding: 0.45rem 0.9rem !important;
-            font-size: 0.72rem !important;
+            min-height: 32px !important;
+            padding: 0.45rem 0.75rem !important;
+            font-size: 0.68rem !important;
+            border-radius: 9px !important;
+            flex: 0 0 auto;
+            box-shadow: none !important;
         }
 
         /* Card grid */
@@ -562,7 +598,16 @@
         }
 
         .watch-cta-btn {
-            font-size: 0.65rem !important;
+            min-height: 30px !important;
+            font-size: 0.64rem !important;
+            line-height: 1 !important;
+            padding: 0.55rem 0.65rem !important;
+            border-radius: 8px !important;
+            white-space: nowrap !important;
+            display: inline-flex !important;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
         }
 
         /* Badge adjustments */
@@ -619,6 +664,13 @@
         /* View More Button - Show on mobile */
         .view-more-btn {
             display: flex !important;
+            min-height: 38px !important;
+            margin-top: 12px !important;
+            padding: 0 12px !important;
+            border-radius: 10px !important;
+            font-size: 0.75rem !important;
+            border-style: solid !important;
+            white-space: nowrap !important;
         }
 
         /* Hide items beyond 6th on mobile when collapsed */
@@ -750,7 +802,7 @@
                             </button>
                             <a href="{{ route('course.view', $item) }}" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;height:100%">
                                 <div class="premium-thumb">
-                                    <img src="{{ $item->thumbnail ?? 'https://img.freepik.com/free-vector/cheerful-woman-studying-internet-watching-webinar-computer-taking-online-course-vector-illustration-knowledge-education-distance-learning-concept_778687-3129.jpg?semt=ais_hybrid&w=740&q=80'}}" alt="{{ $item->title }}">
+                                    <img src="{{ $item->thumbnail ?? 'https://www.shutterstock.com/image-photo/online-learning-system-combining-digital-260nw-2700835217.jpg'}}" alt="{{ $item->title }}">
                                     <div class="premium-card-overlay">
                                         <span class="premium-badge">{{ $item->category_rel->name ?? $item->category }}</span>
                                     </div>

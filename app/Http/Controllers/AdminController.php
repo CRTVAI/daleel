@@ -27,6 +27,15 @@ class AdminController extends Controller
             $query->where('account_type', $request->account_type);
         }
 
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('account_type', 'like', "%{$search}%");
+            });
+        }
+
         $users = $query->orderBy('created_at', 'desc')->paginate(20)->withQueryString();
         $learningGoals = \App\Models\LearningGoal::orderBy('title')->get();
         $experienceLevels = \App\Models\ExperienceLevel::orderBy('title')->get();
