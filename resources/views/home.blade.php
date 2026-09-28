@@ -82,7 +82,7 @@
     background:
       linear-gradient(90deg, rgba(2,6,23,.94) 0%, rgba(2,6,23,.82) 44%, rgba(2,6,23,.46) 100%),
       linear-gradient(180deg, rgba(2,6,23,.08), rgba(2,6,23,.34)),
-      url("https://learn.g2.com/hubfs/Imported%20sitepage%20images/1ZB5giUShe0gw9a6L69qAgsd7wKTQ60ZRoJC5Xq3BIXS517sL6i6mnkAN9khqnaIGzE6FASAusRr7w=w1439-h786.png") center / cover no-repeat;
+      url("https://static.vecteezy.com/system/resources/thumbnails/050/798/516/small/futuristic-digital-network-visualization-with-glowing-nodes-and-lines-representing-data-connections-technology-and-modern-communication-photo.jpeg") center / cover no-repeat;
     overflow: hidden;
     position: relative;
   }
@@ -660,7 +660,7 @@
     text-align: center;
     background:
       linear-gradient(135deg, rgba(2,6,23,.97), rgba(15,23,42,.94)),
-      url("{{ asset('hero-dashboard.png') }}") center / cover no-repeat;
+      url("https://static.vecteezy.com/system/resources/thumbnails/074/003/625/small_2x/abstract-purple-and-dark-polygon-luxury-background-social-ads-banner-or-landing-page-vector.jpg") center / cover no-repeat;
     overflow: hidden;
   }
   .cta-orb { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(760px, 90vw); height: 260px; border-radius: 999px; background: radial-gradient(ellipse, rgba(6,182,212,.13) 0%, transparent 68%); filter: blur(46px); pointer-events: none; }
