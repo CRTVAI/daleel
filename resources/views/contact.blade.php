@@ -21,6 +21,10 @@
   <div class="container grid two">
     <form class="form-panel card-body" method="POST" action="{{ route('contact.send') }}">
       @csrf
+      <div class="captcha-honeypot" aria-hidden="true">
+        <label for="website">Website</label>
+        <input id="website" name="website" value="" tabindex="-1" autocomplete="off">
+      </div>
       <p class="eyebrow">Demo request</p>
       <h2>Request enterprise contact</h2>
       @if (session('enterprise_contact_error'))
@@ -39,6 +43,11 @@
         <div class="field"><label for="size">Company size</label><select id="size" name="size"><option>1-50</option><option>51-250</option><option>251-1000</option><option>1000+</option></select></div>
         <div class="field full"><label for="goal">Training goal</label><textarea id="goal" name="goal" required placeholder="We want to train customer support and operations teams on AI workflows.">{{ old('goal') }}</textarea></div>
       </div>
+      @if (config('services.turnstile.site_key'))
+        <div class="captcha-row">
+          <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
+        </div>
+      @endif
       <button class="btn primary full" type="submit">Send Request</button>
     </form>
     <div>
@@ -55,9 +64,14 @@
 @endsection
 
 @section('scripts')
+@if (config('services.turnstile.site_key'))
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+@endif
 <style>
 .form-message { display: none; margin-top: 16px; padding: 12px; background: #dcfce7; color: #166534; border-radius: 8px; }
 .form-message.show { display: block; }
 .form-message.error { background: #fee2e2; color: #991b1b; }
+.captcha-honeypot { position: absolute; left: -10000px; top: auto; width: 1px; height: 1px; overflow: hidden; }
+.captcha-row { margin: 16px 0; min-height: 65px; }
 </style>
 @endsection

@@ -250,6 +250,20 @@
     margin-top: 4px;
   }
 
+  .hidden-field {
+    position: absolute;
+    left: -10000px;
+    top: auto;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .captcha-row {
+    margin: 14px 0 16px;
+    min-height: 65px;
+  }
+
   .form-group input.error,
   .form-group select.error,
   .form-group textarea.error {
@@ -471,6 +485,10 @@
 
         <form id="enterpriseContactForm" method="POST" action="{{ route('enterprise.contact.send') }}">
           @csrf
+          <div class="hidden-field" aria-hidden="true">
+            <label for="website">Website</label>
+            <input type="text" id="website" name="website" value="" tabindex="-1" autocomplete="off">
+          </div>
           
           <div class="form-row">
             <div class="form-group">
@@ -502,6 +520,13 @@
             @error('message')<div class="error-text">{{ $message }}</div>@enderror
           </div>
 
+          @if (config('services.turnstile.site_key'))
+            <div class="captcha-row">
+              <div class="cf-turnstile" data-sitekey="{{ config('services.turnstile.site_key') }}"></div>
+              @error('cf-turnstile-response')<div class="error-text">{{ $message }}</div>@enderror
+            </div>
+          @endif
+
           <div class="submit-row">
             <span class="response-time">We respond within 24 hours</span>
             <button type="submit" class="submit-btn">
@@ -529,6 +554,9 @@
 @endsection
 
 @section('scripts')
+@if (config('services.turnstile.site_key'))
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+@endif
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('enterpriseContactForm');
